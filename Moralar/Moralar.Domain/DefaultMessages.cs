@@ -44,6 +44,7 @@ namespace Moralar.Domain
         /*NOT FOUND*/
         public const string UserAdministratorNotFound = "Usuário de acessso não encontrado";
         public const string ProfileNotFound = "Usuário não encontrado";
+        public const string FamilyNotFound = "Família não encontrado";
         public const string CreditCardNotFound = "Cartão não encontrado";
         public const string CreditCardNotFoundIugu = "Forma de pagamento não encontrada";
         public const string ZipCodeNotFound = "Cep não encontrado";

@@ -4,5 +4,27 @@
         <name>Moralar.Data</name>
     </assembly>
     <members>
+        <member name="P:Moralar.Data.Entities.Family.HolderNumber">
+            <summary>
+            Dados do Titular
+            </summary>
+        </member>
+        <member name="P:Moralar.Data.Entities.Family.SpouseNumber">
+            <summary>
+            Dados do conjuge
+            </summary>
+        </member>
+        <member name="P:Moralar.Data.Entities.Family.FamilyMemberNumber">
+            <summary>
+            Dados do membro da Família
+            </summary>
+        </member>
+        <member name="T:Moralar.Data.Entities.TransactionLog">
+            <summary>
+            TABELA DE TRANSAÇÕES
+            DynamicDataBefore -- DADOS ANTES DA TRANSÇÃO
+            DynamicDataAfter --  DADOS DEPOIS DA TRANSÇÃO
+            </summary>
+        </member>
     </members>
 </doc>

@@ -1,6 +1,7 @@
 ﻿using Moralar.Data.Entities;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
+using Moralar.Domain.ViewModels.Family;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Iugu.Core.Models;
@@ -40,6 +41,9 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<City, CityDefaultViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Family, FamilyCompleteViewModel>()
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
         }
     }
 }

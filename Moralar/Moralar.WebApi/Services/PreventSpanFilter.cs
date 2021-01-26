@@ -8,6 +8,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.WebApi.Services
 {

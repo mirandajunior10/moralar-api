@@ -49,10 +49,12 @@ namespace Moralar.WebApi
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddMvc(opt =>
-        {
-            opt.Filters.Add(typeof(CheckJson));
-            opt.Filters.Add(typeof(PreventSpanFilter));
-        });
+            {
+                opt.Filters.Add(typeof(CheckJson));
+                opt.Filters.Add(typeof(PreventSpanFilter));
+                //opt.Filters.Add(typeof(Moralar.WebApi.FilterLog.FilterLog));
+                opt.Filters.Add(typeof(Moralar.WebApi.FilterLog.FilterLog));
+            });
 
             /*TRANSLATE I18N*/
             //services.AddLocalization(options => options.ResourcesPath = "Resources");
@@ -78,7 +80,6 @@ namespace Moralar.WebApi
                    builder => builder.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader().AllowCredentials().Build());
            });
             services.AddAutoMapper();
-
             /*CROP IMAGE*/
             services.AddImageResizer();
 

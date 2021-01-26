@@ -136,4 +136,41 @@ namespace Moralar.Data.Enum
         [Description("Outro")]
         Outro = 10
     }
+    public enum TypeTransaction
+    {
+        [EnumMember(Value = "Register")]
+        [Description("Register")]
+        Register = 0,
+        [EnumMember(Value = "Edit")]
+        [Description("Edit")]
+        Edit = 1,
+        [EnumMember(Value = "Consult")]
+        [Description("Consult")]
+        Consult = 2,
+        [EnumMember(Value = "BlockAndUnblock")]
+        [Description("BlockAndUnblock")]
+        BlockAndUnblock = 3,
+        [EnumMember(Value = "Delete")]
+        [Description("Delete")]
+        Delete = 4,
+        [EnumMember(Value = "Export")]
+        [Description("Export")]
+        Export = 5
+    }
+    public enum TypeHttpVerb
+    {
+        [EnumMember(Value = "Post")]
+        [Description("Post")]
+        Post = 0,
+        [EnumMember(Value = "GET")]
+        [Description("GET")]
+        GET = 1,
+        [EnumMember(Value = "PUT")]
+        [Description("PUT")]
+        PUT = 2,
+        [EnumMember(Value = "DELETE")]
+        [Description("DELETE")]
+        DELETE = 3
+    }
+
 }
