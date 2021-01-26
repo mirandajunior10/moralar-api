@@ -1,0 +1,120 @@
+{
+  "format": 1,
+  "restore": {
+    "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Repository\\Moralar.Repository.csproj": {}
+  },
+  "projects": {
+    "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj",
+        "projectName": "Moralar.Data",
+        "projectPath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj",
+        "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
+        "outputPath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp1.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp1.1": {
+            "targetAlias": "netcoreapp1.1",
+            "projectReferences": {}
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp1.1": {
+          "targetAlias": "netcoreapp1.1",
+          "dependencies": {
+            "Microsoft.NETCore.App": {
+              "target": "Package",
+              "version": "[1.1.2, )",
+              "autoReferenced": true
+            },
+            "UtilityFramework.Infra.Core.MongoDb": {
+              "target": "Package",
+              "version": "[2.0.5, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    },
+    "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Repository\\Moralar.Repository.csproj": {
+      "version": "1.0.0",
+      "restore": {
+        "projectUniqueName": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Repository\\Moralar.Repository.csproj",
+        "projectName": "Moralar.Repository",
+        "projectPath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Repository\\Moralar.Repository.csproj",
+        "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
+        "outputPath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Repository\\obj\\",
+        "projectStyle": "PackageReference",
+        "fallbackFolders": [
+          "C:\\Microsoft\\Xamarin\\NuGet\\"
+        ],
+        "configFilePaths": [
+          "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+        ],
+        "originalTargetFrameworks": [
+          "netcoreapp1.1"
+        ],
+        "sources": {
+          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
+          "https://api.nuget.org/v3/index.json": {}
+        },
+        "frameworks": {
+          "netcoreapp1.1": {
+            "targetAlias": "netcoreapp1.1",
+            "projectReferences": {
+              "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj": {
+                "projectPath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj"
+              }
+            }
+          }
+        },
+        "warningProperties": {
+          "warnAsError": [
+            "NU1605"
+          ]
+        }
+      },
+      "frameworks": {
+        "netcoreapp1.1": {
+          "targetAlias": "netcoreapp1.1",
+          "dependencies": {
+            "Microsoft.NETCore.App": {
+              "target": "Package",
+              "version": "[1.1.2, )",
+              "autoReferenced": true
+            },
+            "UtilityFramework.Infra.Core.MongoDb": {
+              "target": "Package",
+              "version": "[2.0.5, )"
+            }
+          },
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,4 @@
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.csprojAssemblyReference.cache
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.AssemblyInfoInputs.cache
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.AssemblyInfo.cs
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.csproj.CoreCompileInputs.cache

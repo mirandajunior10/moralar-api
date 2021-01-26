@@ -1,0 +1,528 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Moralar.WebApi</name>
+    </assembly>
+    <members>
+        <member name="M:Moralar.WebApi.Controllers.BankController.Get">
+            <summary>
+            LISTA DE BANCOS DISPONIVEIS PARA CADASTRO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CityController.Get(System.String)">
+            <summary>
+            LISTAR CIDADES POR ESTADOS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CityController.ListState">
+            <summary>
+            LISTAR ESTADOS 
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CityController.GetInfoFromZipCode(System.String)">
+            <summary>
+            BUSCAR INFORMAÇÕES DE DETERMINADO CEP
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CreditCardController.Get">
+            <summary>
+                LISTAR CARTÕES DE CRÉDITO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CreditCardController.Details(System.String)">
+            <summary>
+                DETALHES DO CARTÃO
+            </summary>
+            <remarks>
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CreditCardController.Register(Template.Domain.ViewModels.CreditCardViewModel)">
+            <summary>
+                REGISTRAR CARTÃO DE CREDITO
+            </summary>
+            <remarks>
+                OBJ DE ENVIO
+                POST api/v1/CreditCard
+                {
+                "name": "string",
+                "number": "string", // #### #### #### ####
+                "expMonth": 0,
+                "expYear": 0, // FORMAT 2019
+                "cvv": "string" // MINLENGTH 3 / MAX 4
+                }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CreditCardController.Delete(System.String)">
+            <summary>
+                REMOVER CARTÃO DE CRÉDITO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.FileController.Upload(Microsoft.AspNetCore.Http.IFormFile,System.String)">
+            <summary>
+            Upload one file
+            </summary>
+            <remarks>
+            
+                POST api/v1/profile/Upload
+                                  
+                    content-type: multipart/form-data
+                    file = archive  
+                
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.FileController.Uploads(System.Collections.Generic.List{Microsoft.AspNetCore.Http.IFormFile},System.String)">
+            <summary>
+            UPLOAD FILES 
+            </summary>
+            <remarks>
+            
+                POST api/v1/profile/aploads
+                                  
+                    content-type: multipart/form-data
+                    files = archive  
+                    files = archive
+                    path = foldername
+                
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.Detail(System.String)">
+            <summary>
+            DETALHES DO USUÁRIO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.GetInfo">
+            <summary>
+            INFORMAÇÕES  DO USUÁRIO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.Delete(UtilityFramework.Application.Core.ViewModels.BaseViewModel)">
+            <summary>
+            REMOVER PERFIL
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "id":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.DeleteByEmail(System.String)">
+            <summary>
+            REMOVER PERFIL BY E-MAIL
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "email":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.Register(Template.Domain.ViewModels.ProfileRegisterViewModel)">
+            <summary>
+            REGISTRAR USUÁRIO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.Token(Template.Domain.ViewModels.LoginViewModel)">
+            <summary>
+            LOGIN
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "login":"string", //optional
+                         "password":"string", //optional
+                         "facebookId":"string", //optional
+                         "googleId":"string" //optional
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.BlockUnBlock(Template.Domain.ViewModels.BlockViewModel)">
+            <summary>
+            BLOQUEAR / DESBLOQUEAR USUÁRIO - ADMIN
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "id": "string", // required
+                         "block": true,
+                         "reason": "" //motivo de bloquear o usuário
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.ChangePassword(Template.Domain.ViewModels.ChangePasswordViewModel)">
+            <summary>
+            ALTERAR PASSWORD
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "currentPassword":"string",
+                         "newPassword":"string",
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters)">
+            <summary>
+            METODO DE LISTAGEM COM DATATABLE - TODOS 
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.RegisterUnRegisterDeviceId(Template.Domain.ViewModels.PushViewModel)">
+            <summary>
+            REGISTRAR E REMOVER DEVICE ID ONESIGNAL OU FCM | CHAMAR APOS LOGIN E LOGOUT
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "id":"string"
+                         "isRegister":true 
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.Update(Template.Domain.ViewModels.ProfileRegisterViewModel)">
+            <summary>
+            UPDATE DE USUÁRIO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "fullName":"string",
+                         "email":"string",
+                         "photo":"string", //filename
+                         "phone":"string", //(##) #####-####
+                         "login":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.ForgotPassword(Template.Domain.ViewModels.LoginViewModel)">
+            <summary>
+            ESQUECI A SENHA
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "email":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.CheckEmail(Template.Domain.ViewModels.ValidationViewModel)">
+            <summary>
+            VERIFICAR SE E-MAIL ESTÁ EM USO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                        POST
+                        {
+                            "email":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.CheckLogin(Template.Domain.ViewModels.ValidationViewModel)">
+            <summary>
+            VERIFICAR SE E-MAIL ESTÁ EM USO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                        POST
+                        {
+                            "login":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.TriggerController.ChangeStatusGatway(UtilityFramework.Services.Iugu.Core.Models.IuguTriggerModel)">
+            <summary>
+            GATILHOS DA IUGU
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.GetInfo">
+            <summary>
+            GET INFO 
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.Detail(System.String)">
+            <summary>
+            GET INFO 
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.Register(Template.Domain.ViewModels.Admin.UserAdministratorViewModel)">
+            <summary>
+            CADASTRO | UPDATE
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "login":"string",
+                         "name":"string",
+                         "email":"string",
+                         "password":"string",
+                         "level":0
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.Token(Template.Domain.ViewModels.Admin.LoginAdminViewModel)">
+            <summary>
+            METODO DE LOGIN
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "login":"string",
+                         "password":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.ForgotPassword(Template.Domain.ViewModels.Admin.LoginAdminViewModel)">
+            <summary>
+            ESQUECI A SENHA
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                        POST
+                            {
+                             "email":"string"
+                            }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.Delete(Template.Domain.ViewModels.Admin.UserAdministratorViewModel)">
+            <summary>
+            REMOVER UM PERFIL DE ACESSO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "id":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.BlockUnblock(Template.Domain.ViewModels.BlockViewModel)">
+            <summary>
+            Bloquear / Desbloquear 
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "targetId":"string"
+                         "block":true
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters)">
+            <summary>
+            LISTAGEM DE USUARIOS DE ACESSO AO ADMIN
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Middleware.IocContainer.AddRepositoryInjection(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            INJEÇÃO DE DEPENDENCIAS DE REPOSITORIO DE ACESSO A DADOS DO BANCO
+            </summary>
+            <param name="services"></param>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Middleware.IocContainer.AddServicesInjection(Microsoft.Extensions.DependencyInjection.IServiceCollection)">
+            <summary>
+            INJEÇÃO DE DEPENDENCIAS DE SERVIÇOS DE API
+            </summary>
+            <param name="services"></param>
+            <returns></returns>
+        </member>
+    </members>
+</doc>
