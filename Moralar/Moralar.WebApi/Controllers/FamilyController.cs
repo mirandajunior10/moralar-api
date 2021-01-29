@@ -427,15 +427,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> DeleteMember([FromBody] FamilyDeleteMember model)
         {
-            //var claim = Util.SetRole(TypeProfile.Profile);
-            //var typeAction = string.IsNullOrEmpty(model.Id) ? TypeAction.Register : TypeAction.Change;
-
-            //if (entity.Photo.Count() == 0 || entity.Photo.FindIndex(x => x == model.Name) < 0)
-            //    return BadRequest(Utilities.ReturnErro(DefaultMessages.PhotoNotFound));
-
-            //entity.Photo.RemoveAt(entity.Photo.FindIndex(x => x == model.Name));
-
-            //await _residencialPropertyRepository.UpdateOneAsync(entity).ConfigureAwait(false);
             try
             {
                 var entityFamily = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
