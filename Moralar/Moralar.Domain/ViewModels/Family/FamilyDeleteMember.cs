@@ -7,6 +7,6 @@ namespace Moralar.Domain.ViewModels.Family
     public class FamilyDeleteMember
     {
         public string FamilyId { get; set; }
-        public int IndexMember { get; set; }
+        public string Name { get; set; }
     }
 }

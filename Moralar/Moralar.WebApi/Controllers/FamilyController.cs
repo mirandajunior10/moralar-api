@@ -429,19 +429,25 @@ namespace Moralar.WebApi.Controllers
         {
             //var claim = Util.SetRole(TypeProfile.Profile);
             //var typeAction = string.IsNullOrEmpty(model.Id) ? TypeAction.Register : TypeAction.Change;
+
+            //if (entity.Photo.Count() == 0 || entity.Photo.FindIndex(x => x == model.Name) < 0)
+            //    return BadRequest(Utilities.ReturnErro(DefaultMessages.PhotoNotFound));
+
+            //entity.Photo.RemoveAt(entity.Photo.FindIndex(x => x == model.Name));
+
+            //await _residencialPropertyRepository.UpdateOneAsync(entity).ConfigureAwait(false);
             try
             {
                 var entityFamily = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
                 if (entityFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
-                if (entityFamily.Members.Count() <= model.IndexMember)
+                if (entityFamily.Members.FindIndex(x => x.Name == model.Name) < 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.MemberNotFound));
 
-                var nameMember = entityFamily.Members[model.IndexMember].Name;
-                entityFamily.Members.RemoveAt(model.IndexMember);
+                entityFamily.Members.RemoveAt(entityFamily.Members.FindIndex(x => x.Name == model.Name));
                 await _familyRepository.UpdateOneAsync(entityFamily).ConfigureAwait(false);
 
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Remover membro de nova família {nameMember}", Request.GetUserId(), Request.GetUserName().Value, entityFamily._id.ToString());
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Remover membro de nova família {model.Name}", Request.GetUserId(), Request.GetUserName().Value, entityFamily._id.ToString());
 
                 return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
