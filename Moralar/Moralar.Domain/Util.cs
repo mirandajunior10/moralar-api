@@ -5,6 +5,7 @@ using Moralar.Data.Enum;
 using Moralar.Domain.ViewModels;
 using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
@@ -17,6 +18,7 @@ namespace Moralar.Domain
     {
 
         private static IStringLocalizer _localizer { get; set; }
+        public static string GetClientIp() => Utilities.HttpContext.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
         public static Dictionary<string, string> GetTemplateVariables()
         {
@@ -41,7 +43,57 @@ namespace Moralar.Domain
 
         }
         public static Claim SetRole(TypeProfile typeProfile) => new Claim(ClaimTypes.Role, Enum.GetName(typeProfile.GetType(), typeProfile));
+        public static Claim GetUserName(this HttpRequest httpRequest)
+        {
+            var userName = httpRequest.GetClaimFromToken("UserName");
+            if (string.IsNullOrEmpty(userName)== false)
+                return new Claim("UserName",userName);
+            return null;
+        }
+      
 
+        public static List<string> GetDiferentFields<T, TY>(this T target, TY source) where T : class
+          where TY : class
+        {
+
+            var response = new List<string>();
+            try
+            {
+                foreach (var prop in source.GetType().GetProperties())
+                {
+                    var targetValue = Utilities.GetValueByProperty(target, prop.Name);
+
+                    var sourceValue = Utilities.GetValueByProperty(source, prop.Name);
+
+                    if (Equals(targetValue, sourceValue) == false)
+                        response.Add(prop.Name);
+                }
+            }
+            catch (Exception)
+            {
+
+                /*unused*/
+            }
+            return response;
+        }
+        public static string GetFieldError<T>(int column, int line)
+        {
+            try
+            {
+                var propertyInfo = typeof(T).GetProperties().FirstOrDefault(x => x.GetCustomAttribute<Column>().ColumnIndex == column);
+
+                if (propertyInfo == null)
+                    return $"O valor da coluna {column} na linha {line} está inválido";
+
+                return $"O valor do campo \"{propertyInfo.GetCustomAttribute<DisplayAttribute>()?.Name ?? propertyInfo.Name}\" está inválido";
+
+            }
+            catch (Exception ex)
+            {
+
+                return $"{ex.InnerException} {ex.Message}".TrimEnd();
+            }
+        }
 
         public static TypeProfile GetRole(this HttpRequest request)
         {
@@ -91,23 +143,5 @@ namespace Moralar.Domain
             return Language.En;
         }
 
-
-        private static void SetLocalizer()
-        {
-            if (_localizer == null)
-            {
-                var factory = Utilities.HttpContextAccessor.HttpContext.RequestServices.GetService(typeof(IStringLocalizerFactory)) as IStringLocalizerFactory;
-                var type = typeof(SharedResource);
-                _localizer = factory.Create(type);
-            }
-        }
-
-        public static string GetTranslate(this string key)
-        {
-            if (_localizer == null)
-                SetLocalizer();
-
-            return _localizer[key]?.ToString();
-        }
     }
 }

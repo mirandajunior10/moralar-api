@@ -1,0 +1,130 @@
+<?xml version="1.0"?>
+<doc>
+    <assembly>
+        <name>Moralar.Domain</name>
+    </assembly>
+    <members>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Cep">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Logradouro">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Complemento">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Bairro">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Localidade">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Uf">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Unidade">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Ibge">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.AddressInfoViewModel.Gia">
+            <summary>
+            
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Holder">
+            <summary>
+            Dados do Titular
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Spouse">
+            <summary>
+            Dados do conjuge
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Members">
+            <summary>
+            Dados do membro da Família
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Financial">
+            <summary>
+            Dados Financeiros
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Priorization">
+            <summary>
+            Dados de Priorização
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.LogActionExportViewModel.Created">
+            <summary>
+            Data e hora
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.LogActionExportViewModel.LocalAction">
+            <summary>
+            Local
+            </summary>
+            <example></example>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.LogActionExportViewModel.ReferenceId">
+            <summary>
+            Referencia do Item
+            </summary>
+        </member>
+        <member name="T:Bmatch.WebApi.Resources.SharedResource">
+            <summary>
+              A strongly-typed resource class, for looking up localized strings, etc.
+            </summary>
+        </member>
+        <member name="P:Bmatch.WebApi.Resources.SharedResource.ResourceManager">
+            <summary>
+              Returns the cached ResourceManager instance used by this class.
+            </summary>
+        </member>
+        <member name="P:Bmatch.WebApi.Resources.SharedResource.Culture">
+            <summary>
+              Overrides the current thread's CurrentUICulture property for all
+              resource lookups using this strongly typed resource class.
+            </summary>
+        </member>
+        <member name="P:Bmatch.WebApi.Resources.SharedResource.Age">
+            <summary>
+              Looks up a localized string similar to Idade.
+            </summary>
+        </member>
+        <member name="P:Bmatch.WebApi.Resources.SharedResource.Gender">
+            <summary>
+              Looks up a localized string similar to Sexo.
+            </summary>
+        </member>
+        <member name="P:Bmatch.WebApi.Resources.SharedResource.Name">
+            <summary>
+              Looks up a localized string similar to Nome.
+            </summary>
+        </member>
+        <member name="P:Bmatch.WebApi.Resources.SharedResource.Required">
+            <summary>
+              Looks up a localized string similar to {0} é obrigatório.
+            </summary>
+        </member>
+    </members>
+</doc>

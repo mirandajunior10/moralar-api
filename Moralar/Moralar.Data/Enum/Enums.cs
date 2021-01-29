@@ -60,7 +60,34 @@ namespace Moralar.Data.Enum
         Pt = 2
 
     }
+    public enum TypeProperty
+    {
+        [EnumMember(Value = "Casa")]
+        [Description("Casa")]
+        Casa = 0,
+        [EnumMember(Value = "Apartamento")]
+        [Description("Apartamento")]
+        Apartamento = 1
+    }
+    public enum TypePropertyRegularization
+    {
+        [EnumMember(Value = "Regular")]
+        [Description("Regular")]
+        Regular = 0,
+        [EnumMember(Value = "Regularizável")]
+        [Description("Regularizável")]
+        Regularizável = 1
+    }
 
+    public enum TypePropertyGasInstallation
+    {
+        [EnumMember(Value = "Gás encanado")]
+        [Description("Gás encanado")]
+        GasEncanado = 0,
+        [EnumMember(Value = "Botijão")]
+        [Description("Botijão")]
+        Botijao = 1
+    }
     public enum TypeProfile
     {
         [EnumMember(Value = "Usuário")]
@@ -136,41 +163,63 @@ namespace Moralar.Data.Enum
         [Description("Outro")]
         Outro = 10
     }
-    public enum TypeTransaction
+    public enum TypeAction
     {
-        [EnumMember(Value = "Register")]
-        [Description("Register")]
-        Register = 0,
-        [EnumMember(Value = "Edit")]
-        [Description("Edit")]
-        Edit = 1,
-        [EnumMember(Value = "Consult")]
-        [Description("Consult")]
-        Consult = 2,
-        [EnumMember(Value = "BlockAndUnblock")]
-        [Description("BlockAndUnblock")]
-        BlockAndUnblock = 3,
-        [EnumMember(Value = "Delete")]
-        [Description("Delete")]
-        Delete = 4,
-        [EnumMember(Value = "Export")]
-        [Description("Export")]
-        Export = 5
+        [EnumMember(Value = "Cadastro")]
+        [Description("Cadastro")]
+        Register,
+        [EnumMember(Value = "Alteração")]
+        [Description("Alteração")]
+        Change,
+        [EnumMember(Value = "Remoção")]
+        [Description("Remoção")]
+        Delete,
+        [EnumMember(Value = "Upload")]
+        [Description("Upload")]
+        Upload,
+        [EnumMember(Value = "Download")]
+        [Description("Download")]
+        Download,
+        [EnumMember(Value = "UnBlock")]
+        [Description("Block")]
+        Block,
+        [EnumMember(Value = "UnBlock")]
+        [Description("UnBlock")]
+        UnBlock,
     }
-    public enum TypeHttpVerb
+    public enum TypeResposible
     {
-        [EnumMember(Value = "Post")]
-        [Description("Post")]
-        Post = 0,
-        [EnumMember(Value = "GET")]
-        [Description("GET")]
-        GET = 1,
-        [EnumMember(Value = "PUT")]
-        [Description("PUT")]
-        PUT = 2,
-        [EnumMember(Value = "DELETE")]
-        [Description("DELETE")]
-        DELETE = 3
+        [EnumMember(Value = "Gestor")]
+        [Description("Gestor")]
+        Gestor = 0,
+        [EnumMember(Value = "Usuário administrador")]
+        [Description("Usuário administrador")]
+        UserAdminstrator = 1,
+        [EnumMember(Value = "Usuário administrador/gestor")]
+        [Description("Usuário administrador/gestor")]
+        UserAdminstratorGestor = 2
     }
+    public enum TypeGenre
+    {
+        [EnumMember(Value = "Feminino")]
+        [Description("Feminino")]
+        Feminino = 0,
+        [EnumMember(Value = "Masculino")]
+        [Description("Masculino")]
+        Masculino = 1,
+        [EnumMember(Value = "Outro")]
+        [Description("Outro")]
+        Outro = 2
+    }
+    public enum LocalAction
+    {
+        [EnumMember(Value = "Família")]
+        [Description("Família")]
+        Familia = 0,
+        [EnumMember(Value = "Propriedade Residencial")]
+        [Description("Propriedade Residencial")]
+        ResidencialProperty,
+    }
+
 
 }

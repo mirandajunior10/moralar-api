@@ -238,8 +238,8 @@ namespace Moralar.WebApi.Controllers
             {
                 model.TrimStringProperties();
 
-                if (string.IsNullOrEmpty(model.RefreshToken) == false)
-                    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claim);
+                //if (string.IsNullOrEmpty(model.RefreshToken) == false)
+                //    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claim);
 
                 var isInvalidState = ModelState.ValidModelState();
 

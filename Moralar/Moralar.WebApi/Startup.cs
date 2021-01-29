@@ -52,8 +52,6 @@ namespace Moralar.WebApi
             {
                 opt.Filters.Add(typeof(CheckJson));
                 opt.Filters.Add(typeof(PreventSpanFilter));
-                //opt.Filters.Add(typeof(Moralar.WebApi.FilterLog.FilterLog));
-                opt.Filters.Add(typeof(Moralar.WebApi.FilterLog.FilterLog));
             });
 
             /*TRANSLATE I18N*/
@@ -156,6 +154,7 @@ namespace Moralar.WebApi
                    c.SwaggerEndpoint($"../swagger/v1/swagger.json".Trim(), $"API {ApplicationName}");
                    c.EnableFilter();
                    c.EnableDeepLinking();
+                   c.DocExpansion(DocExpansion.None);
                });
             }
 

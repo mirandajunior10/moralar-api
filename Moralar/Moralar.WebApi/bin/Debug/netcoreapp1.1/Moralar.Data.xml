@@ -4,26 +4,29 @@
         <name>Moralar.Data</name>
     </assembly>
     <members>
-        <member name="P:Moralar.Data.Entities.Family.HolderNumber">
+        <member name="P:Moralar.Data.Entities.Family.Holder">
             <summary>
             Dados do Titular
             </summary>
         </member>
-        <member name="P:Moralar.Data.Entities.Family.SpouseNumber">
+        <member name="P:Moralar.Data.Entities.Family.Spouse">
             <summary>
             Dados do conjuge
             </summary>
         </member>
-        <member name="P:Moralar.Data.Entities.Family.FamilyMemberNumber">
+        <member name="P:Moralar.Data.Entities.Family.Members">
             <summary>
             Dados do membro da Família
             </summary>
         </member>
-        <member name="T:Moralar.Data.Entities.TransactionLog">
+        <member name="P:Moralar.Data.Entities.Family.Financial">
             <summary>
-            TABELA DE TRANSAÇÕES
-            DynamicDataBefore -- DADOS ANTES DA TRANSÇÃO
-            DynamicDataAfter --  DADOS DEPOIS DA TRANSÇÃO
+            Dados Financeiros
+            </summary>
+        </member>
+        <member name="P:Moralar.Data.Entities.Family.Priorization">
+            <summary>
+            Dados de Priorização
             </summary>
         </member>
     </members>

@@ -129,6 +129,10 @@
             "UtilityFramework.Services.Iugu.Core": {
               "target": "Package",
               "version": "[1.8.8, )"
+            },
+            "xunit.extensibility.core": {
+              "target": "Package",
+              "version": "[2.4.1, )"
             }
           },
           "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.101\\RuntimeIdentifierGraph.json"

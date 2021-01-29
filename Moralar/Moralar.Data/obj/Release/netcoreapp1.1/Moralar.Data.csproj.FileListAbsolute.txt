@@ -1,0 +1,10 @@
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\bin\Release\netcoreapp1.1\Moralar.Data.xml
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\bin\Release\netcoreapp1.1\Moralar.Data.deps.json
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\bin\Release\netcoreapp1.1\Moralar.Data.dll
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\bin\Release\netcoreapp1.1\Moralar.Data.pdb
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\obj\Release\netcoreapp1.1\Moralar.Data.csprojAssemblyReference.cache
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\obj\Release\netcoreapp1.1\Moralar.Data.AssemblyInfoInputs.cache
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\obj\Release\netcoreapp1.1\Moralar.Data.AssemblyInfo.cs
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\obj\Release\netcoreapp1.1\Moralar.Data.csproj.CoreCompileInputs.cache
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\obj\Release\netcoreapp1.1\Moralar.Data.dll
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Data\obj\Release\netcoreapp1.1\Moralar.Data.pdb

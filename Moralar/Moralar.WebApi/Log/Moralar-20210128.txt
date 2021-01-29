@@ -1,0 +1,1526 @@
+2021-01-28T10:27:01.7225153-03:00 0HM63I0F777SE [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/DeleteMember
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "familyId": "6011d02a4c7c9e71c25df866",
+  "indexMember": 0
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (8e9a4e91)
+2021-01-28T10:37:54.3308759-03:00 0HM63I6RCSF0C [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/DeleteMember
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "familyId": "6011d02a4c7c9e71c25df866",
+  "indexMember": 1
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Membro da família não encontrado","messageEx":null}
+############# END ############
+ (fa1e46d5)
+2021-01-28T10:46:02.1978424-03:00 0HM63IB59A7TU [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/DeleteMember
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "familyId": "6011d02a4c7c9e71c25df866",
+  "indexMember": 1
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (00691d2a)
+2021-01-28T11:06:08.9898466-03:00 0HM63IN6UH158 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/RegisterMember
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "familyId": "6011d02a4c7c9e71c25df866",
+  "members": [
+    {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "Scholarity" : 0,
+            "KinShip" : 0
+    }
+  ]
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (0eef1cde)
+2021-01-28T11:06:49.2368494-03:00 0HM63IN6UH159 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/RegisterMember
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "familyId": "6011d02a4c7c9e71c25df866",
+  "members": [
+    {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "Scholarity" : 0,
+            "KinShip" : 0
+    }
+  ]
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (0eef1cde)
+2021-01-28T11:21:21.9156437-03:00 0HM63ITF3DFHI [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/RegisterMember
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "familyId": "6011d02a4c7c9e71c25df866",
+  "members": [
+    {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "Scholarity" : 0,
+            "KinShip" : 0
+    }
+  ]
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (4221e654)
+2021-01-28T11:22:14.6633197-03:00 0HM63ITF3DFHJ [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/RegisterMember
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "familyId": "6011d02a4c7c9e71c25df866",
+  "members": [
+    {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "Scholarity" : 0,
+            "KinShip" : 0
+    }, {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "Scholarity" : 0,
+            "KinShip" : 0
+    }, {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "Scholarity" : 0,
+            "KinShip" : 0
+    }, {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "Scholarity" : 0,
+            "KinShip" : 0
+    }
+  ]
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (a8e2489f)
+2021-01-28T11:30:54.7736058-03:00 0HM63J3KRFC2L [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Detail/6011d02a4c7c9e71c25df866
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Credênciais inválidas.","messageEx":null}
+############# END ############
+ (cac4084c)
+2021-01-28T11:32:51.8149560-03:00 0HM63J5K9VHQT [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Detail/6011d02a4c7c9e71c25df866
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":"AutoMapper.AutoMapperMappingException: Missing type map configuration or unsupported mapping.\r\n\r\nMapping types:\r\nFamilyHolder -> FamilyHolderViewModel\r\nMoralar.Data.Entities.Auxiliar.FamilyHolder -> Moralar.Domain.ViewModels.Family.FamilyHolderViewModel\r\n   at lambda_method(Closure , FamilyHolder , FamilyHolderViewModel , ResolutionContext )\r\n   at AutoMapper.ResolutionContext.Map[TSource,TDestination](TSource source, TDestination destination)\r\n   at lambda_method(Closure , Object , Object , ResolutionContext ) Error mapping types.\r\n\r\nMapping types:\r\nFamily -> FamilyCompleteViewModel\r\nMoralar.Data.Entities.Family -> Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel\r\n\r\nType Map configuration:\r\nFamily -> FamilyCompleteViewModel\r\nMoralar.Data.Entities.Family -> Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel\r\n\r\nProperty:\r\nHolder"}
+############# END ############
+ (d5c532c4)
+2021-01-28T11:35:37.0208397-03:00 0HM63J5K9VHQU [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Detail/6011d02a4c7c9e71c25df866
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":"AutoMapper.AutoMapperMappingException: Missing type map configuration or unsupported mapping.\r\n\r\nMapping types:\r\nFamilyHolder -> FamilyHolderViewModel\r\nMoralar.Data.Entities.Auxiliar.FamilyHolder -> Moralar.Domain.ViewModels.Family.FamilyHolderViewModel\r\n   at lambda_method(Closure , FamilyHolder , FamilyHolderViewModel , ResolutionContext )\r\n   at AutoMapper.ResolutionContext.Map[TSource,TDestination](TSource source, TDestination destination)\r\n   at lambda_method(Closure , Object , Object , ResolutionContext ) Error mapping types.\r\n\r\nMapping types:\r\nFamily -> FamilyCompleteViewModel\r\nMoralar.Data.Entities.Family -> Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel\r\n\r\nType Map configuration:\r\nFamily -> FamilyCompleteViewModel\r\nMoralar.Data.Entities.Family -> Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel\r\n\r\nProperty:\r\nHolder"}
+############# END ############
+ (d5c532c4)
+2021-01-28T11:38:03.8453896-03:00 0HM63J93B5QGU [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Detail/6011d02a4c7c9e71c25df866
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":{"holder":{"number":"number","name":"name","cpf":"cpf","birthday":1611776217,"genre":1,"email":"email","phone":"phone","scholarity":1},"spouse":{"name":"name","birthday":1611776217,"genre":"Masculino","scholarity":0},"members":[{"name":"name0","birthday":1611776217,"genre":0,"kinShip":0,"scholarity":0},{"name":"name","birthday":1611776217,"genre":0,"kinShip":0,"scholarity":0},{"name":"name","birthday":1611776217,"genre":0,"kinShip":0,"scholarity":0},{"name":"name","birthday":1611776217,"genre":0,"kinShip":0,"scholarity":0},{"name":"name","birthday":1611776217,"genre":0,"kinShip":0,"scholarity":0}],"financial":{"familyIncome":20.0,"propertyValueForDemolished":30.0,"maximumPurchase":40.0,"incrementValue":50.0},"priorization":{"workFront":true,"permanentDisabled":true,"elderlyOverEighty":true,"yearsInSextyAndSeventyNine":false,"womanServedByProtectiveMeasure":true,"femaleBreadWinner":true,"singleParent":true,"familyWithMoreThanFivePeople":true,"childUnderEighteen":true,"headOfHouseholdWithoutIncome":true,"benefitOfContinuedProvision":true,"familyPurse":true,"involuntaryCohabitation":true,"familyIncomeOfUpTwoMinimumWages":true},"id":"6011d02a4c7c9e71c25df866"},"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (e53b871e)
+2021-01-28T13:48:01.5725127-03:00 0HM63LGFV7UCP [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "id": "6011d02a4c7c9e71c25df866",
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : NumberLong(1611776217),
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : NumberLong(1611776217),
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : NumberLong(1611776217),
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : NumberLong(1611776217),
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : NumberLong(1611776217),
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : NumberLong(1611776217),
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"Spouse.Birthday":"O valor do campo \"Spouse.Birthday\" é inválido, informe um 'Error parsing NaN value'"},"message":"O valor do campo \"Spouse.Birthday\" é inválido, informe um 'Error parsing NaN value'","messageEx":null}
+############# END ############
+ (ce1fc29b)
+2021-01-28T13:49:21.9842589-03:00 0HM63LGFV7UCQ [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "id": "6011d02a4c7c9e71c25df866",
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (b6ca9280)
+2021-01-28T13:57:16.3670415-03:00 0HM63LMGDOVNI [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (7ddf8b21)
+2021-01-28T14:06:32.0769772-03:00 0HM63LRS7V2EM [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (7ddf8b21)
+2021-01-28T14:13:49.5666220-03:00 0HM63LVVAMKJ8 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (7ddf8b21)
+2021-01-28T14:18:58.6285361-03:00 0HM63M2VA5J09 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"id":"O valor do campo \"id\" é inválido, informe um 'MongoDB.Bson.ObjectId'"},"message":"O valor do campo \"id\" é inválido, informe um 'MongoDB.Bson.ObjectId'","messageEx":null}
+############# END ############
+ (a1911e48)
+2021-01-28T14:19:14.2829859-03:00 0HM63M2VA5J0A [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": 6011d02a4c7c9e71c25df866,
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"id":"O valor do campo \"id\" é inválido, informe um 'Input string 6011d02a4c7c9e71c25df866 is not a valid number'"},"message":"O valor do campo \"id\" é inválido, informe um 'Input string 6011d02a4c7c9e71c25df866 is not a valid number'","messageEx":null}
+############# END ############
+ (395f00ba)
+2021-01-28T14:19:30.9406563-03:00 0HM63M2VA5J0B [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": ObjectId(""6011d02a4c7c9e71c25df866"),
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"id":"O valor do campo \"id\" é inválido, informe um 'Unexpected character encountered while parsing value'"},"message":"O valor do campo \"id\" é inválido, informe um 'Unexpected character encountered while parsing value'","messageEx":null}
+############# END ############
+ (822c7965)
+2021-01-28T14:19:43.6478534-03:00 0HM63M2VA5J0C [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": ObjectId("6011d02a4c7c9e71c25df866"),
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"id":"O valor do campo \"id\" é inválido, informe um 'Unexpected character encountered while parsing value'"},"message":"O valor do campo \"id\" é inválido, informe um 'Unexpected character encountered while parsing value'","messageEx":null}
+############# END ############
+ (28df5ba9)
+2021-01-28T14:24:21.8766015-03:00 0HM63M63KT6D6 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": ObjectId("6011d02a4c7c9e71c25df866"),
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"id":"O valor do campo \"id\" é inválido, informe um 'Unexpected character encountered while parsing value'"},"message":"O valor do campo \"id\" é inválido, informe um 'Unexpected character encountered while parsing value'","messageEx":null}
+############# END ############
+ (28df5ba9)
+2021-01-28T14:31:12.6161324-03:00 0HM63M9NUA8LD [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (7ddf8b21)
+2021-01-28T14:34:59.6841358-03:00 0HM63MBRSKS4O [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (7ddf8b21)
+2021-01-28T14:36:26.7686957-03:00 0HM63MBRSKS4V [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+ 
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (448d6936)
+2021-01-28T14:44:38.8351945-03:00 0HM63MHBPFAVD [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (9ea3b4f9)
+2021-01-28T14:46:04.6634717-03:00 0HM63MI8I8MN5 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Object of type 'Moralar.Domain.ViewModels.Family.FamilyHolderMinViewModel' cannot be converted to type 'Moralar.Data.Entities.Auxiliar.FamilyHolder'."}
+############# END ############
+ (9ea3b4f9)
+2021-01-28T14:48:33.9744919-03:00 0HM63MIIEOO0T [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Edit
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+   "id": "6011d02a4c7c9e71c25df866",
+  "holder": {
+    "name": "sérgio",
+    "genre": 0,
+    "email": "sergio.rodrigues@megaleios",
+    "phone": "555555668",
+    "scholarity": 0
+  },
+ "Spouse" : {
+        "Name" : "name",
+        "Birthday" : 1611776217,
+        "Genre" : 1,
+        "SpouseScholarity" : 0
+    },
+    "Members" : [ 
+        {
+            "Name" : "name0",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }, 
+        {
+            "Name" : "name",
+            "Birthday" : 1611776217,
+            "Genre" : 0,
+            "KinShip" : 0,
+            "Scholarity" : 0
+        }
+    ],
+    "Financial" : {
+        "FamilyIncome" : "20",
+        "PropertyValueForDemolished" : "30",
+        "MaximumPurchase" : "40",
+        "IncrementValue" : "50"
+    },
+    "Priorization" : {
+        "WorkFront" : true,
+        "PermanentDisabled" : true,
+        "ElderlyOverEighty" : true,
+        "WomanServedByProtectiveMeasure" : true,
+        "FemaleBreadwinner" : true,
+        "SingleParent" : true,
+        "FamilyWithMoreThanFivePeople" : true,
+        "ChildUnderEighteen" : true,
+        "HeadOfHouseholdWithoutIncome" : true,
+        "BenefitOfContinuedProvision" : true,
+        "FamilyPurse" : true,
+        "InvoluntaryCohabitation" : true,
+        "FamilyIncomeOfUpTwoMinimumWages" : true
+    }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (5f6bda6d)
+2021-01-28T15:00:32.4915476-03:00 0HM63MQ40G5RO [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/LoadData
+
+HEADERS: {"Authorization":"Bearer"}
+
+BODY: draw=1&columns%5B0%5D%5Bdata%5D=created&columns%5B0%5D%5Bname%5D=Created&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=10&search%5Bvalue%5D=&search%5Bregex%5D=false
+RESPONSE: {"draw":0,"recordsTotal":0,"recordsFiltered":0,"data":[],"erro":true,"messageEx":"AutoMapper.AutoMapperMappingException: Missing type map configuration or unsupported mapping.\r\n\r\nMapping types:\r\nFamily -> FamilyHolderViewModel\r\nMoralar.Data.Entities.Family -> Moralar.Domain.ViewModels.Family.FamilyHolderViewModel\r\n   at lambda_method(Closure , Family , FamilyHolderViewModel , ResolutionContext )\r\n   at AutoMapper.ResolutionContext.Map[TSource,TDestination](TSource source, TDestination destination)\r\n   at lambda_method(Closure , Object , Object , ResolutionContext ) Error mapping types.\r\n\r\nMapping types:\r\nList`1 -> List`1\r\nSystem.Collections.Generic.List`1[[Moralar.Data.Entities.Family, Moralar.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] -> System.Collections.Generic.List`1[[Moralar.Domain.ViewModels.Family.FamilyHolderViewModel, Moralar.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"}
+############# END ############
+ (15b9602c)
+2021-01-28T15:02:13.7819719-03:00 0HM63MQ40G5RU [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/LoadData
+
+HEADERS: {"Authorization":"Bearer"}
+
+BODY: draw=1&columns%5B0%5D%5Bdata%5D=created&columns%5B0%5D%5Bname%5D=Created&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=10&search%5Bvalue%5D=&search%5Bregex%5D=false
+RESPONSE: {"draw":0,"recordsTotal":0,"recordsFiltered":0,"data":[],"erro":true,"messageEx":"AutoMapper.AutoMapperMappingException: Missing type map configuration or unsupported mapping.\r\n\r\nMapping types:\r\nFamily -> FamilyHolderViewModel\r\nMoralar.Data.Entities.Family -> Moralar.Domain.ViewModels.Family.FamilyHolderViewModel\r\n   at lambda_method(Closure , Family , FamilyHolderViewModel , ResolutionContext )\r\n   at AutoMapper.ResolutionContext.Map[TSource,TDestination](TSource source, TDestination destination)\r\n   at lambda_method(Closure , Object , Object , ResolutionContext ) Error mapping types.\r\n\r\nMapping types:\r\nList`1 -> List`1\r\nSystem.Collections.Generic.List`1[[Moralar.Data.Entities.Family, Moralar.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] -> System.Collections.Generic.List`1[[Moralar.Domain.ViewModels.Family.FamilyHolderViewModel, Moralar.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"}
+############# END ############
+ (15b9602c)
+2021-01-28T15:22:17.5656077-03:00 0HM63N6GVLIMP [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/LoadData
+
+HEADERS: {"Authorization":"Bearer"}
+
+BODY: draw=1&columns%5B0%5D%5Bdata%5D=created&columns%5B0%5D%5Bname%5D=Created&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=10&search%5Bvalue%5D=&search%5Bregex%5D=false
+RESPONSE: {"draw":0,"recordsTotal":0,"recordsFiltered":0,"data":[],"erro":true,"messageEx":"AutoMapper.AutoMapperMappingException: Missing type map configuration or unsupported mapping.\r\n\r\nMapping types:\r\nFamilyHolder -> FamilyHolderListViewModel\r\nMoralar.Data.Entities.Auxiliar.FamilyHolder -> Moralar.Domain.ViewModels.Family.FamilyHolderListViewModel\r\n   at lambda_method(Closure , FamilyHolder , FamilyHolderListViewModel , ResolutionContext )\r\n   at AutoMapper.ResolutionContext.Map[TSource,TDestination](TSource source, TDestination destination)\r\n   at lambda_method(Closure , Object , Object , ResolutionContext ) Error mapping types.\r\n\r\nMapping types:\r\nSelectListIterator`2 -> List`1\r\nSystem.Linq.Enumerable+SelectListIterator`2[[Moralar.Data.Entities.Family, Moralar.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null],[Moralar.Data.Entities.Auxiliar.FamilyHolder, Moralar.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] -> System.Collections.Generic.List`1[[Moralar.Domain.ViewModels.Family.FamilyHolderListViewModel, Moralar.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"}
+############# END ############
+ (7e622f97)
+2021-01-28T15:33:59.5066371-03:00 0HM63NCPH0J2H [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/LoadData
+
+HEADERS: {"Authorization":"Bearer"}
+
+BODY: draw=1&columns%5B0%5D%5Bdata%5D=created&columns%5B0%5D%5Bname%5D=Created&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=10&search%5Bvalue%5D=&search%5Bregex%5D=false
+RESPONSE: {"draw":1,"recordsTotal":2,"recordsFiltered":2,"data":[{"created":1611780136,"number":"number","name":"name","cpf":"cpf","birthday":0,"genre":0,"email":"email","phone":"phone","scholarity":0,"blocked":false,"id":null},{"created":1611781361,"number":"fasdf","name":"name","cpf":"name","birthday":0,"genre":0,"email":"email","phone":"phone","scholarity":0,"blocked":false,"id":null}],"erro":false,"messageEx":null}
+############# END ############
+ (6cf08ae7)
+2021-01-28T15:58:26.5571674-03:00 0HM63NQ7K23ER [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Token
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holderCpf": "cpf",
+  "holderBirthday": 1611776217
+}
+RESPONSE: {"data":{"access_token":"ew0KICAiYWxnIjogIkhTMjU2IiwNCiAgInR5cCI6ICJKV1QiDQp9.ew0KICAic3ViIjogIjYwMTFkMDJhNGM3YzllNzFjMjVkZjg2NiIsDQogICJqdGkiOiAiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwNCiAgImlhdCI6IDE2MTE4NjAzMDYsDQogICJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiAiUHJvZmlsZSIsDQogICJ1c2VyTmFtZSI6ICJuYW1lIiwNCiAgIm5iZiI6IDE2MTE4NjAzMDYsDQogICJleHAiOiAxNjExODYzOTA2LA0KICAiaXNzIjogIk1vcmFsYXIiLA0KICAiYXVkIjogIk1vcmFsYXIiDQp9.GdpHJNACwlSHWwwhhmY4OF3FFVt8ISpNHkSGxmAEv8c","refresh_token":"ew0KICAiYWxnIjogIkhTMjU2IiwNCiAgInR5cCI6ICJKV1QiDQp9.ew0KICAic3ViIjogIjYwMTFkMDJhNGM3YzllNzFjMjVkZjg2NiIsDQogICJqdGkiOiAiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwNCiAgImlhdCI6IDE2MTE4NjAzMDYsDQogICJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiAiUHJvZmlsZSIsDQogICJ1c2VyTmFtZSI6ICJuYW1lIiwNCiAgIm5iZiI6IDE2MTE4NjAzMDYsDQogICJleHAiOiAxNjExODcxMTA2LA0KICAiaXNzIjogIk1vcmFsYXIiLA0KICAiYXVkIjogIk1vcmFsYXIiDQp9.d2DROFxkrEyzCYRSoogAqSivtfMkyrs1ORtx0fnz4cc","expires_in":3600,"expires":"28/01/2021 16:58:26","expires_type":"seconds"},"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (bd145767)
+2021-01-28T16:00:42.1588085-03:00 0HM63NQ7K23ES [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/BlockUnBlock
+
+HEADERS: {"Authorization":"bearer ew0KICAiYWxnIjogIkhTMjU2IiwNCiAgInR5cCI6ICJKV1QiDQp9.ew0KICAic3ViIjogIjYwMTFkMDJhNGM3YzllNzFjMjVkZjg2NiIsDQogICJqdGkiOiAiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwNCiAgImlhdCI6IDE2MTE4NjAzMDYsDQogICJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiAiUHJvZmlsZSIsDQogICJ1c2VyTmFtZSI6ICJuYW1lIiwNCiAgIm5iZiI6IDE2MTE4NjAzMDYsDQogICJleHAiOiAxNjExODYzOTA2LA0KICAiaXNzIjogIk1vcmFsYXIiLA0KICAiYXVkIjogIk1vcmFsYXIiDQp9.GdpHJNACwlSHWwwhhmY4OF3FFVt8ISpNHkSGxmAEv8c"}
+
+BODY: {
+  "block": true,
+  "reason": "teste",
+  "targetId": "6011d50433783ac3a48979f5"
+}
+RESPONSE: {"data":null,"erro":false,"errors":null,"message":"Bloqueado com sucesso","messageEx":null}
+############# END ############
+ (04bc60ed)
+2021-01-28T16:01:08.5955101-03:00 0HM63NQ7K23EU [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/LoadData
+
+HEADERS: {"Authorization":"Bearer"}
+
+BODY: draw=1&columns%5B0%5D%5Bdata%5D=created&columns%5B0%5D%5Bname%5D=Created&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=10&search%5Bvalue%5D=&search%5Bregex%5D=false
+RESPONSE: {"draw":1,"recordsTotal":2,"recordsFiltered":2,"data":[{"created":1611780136,"number":"number","name":"name","cpf":"cpf","birthday":0,"genre":0,"email":"email","phone":"phone","scholarity":0,"blocked":false,"id":null},{"created":1611781361,"number":"fasdf","name":"name","cpf":"name","birthday":0,"genre":0,"email":"email","phone":"phone","scholarity":0,"blocked":true,"id":null}],"erro":false,"messageEx":null}
+############# END ############
+ (f9c74b86)
+2021-01-28T16:01:24.5578315-03:00 0HM63NQ7K23F0 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/LoadData
+
+HEADERS: {"Authorization":"Bearer"}
+
+BODY: draw=1&columns%5B0%5D%5Bdata%5D=created&columns%5B0%5D%5Bname%5D=Created&columns%5B0%5D%5Bsearchable%5D=true&columns%5B0%5D%5Borderable%5D=true&columns%5B0%5D%5Bsearch%5D%5Bvalue%5D=&columns%5B0%5D%5Bsearch%5D%5Bregex%5D=false&order%5B0%5D%5Bcolumn%5D=0&order%5B0%5D%5Bdir%5D=asc&start=0&length=10&search%5Bvalue%5D=&search%5Bregex%5D=false
+RESPONSE: {"draw":1,"recordsTotal":2,"recordsFiltered":2,"data":[{"created":1611780136,"number":"number","name":"name","cpf":"cpf","birthday":0,"genre":0,"email":"email","phone":"phone","scholarity":0,"blocked":false,"id":null},{"created":1611781361,"number":"fasdf","name":"name","cpf":"name","birthday":0,"genre":0,"email":"email","phone":"phone","scholarity":0,"blocked":true,"id":null}],"erro":false,"messageEx":null}
+############# END ############
+ (f9c74b86)

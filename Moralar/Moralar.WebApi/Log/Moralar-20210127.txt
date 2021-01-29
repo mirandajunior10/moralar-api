@@ -1,0 +1,906 @@
+2021-01-27T16:42:04.5879406-03:00 0HM62VDGE0VRM [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": "1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"holder.genre":"O valor do campo \"holder.genre\" é inválido, informe um 'Error converting value \"1,\n Moralar.Data.Enum.TypeGenre'"},"message":"O valor do campo \"holder.genre\" é inválido, informe um 'Error converting value \"1,\n Moralar.Data.Enum.TypeGenre'","messageEx":null}
+############# END ############
+ (f9ed8f85)
+2021-01-27T16:50:42.3180549-03:00 0HM62VJ44VBF8 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (eebb94c5)
+2021-01-27T16:52:22.9729477-03:00 0HM62VJUKIO4C [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Cpf em uso.","messageEx":null}
+############# END ############
+ (61ea25f6)
+2021-01-27T16:52:45.1449253-03:00 0HM62VJUKIO4D [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (eebb94c5)
+2021-01-27T16:54:08.1058687-03:00 0HM62VL2P0THL [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (ade142f8)
+2021-01-27T16:54:27.6237188-03:00 0HM62VL2P0THQ [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Cpf em uso.","messageEx":null}
+############# END ############
+ (0ed87cd8)
+2021-01-27T16:55:06.1182408-03:00 0HM62VL2P0THR [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (ade142f8)
+2021-01-27T16:55:30.4013344-03:00 0HM62VL2P0THS [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "Member": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (e463fbda)
+2021-01-27T17:02:13.9252598-03:00 0HM62VPIBVFUU [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "Members": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (b3ad4c27)
+2021-01-27T17:15:10.4306539-03:00 0HM62VV2AJCS3 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "number",
+    "name": "name",
+    "cpf": "cpf",
+    "birthday": 1611776217,
+    "genre": "1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"holder.genre":"O valor do campo \"holder.genre\" é inválido, informe um 'Error converting value \"1,\n Moralar.Data.Enum.TypeGenre'"},"message":"O valor do campo \"holder.genre\" é inválido, informe um 'Error converting value \"1,\n Moralar.Data.Enum.TypeGenre'","messageEx":null}
+############# END ############
+ (9d3ee48f)
+2021-01-27T17:16:00.2180634-03:00 0HM62VV2AJCSA [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "number",
+    "name": "name",
+    "cpf": "cpf",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (877f991e)
+2021-01-27T17:17:42.5613907-03:00 0HM63026NB7QQ [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "number",
+    "name": "name",
+    "cpf": "cpf",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "familyMember": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (877f991e)
+2021-01-27T17:42:20.0618383-03:00 0HM630FR84DEP [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holder": {
+    "number": "number",
+    "name": "name",
+    "cpf": "cpf",
+    "birthday": 1611776217,
+    "genre": 1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "Members": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }, {
+      "name": "name2",
+      "birthday":  1611776217,
+      "genre": 2,
+      "kinShip": 2,
+      "scholarity": 2
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (3fdcd8f7)
+2021-01-27T17:55:55.9602458-03:00 0HM630NCETIO5 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Token
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "holderCpf": "cpf",
+  "holderBirthday": 1611776217
+}
+RESPONSE: {"data":{"access_token":"ew0KICAiYWxnIjogIkhTMjU2IiwNCiAgInR5cCI6ICJKV1QiDQp9.ew0KICAic3ViIjogIjYwMTFkMDJhNGM3YzllNzFjMjVkZjg2NiIsDQogICJqdGkiOiAiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwNCiAgImlhdCI6IDE2MTE3ODA5NTIsDQogICJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiAiUHJvZmlsZSIsDQogICJ1c2VyTmFtZSI6ICJuYW1lIiwNCiAgIm5iZiI6IDE2MTE3ODA5NTIsDQogICJleHAiOiAxNjExNzg0NTUyLA0KICAiaXNzIjogIk1vcmFsYXIiLA0KICAiYXVkIjogIk1vcmFsYXIiDQp9.l6TbDqXi_5zRzfToKALc8gxG_puIz_3dlMVTMwJ3OAQ","refresh_token":"ew0KICAiYWxnIjogIkhTMjU2IiwNCiAgInR5cCI6ICJKV1QiDQp9.ew0KICAic3ViIjogIjYwMTFkMDJhNGM3YzllNzFjMjVkZjg2NiIsDQogICJqdGkiOiAiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwNCiAgImlhdCI6IDE2MTE3ODA5NTIsDQogICJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiAiUHJvZmlsZSIsDQogICJ1c2VyTmFtZSI6ICJuYW1lIiwNCiAgIm5iZiI6IDE2MTE3ODA5NTIsDQogICJleHAiOiAxNjExNzkxNzUyLA0KICAiaXNzIjogIk1vcmFsYXIiLA0KICAiYXVkIjogIk1vcmFsYXIiDQp9.wdTCZqfdxYN7crRmhzQHACrXd84n_nMLQycr2kd9N0Q","expires_in":3600,"expires":"27/01/2021 18:55:52","expires_type":"seconds"},"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (3e523bf1)
+2021-01-27T18:02:20.0819184-03:00 0HM630Q8K0LEQ [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/Family/Register
+
+HEADERS: {"Authorization":"bearer ew0KICAiYWxnIjogIkhTMjU2IiwNCiAgInR5cCI6ICJKV1QiDQp9.ew0KICAic3ViIjogIjYwMTFkMDJhNGM3YzllNzFjMjVkZjg2NiIsDQogICJqdGkiOiAiMDAwMDAwMDAtMDAwMC0wMDAwLTAwMDAtMDAwMDAwMDAwMDAwIiwNCiAgImlhdCI6IDE2MTE3ODA5NTIsDQogICJodHRwOi8vc2NoZW1hcy5taWNyb3NvZnQuY29tL3dzLzIwMDgvMDYvaWRlbnRpdHkvY2xhaW1zL3JvbGUiOiAiUHJvZmlsZSIsDQogICJ1c2VyTmFtZSI6ICJuYW1lIiwNCiAgIm5iZiI6IDE2MTE3ODA5NTIsDQogICJleHAiOiAxNjExNzg0NTUyLA0KICAiaXNzIjogIk1vcmFsYXIiLA0KICAiYXVkIjogIk1vcmFsYXIiDQp9.l6TbDqXi_5zRzfToKALc8gxG_puIz_3dlMVTMwJ3OAQ"}
+
+BODY: {
+  "holder": {
+    "number": "fasdf",
+    "name": "name",
+    "cpf": "name",
+    "birthday": 1611776217,
+    "genre": "1,
+    "email": "email",
+    "phone": "phone",
+    "scholarity": 1
+  },
+  "spouse": {
+    "name": "name",
+    "birthday": 1611776217,
+    "genre": 1,
+    "scholarity": 1
+  },
+  "members": [
+    {
+      "name": "name",
+      "birthday":  1611776217,
+      "genre": 1,
+      "kinShip": 1,
+      "scholarity": 1
+    }
+  ],
+  "financial": {
+    "familyIncome": 20,
+    "propertyValueForDemolished": 30,
+    "maximumPurchase": 40,
+    "incrementValue": 50
+  },
+  "priorization": {
+    "workFront": true,
+    "permanentDisabled": true,
+    "elderlyOverEighty": true,
+    "yearsInSextyAndSeventyNine": true,
+    "womanServedByProtectiveMeasure": true,
+    "femaleBreadWinner": true,
+    "singleParent": true,
+    "familyWithMoreThanFivePeople": true,
+    "childUnderEighteen": true,
+    "headOfHouseholdWithoutIncome": true,
+    "benefitOfContinuedProvision": true,
+    "familyPurse": true,
+    "involuntaryCohabitation": true,
+    "familyIncomeOfUpTwoMinimumWages": true
+  },
+  "password": "fasdf",
+  "isFirstAcess": true,
+  "providerId": "string"
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"holder.genre":"O valor do campo \"holder.genre\" é inválido, informe um 'Error converting value \"1,\n Moralar.Data.Enum.TypeGenre'"},"message":"O valor do campo \"holder.genre\" é inválido, informe um 'Error converting value \"1,\n Moralar.Data.Enum.TypeGenre'","messageEx":null}
+############# END ############
+ (2f294084)

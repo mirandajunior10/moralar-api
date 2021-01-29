@@ -10,6 +10,7 @@
   </PropertyGroup>
   <PropertyGroup>
     <DocumentationFile>XmlDocument.xml</DocumentationFile>
+    <UserSecretsId>5ddf18df-5562-493b-9e2e-64dc8874fcf9</UserSecretsId>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">

@@ -19,6 +19,7 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
 using System.Net;
 using System.Reflection;
+using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
@@ -331,14 +332,21 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Token([FromBody] LoginViewModel model)
         {
+            var claims = new List<Claim>();
             var claim = Util.SetRole(TypeProfile.Profile);
+            var claimUserName = Request.GetUserName();
+            claims.Add(claim);
 
             try
             {
+                if (claimUserName != null)
+                    claims.Add(claimUserName);
+
                 model.TrimStringProperties();
 
-                if (string.IsNullOrEmpty(model.RefreshToken) == false)
-                    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claim);
+              
+                //if (string.IsNullOrEmpty(model.RefreshToken) == false)
+                //    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
 
                 Data.Entities.Profile entity;
                 if (model.TypeProvider != TypeProvider.Password)
@@ -364,11 +372,11 @@ namespace Moralar.WebApi.Controllers
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 
                 }
-
+                claims.Add(new Claim("UserName", entity.FullName));
                 if (entity.DataBlocked != null)
                     return BadRequest(Utilities.ReturnErro($"Usuário bloqueado : {entity.Reason}"));
 
-                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claim)));
+                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
             }
             catch (Exception ex)
             {

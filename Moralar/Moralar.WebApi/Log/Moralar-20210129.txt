@@ -1,0 +1,961 @@
+2021-01-29T13:28:55.0073126-03:00 0HM64EAD0JBRE [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+  "residencialPropertyFeatureViewModel": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 3,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (381fb08d)
+2021-01-29T13:40:46.3087790-03:00 0HM64EGOOH3NA [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+  "residencialPropertyFeatureViewModel": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 3,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (381fb08d)
+2021-01-29T13:42:04.2616714-03:00 0HM64EGOOH3NH [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 3,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (33d7e924)
+2021-01-29T13:44:43.6321679-03:00 0HM64EKD8H8CB [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 3,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (33d7e924)
+2021-01-29T13:44:57.9233353-03:00 0HM64EKD8H8CC [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 21,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"ResidencialPropertyFeatures.NumberFloors":["Insira um valor de 0 até 20"]},"message":"Insira um valor de 0 até 20","messageEx":null}
+############# END ############
+ (5a23da46)
+2021-01-29T13:45:35.8851286-03:00 0HM64EKD8H8CD [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (257d3b0c)
+2021-01-29T14:01:52.6173143-03:00 0HM64ETKADUQC [ERR] An unhandled exception has occurred: Object reference not set to an instance of an object. (e9c253af)
+System.NullReferenceException: Object reference not set to an instance of an object.
+   at Moralar.WebApi.Controllers.ResidencialPropertyController.<Register>d__10.MoveNext() in D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\Controllers\ResidencialPropertyController.cs:line 258
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeActionMethodAsync>d__27.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeNextActionFilterAsync>d__25.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Rethrow(ActionExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeNextResourceFilter>d__22.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Rethrow(ResourceExecutedContext context)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)
+   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeAsync>d__20.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware`1.<Invoke>d__18.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware`1.<Invoke>d__18.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.<Invoke>d__3.MoveNext()
+--- End of stack trace from previous location where exception was thrown ---
+   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()
+   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)
+   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware.<Invoke>d__6.MoveNext()
+2021-01-29T14:01:52.8401739-03:00 0HM64ETKADUQC [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {
+  "data": null,
+  "erro": true,
+  "message": "Erro inesperado.",
+  "messageEx": "Object reference not set to an instance of an object.",
+  "stacktrace": "at Moralar.WebApi.Controllers.ResidencialPropertyController.<Register>d__10.MoveNext() in D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.WebApi\\Controllers\\ResidencialPropertyController.cs:line 258\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeActionMethodAsync>d__27.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeNextActionFilterAsync>d__25.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Rethrow(ActionExecutedContext context)\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeNextResourceFilter>d__22.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Rethrow(ResourceExecutedContext context)\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.Next(State& next, Scope& scope, Object& state, Boolean& isCompleted)\r\n   at Microsoft.AspNetCore.Mvc.Internal.ControllerActionInvoker.<InvokeAsync>d__20.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at Microsoft.AspNetCore.Builder.RouterMiddleware.<Invoke>d__4.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware`1.<Invoke>d__18.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at Microsoft.AspNetCore.Authentication.AuthenticationMiddleware`1.<Invoke>d__18.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at Microsoft.AspNetCore.Diagnostics.StatusCodePagesMiddleware.<Invoke>d__3.MoveNext()\r\n--- End of stack trace from previous location where exception was thrown ---\r\n   at System.Runtime.ExceptionServices.ExceptionDispatchInfo.Throw()\r\n   at System.Runtime.CompilerServices.TaskAwaiter.HandleNonSuccessAndDebuggerNotification(Task task)\r\n   at Microsoft.AspNetCore.Diagnostics.ExceptionHandlerMiddleware.<Invoke>d__6.MoveNext()"
+}
+############# END ############
+ (d7dd4d53)
+2021-01-29T14:07:41.5190043-03:00 0HM64F1CKPQ86 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "www.google.com.br/20",
+    "www.google.com.br/20",
+    "www.google.com.br/20",
+    "www.google.com.br/20",
+    "www.google.com.br/20"
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"Photo":["Insira um valor de 0 até 20"]},"message":"Insira um valor de 0 até 20","messageEx":null}
+############# END ############
+ (a7108009)
+2021-01-29T14:12:04.7432662-03:00 0HM64F3T4BR11 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"Photo":["A foto deve ter no mínimo Foto e no máximo 1 imagens"]},"message":"A foto deve ter no mínimo Foto e no máximo 1 imagens","messageEx":null}
+############# END ############
+ (21ef7355)
+2021-01-29T14:12:10.0677266-03:00 0HM64F3T4BR12 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"Photo":["A foto deve ter no mínimo Foto e no máximo 1 imagens"]},"message":"A foto deve ter no mínimo Foto e no máximo 1 imagens","messageEx":null}
+############# END ############
+ (21ef7355)
+2021-01-29T14:12:53.0127522-03:00 0HM64F4BL6VSR [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"Photo":["A foto deve ter no mínimo 1 e no máximo 15 imagens"]},"message":"A foto deve ter no mínimo 1 e no máximo 15 imagens","messageEx":null}
+############# END ############
+ (b9977f6c)
+2021-01-29T14:17:43.1956875-03:00 0HM64F73ANP3E [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "1.jpg",
+    "2.jpg",
+    "3.jpg"
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"Photo":["A foto deve ter no mínimo 1 e no máximo 15 imagens"]},"message":"A foto deve ter no mínimo 1 e no máximo 15 imagens","messageEx":null}
+############# END ############
+ (599a82d4)
+2021-01-29T14:18:17.1087909-03:00 0HM64F73ANP3L [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "1.jpg",
+    "2.jpg",
+    "3.jpg"
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":null,"erro":true,"errors":{"Photo":["A foto deve ter no mínimo 1 e no máximo 15 imagens"]},"message":"A foto deve ter no mínimo 1 e no máximo 15 imagens","messageEx":null}
+############# END ############
+ (599a82d4)
+2021-01-29T14:20:06.7063159-03:00 0HM64F7VOVN9K [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "1.jpg",
+    "2.jpg",
+    "3.jpg"
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (676a3f55)
+2021-01-29T14:24:40.3936674-03:00 0HM64FAN7LNCR [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "1.jpg",
+    "2.jpg",
+    "3.jpg"
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (676a3f55)
+2021-01-29T15:09:51.2598750-03:00 0HM64G3ILNDG3 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/DeletePhoto
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "id": "601444d7551b7783f7d8af43",
+  "name": "http://apidev.megaleios.com/ApiMoralarDev/content/upload/3.jpg"
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (de711b40)
+2021-01-29T15:10:12.5591676-03:00 0HM64G3ILNDG4 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/DeletePhoto
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "id": "601444d7551b7783f7d8af43",
+  "name": "http://apidev.megaleios.com/ApiMoralarDev/content/upload/13.jpg"
+}
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Membro da família não encontrado","messageEx":null}
+############# END ############
+ (6c87fed6)
+2021-01-29T15:10:26.6758108-03:00 0HM64G3ILNDG5 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/DeletePhoto
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "id": "601444d7551b7783f7d8af43",
+  "name": "http://apidev.megaleios.com/ApiMoralarDev/content/upload/3.jpg"
+}
+RESPONSE: {"data":"Atualizado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (de711b40)
+2021-01-29T15:14:39.7843379-03:00 0HM64G6HCDST3 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Detail/601444d7551b7783f7d8af43
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Missing type map configuration or unsupported mapping.\r\n\r\nMapping types:\r\nResidencialProperty -> ResidencialPropertyViewModel\r\nMoralar.Data.Entities.ResidencialProperty -> Moralar.Domain.ViewModels.Property.ResidencialPropertyViewModel"}
+############# END ############
+ (ad59553e)
+2021-01-29T15:22:13.7491620-03:00 0HM64GB18P4R0 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Detail/601444d7551b7783f7d8af43
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/4.jpg"],"project":"project","residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601444d7551b7783f7d8af43"},"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (77cba8ec)
+2021-01-29T15:32:56.4127270-03:00 0HM64GGF6DSMA [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/GetAll
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":[{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/4.jpg"],"project":"project","residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601444d7551b7783f7d8af43"}],"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (afb3f93a)
+2021-01-29T15:33:24.2862164-03:00 0HM64GGF6DSMB [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Register
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "code": "fasdfasd",
+  "photo": [
+    "1.jpg",
+    "2.jpg",
+    "3.jpg"
+  ],
+  "project": "project",
+ "residencialPropertyAdress": {
+  "streetAddress": "streetAddress",
+  "number": "number",
+  "cityName": "cityName",
+  "cityId": "cityId",
+  "stateName": "stateName",
+  "stateUf": "stateUf",
+  "stateId": "stateId",
+  "neighborhood": "neighborhood",
+  "complement": "complement",
+  "location": "location",
+},
+  "residencialPropertyFeatures": {
+    "propertyValue": 200,
+    "typeProperty": 0,
+    "squareFootage": 1,
+    "condominiumValue": 22,
+    "iptuValue": 333,
+    "neighborhood": "neighborhood",
+    "numberFloors": 20,
+    "floorLocation": 2,
+    "hasElavator": true,
+    "numberOfBedrooms": 1,
+    "numberOfBathrooms": 1,
+    "hasServiceArea": true,
+    "hasGarage": true,
+    "hasYard": true,
+    "hasCistern": true,
+    "hasWall": true,
+    "hasAccessLadder": true,
+    "hasAccessRamp": true,
+    "hasAdaptedToPcd": true,
+    "propertyRegularization": 1,
+    "typeGasInstallation": 1
+  }
+}
+RESPONSE: {"data":"Registrado com sucesso!","erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (676a3f55)
+2021-01-29T15:33:30.5027812-03:00 0HM64GGF6DSMC [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/GetAll
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":[{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/4.jpg"],"project":"project","residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601444d7551b7783f7d8af43"},{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/3.jpg"],"project":"project","residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601454f32512d2ff47b69116"}],"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (abef7008)
+2021-01-29T15:35:53.8718469-03:00 0HM64GIGCMTLA [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/BlockUnBlock
+
+HEADERS: {"Authorization":""}
+
+BODY: {
+  "block": true,
+  "reason": "asdfas",
+  "targetId": "601444d7551b7783f7d8af43"
+}
+RESPONSE: {"data":null,"erro":false,"errors":null,"message":"Bloqueado com sucesso","messageEx":null}
+############# END ############
+ (9b18339b)
+2021-01-29T15:41:33.4371666-03:00 0HM64GLU09L0K [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/GetAll
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":[{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/4.jpg"],"project":"project","status":true,"residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601444d7551b7783f7d8af43"},{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/3.jpg"],"project":"project","status":false,"residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601454f32512d2ff47b69116"}],"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (e3463267)
+2021-01-29T15:43:29.4939479-03:00 0HM64GMQIBU7C [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/Detail/601444d7551b7783f7d8af43
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/4.jpg"],"project":"project","blocked":true,"residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601444d7551b7783f7d8af43"},"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (87253fcb)
+2021-01-29T16:25:50.2607239-03:00 0HM64HEE8B986 [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/GetAllBy?status=1
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":null,"erro":true,"errors":null,"message":"Ocorreu um erro, verifique e tente novamente","messageEx":" Missing type map configuration or unsupported mapping.\r\n\r\nMapping types:\r\nAsyncCursor`1 -> List`1\r\nMongoDB.Driver.Core.Operations.AsyncCursor`1[[Moralar.Data.Entities.ResidencialProperty, Moralar.Data, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]] -> System.Collections.Generic.List`1[[Moralar.Domain.ViewModels.Property.ResidencialPropertyViewModel, Moralar.Domain, Version=1.0.0.0, Culture=neutral, PublicKeyToken=null]]"}
+############# END ############
+ (8ec4cf29)
+2021-01-29T16:31:41.5270059-03:00 0HM64HHPMIC3L [WRN] ############# START ############
+HTTP/1.1  http://localhost:5000/api/v1/ResidencialProperty/GetAllBy?status=1
+
+HEADERS: {"Authorization":""}
+
+RESPONSE: {"data":[{"code":"fasdfasd","photo":["http://apidev.megaleios.com/ApiMoralarDev/content/upload/1.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/2.jpg","http://apidev.megaleios.com/ApiMoralarDev/content/upload/4.jpg"],"project":"project","blocked":true,"residencialPropertyAdress":{"streetAddress":"streetAddress","number":"number","cityName":"cityName","cityId":"cityId","stateName":"stateName","stateUf":"stateUf","stateId":"stateId","neighborhood":"neighborhood","complement":"complement","location":"location"},"residencialPropertyFeatures":{"propertyValue":200.0,"typeProperty":0,"squareFootage":1.0,"condominiumValue":22.0,"iptuValue":333.0,"neighborhood":"neighborhood","numberFloors":20,"floorLocation":2,"hasElavator":true,"numberOfBedrooms":1,"numberOfBathrooms":1,"hasServiceArea":true,"hasGarage":true,"hasYard":true,"hasCistern":true,"hasWall":true,"hasAccessLadder":true,"hasAccessRamp":true,"hasAdaptedToPcd":true,"propertyRegularization":1,"typeGasInstallation":1},"id":"601444d7551b7783f7d8af43"}],"erro":false,"errors":null,"message":"Sucesso","messageEx":null}
+############# END ############
+ (29b09a5d)

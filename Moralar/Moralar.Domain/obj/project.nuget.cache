@@ -1,6 +1,6 @@
 {
   "version": 2,
-  "dgSpecHash": "72EDI44/2oe3iMHpdPzC7MhGqrGL20lxl194FnopNLF3SaZdsowVg/kVVOcmAofYnCEd6Y0UCoTfL9daCkhCCw==",
+  "dgSpecHash": "27Od6mLNzY4zELT48G4Oe5iOekwofsWiLf3yHbkacLdoZABmjETVrHRIoDLvVrwDitLLXMQ6c6rOrWARVoJxHQ==",
   "success": true,
   "projectFilePath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Domain\\Moralar.Domain.csproj",
   "expectedPackageFiles": [
@@ -268,7 +268,9 @@
     "C:\\Users\\Usuario\\.nuget\\packages\\utilityframework.application.core\\2.2.12\\utilityframework.application.core.2.2.12.nupkg.sha512",
     "C:\\Users\\Usuario\\.nuget\\packages\\utilityframework.infra.core.mongodb\\2.0.5\\utilityframework.infra.core.mongodb.2.0.5.nupkg.sha512",
     "C:\\Users\\Usuario\\.nuget\\packages\\utilityframework.services.core\\1.5.3\\utilityframework.services.core.1.5.3.nupkg.sha512",
-    "C:\\Users\\Usuario\\.nuget\\packages\\utilityframework.services.iugu.core\\1.8.8\\utilityframework.services.iugu.core.1.8.8.nupkg.sha512"
+    "C:\\Users\\Usuario\\.nuget\\packages\\utilityframework.services.iugu.core\\1.8.8\\utilityframework.services.iugu.core.1.8.8.nupkg.sha512",
+    "C:\\Users\\Usuario\\.nuget\\packages\\xunit.abstractions\\2.0.3\\xunit.abstractions.2.0.3.nupkg.sha512",
+    "C:\\Users\\Usuario\\.nuget\\packages\\xunit.extensibility.core\\2.4.1\\xunit.extensibility.core.2.4.1.nupkg.sha512"
   ],
   "logs": [
     {

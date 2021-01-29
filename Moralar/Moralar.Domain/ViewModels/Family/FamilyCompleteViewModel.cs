@@ -8,42 +8,35 @@ namespace Moralar.Domain.ViewModels.Family
 {
     public class FamilyCompleteViewModel : BaseViewModel
     {
-        public string HolderNumber { get; set; }
-        public string HolderName { get; set; }
-        public string HolderCpf { get; set; }
-        public long HolderBirthday { get; set; }
-        public string HolderGenre { get; set; }
-        public string HolderEmail { get; set; }
-        public string HolderPhone { get; set; }
-        public TypeScholarity HolderScholarity { get; set; }
-
+        /// <summary>
+        /// Dados do Titular
+        /// </summary>
+        public FamilyHolderViewModel Holder { get; set; }
 
         /// <summary>
         /// Dados do conjuge
         /// </summary>
-        public string SpouseNumber { get; set; }
-        public string SpouseName { get; set; }
-        public string SpouseCpf { get; set; }
-        public long SpouseBirthday { get; set; }
-        public string SpouseGenre { get; set; }
-        public string SpouseEmail { get; set; }
-        public string SpousePhone { get; set; }
-        public string SpouseRelationship { get; set; }
-        public TypeScholarity SpouseScholarity { get; set; }
+        public FamilySpouseViewModel Spouse { get; set; }
 
 
         /// <summary>
         /// Dados do membro da Família
         /// </summary>
-        public string FamilyMemberNumber { get; set; }
-        public string FamilyMemberName { get; set; }
-        public string FamilyMemberCpf { get; set; }
-        public long FamilyMemberBirthday { get; set; }
-        public string FamilyMemberGenre { get; set; }
-        public string FamilyMemberEmail { get; set; }
-        public string FamilyMemberPhone { get; set; }
-        public string FamilyMemberRelationship { get; set; }
-        public TypeScholarity FamilyMemberScholarity { get; set; }
-        public TypeKingShip FamilyKinShip { get; set; }
+        public List<FamilyMemberViewModel> Members { get; set; }
+
+
+        /// <summary>
+        /// Dados Financeiros
+        /// </summary>
+        public FamilyFinancialViewModel Financial { get; set; }
+
+        /// <summary>
+        /// Dados de Priorização
+        /// </summary>
+        public FamilyPriorizationViewModel Priorization { get; set; }
+        //public string Password { get; set; }
+        //public bool IsFirstAcess { get; set; }
+        //public string ProviderId { get; set; }
+      
     }
 }

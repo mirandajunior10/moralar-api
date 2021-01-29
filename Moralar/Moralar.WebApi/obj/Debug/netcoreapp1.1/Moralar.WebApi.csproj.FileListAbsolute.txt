@@ -1,7 +1,3 @@
-D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.csprojAssemblyReference.cache
-D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.AssemblyInfoInputs.cache
-D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.AssemblyInfo.cs
-D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.csproj.CoreCompileInputs.cache
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\bin\Debug\netcoreapp1.1\appsettings.Development.json
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\bin\Debug\netcoreapp1.1\appsettings.json
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\bin\Debug\netcoreapp1.1\appsettings.Staging.json
@@ -32,6 +28,10 @@ D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\bin\Debug\netcoreapp1.1\
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\bin\Debug\netcoreapp1.1\Moralar.Domain.xml
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\bin\Debug\netcoreapp1.1\en\Moralar.Domain.resources.dll
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\bin\Debug\netcoreapp1.1\pt\Moralar.Domain.resources.dll
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.csprojAssemblyReference.cache
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.AssemblyInfoInputs.cache
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.AssemblyInfo.cs
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.csproj.CoreCompileInputs.cache
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.csproj.CopyComplete
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.dll
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Debug\netcoreapp1.1\Moralar.WebApi.pdb

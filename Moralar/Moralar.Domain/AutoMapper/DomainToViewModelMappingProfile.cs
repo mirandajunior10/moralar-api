@@ -1,7 +1,9 @@
 ﻿using Moralar.Data.Entities;
+using Moralar.Data.Entities.Auxiliar;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
 using Moralar.Domain.ViewModels.Family;
+using Moralar.Domain.ViewModels.Property;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Iugu.Core.Models;
@@ -41,8 +43,43 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<City, CityDefaultViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
+            #region Family
+            CreateMap<FamilyHolder, FamilyHolderViewModel>();
+            CreateMap<FamilyHolder, FamilyHolderListViewModel>()
+                ;
+            CreateMap<FamilyHolder, FamilyHolderMinViewModel>();
+            CreateMap<FamilySpouse,FamilySpouseViewModel >();
+            CreateMap<FamilyMember,FamilyMemberViewModel >();
+            CreateMap<FamilyFinancial,FamilyFinancialViewModel >();
+            CreateMap<FamilyPriorization,FamilyPriorizationViewModel >();
+            CreateMap<Family, FamilyHolderListViewModel>()
+                .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created))
+                .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Holder.Number))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Holder.Name))
+                .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Holder.Cpf))
+                .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Holder.Email))
+                .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Holder.Phone))
+                .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null? true:false))
+                ;
+            //.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Family,FamilyCompleteViewModel >()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<Family, FamilyCompleteViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Family, FamilyEditViewModel>()
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
+               .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));
+            #endregion
+            #region ResidencialProperty
+                   CreateMap<ResidencialProperty, ResidencialPropertyViewModel>()
+                       .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
+                       .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false));
+                   CreateMap<ResidencialPropertyAdress, ResidencialPropertyAdressViewModel>();
+                   CreateMap<ResidencialPropertyFeatures, ResidencialPropertyFeatureViewModel>();
+            
+            #endregion
+
 
         }
     }

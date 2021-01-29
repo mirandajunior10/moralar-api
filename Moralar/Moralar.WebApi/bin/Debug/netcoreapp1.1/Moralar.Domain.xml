@@ -49,14 +49,70 @@
             
             </summary>
         </member>
-        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.SpouseNumber">
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Holder">
+            <summary>
+            Dados do Titular
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Spouse">
             <summary>
             Dados do conjuge
             </summary>
         </member>
-        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.FamilyMemberNumber">
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Members">
             <summary>
             Dados do membro da Família
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Financial">
+            <summary>
+            Dados Financeiros
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Priorization">
+            <summary>
+            Dados de Priorização
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Holder">
+            <summary>
+            Dados do Titular da Família
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Spouse">
+            <summary>
+            Dados do Cônjuge
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Members">
+            <summary>
+            Dados do membro da Família
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Financial">
+            <summary>
+            Dados Financeiros
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Priorization">
+            <summary>
+            Dados de Priorização
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.LogActionExportViewModel.Created">
+            <summary>
+            Data e hora
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.LogActionExportViewModel.LocalAction">
+            <summary>
+            Local
+            </summary>
+            <example></example>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.LogActionExportViewModel.ReferenceId">
+            <summary>
+            Referencia do Item
             </summary>
         </member>
         <member name="T:Bmatch.WebApi.Resources.SharedResource">
