@@ -40,13 +40,16 @@ namespace Moralar.WebApi.Controllers
         private readonly IMapper _mapper;
         private readonly IProfileRepository _profileRepository;
         private readonly ISenderMailService _senderMailService;
+        private readonly IUtilService _utilService;
 
-        public ProfileController(IMapper mapper, IProfileRepository profileRepository, ISenderMailService senderMailService)
+        public ProfileController(IMapper mapper, IProfileRepository profileRepository, ISenderMailService senderMailService, IUtilService utilService)
         {
             _mapper = mapper;
             _profileRepository = profileRepository;
             _senderMailService = senderMailService;
+            _utilService = utilService;
         }
+
 
 
         /// <summary>
@@ -246,57 +249,74 @@ namespace Moralar.WebApi.Controllers
             {
                 model.TrimStringProperties();
                 var ignoreValidation = new List<string>();
-                if (model.TypeProvider != TypeProvider.Password)
-                {
-                    ignoreValidation.Add(nameof(model.Login));
-                    ignoreValidation.Add(nameof(model.Password));
-                }
+                //if (model.TypeProvider != TypeProvider.Password)
+                //{
+                //    ignoreValidation.Add(nameof(model.Login));
+                //    ignoreValidation.Add(nameof(model.Password));
+                //}
 
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
 
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                if (model.TypeProvider != TypeProvider.Password)
-                {
+                //if (model.TypeProvider != TypeProvider.Password)
+                //{
 
-                    if (string.IsNullOrEmpty(model.ProviderId))
-                        return BadRequest(Utilities.ReturnErro(DefaultMessages.EmptyProviderId));
-                    var messageErro = "";
-                    if (await _profileRepository.CheckByAsync(x => x.ProviderId == model.ProviderId))
-                    {
-                        switch (model.TypeProvider)
-                        {
-                            case TypeProvider.Apple:
-                                messageErro = DefaultMessages.AppleIdInUse;
-                                break;
-                            default:
-                                messageErro = DefaultMessages.FacebookInUse;
-                                break;
-                        }
-                        return BadRequest(Utilities.ReturnErro(messageErro));
+                //    if (string.IsNullOrEmpty(model.ProviderId))
+                //        return BadRequest(Utilities.ReturnErro(DefaultMessages.EmptyProviderId));
+                //    var messageErro = "";
+                //    if (await _profileRepository.CheckByAsync(x => x.ProviderId == model.ProviderId))
+                //    {
+                //        switch (model.TypeProvider)
+                //        {
+                //            case TypeProvider.Apple:
+                //                messageErro = DefaultMessages.AppleIdInUse;
+                //                break;
+                //            default:
+                //                messageErro = DefaultMessages.FacebookInUse;
+                //                break;
+                //        }
+                //        return BadRequest(Utilities.ReturnErro(messageErro));
 
-                    }
+                //    }
 
-                    model.Login = model.Email;
-                }
+                //    model.Login = model.Email;
+                //}
 
                 if (await _profileRepository.CheckByAsync(x => x.Cpf == model.Cpf).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
 
-                if (await _profileRepository.CheckByAsync(x => x.Login == model.Login).ConfigureAwait(false))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
+                //if (await _profileRepository.CheckByAsync(x => x.Login == model.Login).ConfigureAwait(false))
+                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
 
                 if (await _profileRepository.CheckByAsync(x => x.Email == model.Email).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailInUse));
 
                 var entity = _mapper.Map<Data.Entities.Profile>(model);
 
-                entity.Password = model.Password;
+                entity.Password =  Utilities.RandomInt(8);
 
                 var entityId = await _profileRepository.CreateAsync(entity).ConfigureAwait(false);
+                //await _creditCardRepository.FindByAsync(x => x.CustomerId == userId) as List<CreditCard>;
+                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de novo Perfil {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
 
-                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entityId, false, claim)));
+                var dataBody = Util.GetTemplateVariables();
+                dataBody.Add("{{ title }}", "Lembrete de senha");
+                dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Name.GetFirstName()}</p>" +
+                                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
+                                            //$"<p><b>Login</b> : {profile.Login}</p>" +
+                                            $"<p><b>Senha</b> :{entity.Password}</p>"
+                                            );
+
+                var body = _senderMailService.GerateBody("custom", dataBody);
+
+                var unused = Task.Run(async () =>
+                {
+                    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Email, body, "Lembrete de senha").ConfigureAwait(false);
+                });
+                //return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entityId, false, claim)));
+                return Ok(Utilities.ReturnSuccess("Registrado com sucesso!"));
             }
             catch (Exception ex)
             {
@@ -366,15 +386,15 @@ namespace Moralar.WebApi.Controllers
                         return BadRequest(isInvalidState);
 
                     entity = await _profileRepository
-                       .FindOneByAsync(x => x.Login == model.Login && x.Password == model.Password).ConfigureAwait(false);
+                       .FindOneByAsync(x => x.Cpf == model.Login && x.Password == model.Password).ConfigureAwait(false);
 
                     if (entity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 
                 }
-                claims.Add(new Claim("UserName", entity.FullName));
-                if (entity.DataBlocked != null)
-                    return BadRequest(Utilities.ReturnErro($"Usuário bloqueado : {entity.Reason}"));
+                claims.Add(new Claim("UserName", entity.Name));
+                //if (entity.DataBlocked != null)
+                //    return BadRequest(Utilities.ReturnErro($"Usuário bloqueado : {entity.Reason}"));
 
                 return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
             }
@@ -511,26 +531,32 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [OnlyAdministrator]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model,[FromBody] string name, TypeUserProfile typeUserProfile)
         {
             var response = new DtResult<ProfileViewModel>();
-
             try
             {
+                var builder = Builders<Data.Entities.Profile>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Profile>>();
+
+                conditions.Add(builder.Where(x => x.Created != null));
+                conditions.Add(builder.Where(x => x.TypeProfile == typeUserProfile ));
+                if (!string.IsNullOrEmpty(name))
+                    conditions.Add(builder.Where(x => x.Name.ToUpper().StartsWith(name.ToUpper())));
+               
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
-                var totalRecords = await _profileRepository.CountAsync(x => x.Created != null);
-
+                var totalRecords = (int)await _profileRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
                 var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
                     ? Builders<Data.Entities.Profile>.Sort.Descending(sortColumn)
                     : Builders<Data.Entities.Profile>.Sort.Ascending(sortColumn);
 
                 var retorno = await _profileRepository
-                    .LoadDataTableAsync(x => x.Created != null, model.Search.Value, sortBy, model.Start, model.Length, columns);
+                    .LoadDataTableAsync( model.Search.Value, sortBy, model.Start, model.Length, conditions, columns);
 
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
-                    ? (int)await _profileRepository.CountSearchDataTableAsync(x => x.Created != null, model.Search.Value, columns)
+                    ? (int)await _profileRepository.CountSearchDataTableAsync( model.Search.Value, conditions, columns)
                     : totalRecords;
 
                 response.Data = _mapper.Map<List<ProfileViewModel>>(retorno);
@@ -663,16 +689,16 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailInUse));
 
 
-                if (await _profileRepository.CheckByAsync(x => x.Login == model.Login && x._id != _id))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
+                //if (await _profileRepository.CheckByAsync(x => x.Login == model.Login && x._id != _id))
+                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
 
                 var profileEntity = await _profileRepository.FindByIdAsync(userId).ConfigureAwait(false);
 
                 profileEntity.Email = model.Email;
-                profileEntity.FullName = model.FullName;
+                profileEntity.Name = model.Name;
                 profileEntity.Phone = model.Phone?.OnlyNumbers();
-                profileEntity.Login = model.Login;
-                profileEntity.Photo = model.Photo.RemovePathImage().SetPhotoProfile(profileEntity.ProviderId);
+                //profileEntity.Login = model.Login;
+                //profileEntity.Photo = model.Photo.RemovePathImage().SetPhotoProfile(profileEntity.ProviderId);
 
                 profileEntity = await _profileRepository.UpdateAsync(profileEntity).ConfigureAwait(false);
 
@@ -727,9 +753,9 @@ namespace Moralar.WebApi.Controllers
                 var newPassword = Utilities.RandomInt(8);
 
                 dataBody.Add("{{ title }}", "Lembrete de senha");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {profile.FullName.GetFirstName()}</p>" +
+                dataBody.Add("{{ message }}", $"<p>Caro(a) {profile.Name.GetFirstName()}</p>" +
                                             $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
-                                            $"<p><b>Login</b> : {profile.Login}</p>" +
+                                            $"<p><b>CPF</b> : {profile.Cpf}</p>" +
                                             $"<p><b>Senha</b> :{newPassword}</p>");
 
                 var body = _senderMailService.GerateBody("custom", dataBody);
@@ -829,7 +855,7 @@ namespace Moralar.WebApi.Controllers
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                if (await _profileRepository.CheckByAsync(x => x.Login == model.Login).ConfigureAwait(false))
+                if (await _profileRepository.CheckByAsync(x => x.Cpf == model.Cpf).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
 
                 return Ok(Utilities.ReturnSuccess("Disponível"));
@@ -924,8 +950,8 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(model.Cpf) == false && await _profileRepository.CheckByAsync(x => x.Cpf == model.Cpf).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
 
-                if (string.IsNullOrEmpty(model.Login) == false && await _profileRepository.CheckByAsync(x => x.Login == model.Login).ConfigureAwait(false))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
+                //if (string.IsNullOrEmpty(model.Login) == false && await _profileRepository.CheckByAsync(x => x.Cpf == model.cp).ConfigureAwait(false))
+                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
 
                 if (string.IsNullOrEmpty(model.Email) == false && await _profileRepository.CheckByAsync(x => x.Email == model.Email).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailInUse));

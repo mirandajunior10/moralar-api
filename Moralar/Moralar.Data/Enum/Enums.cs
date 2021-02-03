@@ -46,7 +46,15 @@ namespace Moralar.Data.Enum
         [Description("Pessoa Física")]
         PhysicalPerson = 1
     }
-
+    public enum TypeUserProfile
+    {
+        [EnumMember(Value = "Gestor")]
+        [Description("Gestor")]
+        Gestor = 0,
+        [EnumMember(Value = "TTS")]
+        [Description("TTS")]
+        TTS = 1,
+    }
     public enum Language
     {
         [EnumMember(Value = "Ingles")]
@@ -218,7 +226,28 @@ namespace Moralar.Data.Enum
         Familia = 0,
         [EnumMember(Value = "Propriedade Residencial")]
         [Description("Propriedade Residencial")]
-        ResidencialProperty,
+        ResidencialProperty=1,
+        [EnumMember(Value = "Questionário")]
+        [Description("Questionário")]
+        Question=2,
+        [EnumMember(Value = "Perfil")]
+        [Description("Perfil")]
+        Perfil = 3
+    }
+    public enum TypeResponse
+    {
+        [EnumMember(Value = "Texto")]
+        [Description("Texto")]
+        Texto = 0,
+        [EnumMember(Value = "Múltipla escolha")]
+        [Description("Múltipla escolha")]
+        MultiplaEscolha = 1,
+        [EnumMember(Value = "Escolha única")]
+        [Description("Escolha única")]
+        EscolhaUnica = 2,
+        [EnumMember(Value = "Lista suspensa")]
+        [Description("Lista suspensa")]
+        ListaSuspensa = 3
     }
 
 

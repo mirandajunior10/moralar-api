@@ -49,6 +49,9 @@ namespace Moralar.Domain
         public const string UserAdministratorNotFound = "Usuário de acessso não encontrado";
         public const string ProfileNotFound = "Usuário não encontrado";
         public const string ResidencialPropertyNotFound = "Propriedade não encontrado";
+        public const string QuizNotFound = "Quiz não encontrado";
+        public const string DescriptionNotFound = "Descrição não encontrado";
+        public const string QuestionNotFound = "Quiz não encontrado";
         public const string FamilyNotFound = "Família não encontrado";
         public const string MemberNotFound = "Membro da família não encontrado";
         public const string PhotoNotFound = "Membro da família não encontrado";

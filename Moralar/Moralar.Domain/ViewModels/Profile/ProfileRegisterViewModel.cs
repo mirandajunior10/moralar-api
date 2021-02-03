@@ -5,9 +5,10 @@ namespace Moralar.Domain.ViewModels
 {
     public class ProfileRegisterViewModel : ProfileViewModel
     {
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        public string Password { get; set; }
-        public string ProviderId { get; set; }
-        public TypeProvider TypeProvider { get; set; }
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //public string Password { get; set; }
+
+
+        //public string ProviderId { get; set; }
     }
 }

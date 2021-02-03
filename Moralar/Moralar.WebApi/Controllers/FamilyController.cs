@@ -411,7 +411,7 @@ namespace Moralar.WebApi.Controllers
         ///         POST
         ///           {
         ///             "familyId": "6011d02a4c7c9e71c25df866", Id da família
-        ///             "indexMember": 1 // Indíce da lista(a contagem sempre começa do zero)
+        ///             "name": "" // nome 
         ///            }
         /// </remarks>
         /// <response code="200">Returns success</response>

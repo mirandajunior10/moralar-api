@@ -5,6 +5,8 @@ using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Property;
+using Moralar.Domain.ViewModels.Question;
+using Moralar.Domain.ViewModels.Quiz;
 using System.Collections.Generic;
 using AutoMapperProfile = AutoMapper.Profile;
 
@@ -39,13 +41,22 @@ namespace Moralar.Domain.AutoMapper
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
                CreateMap<ResidencialPropertyFeatureViewModel, ResidencialPropertyFeatures>();
                CreateMap<ResidencialPropertyAdressViewModel, ResidencialPropertyAdress>();
-            
+
             #endregion
-            //.ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));
-            //.ForMember(dest => dest.Spouse, opt => opt.MapFrom(src => src.SpouseViewModel))
-            //.ForMember(dest => dest.Members, opt => opt.MapFrom(src => src.FamilyMemberViewModel))
-            //.ForMember(dest => dest.Financial, opt => opt.MapFrom(src => src.FinancialViewModel))
-            //.ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.PriorizationViewModel));
+            #region Question
+            CreateMap<QuestionViewModel, Question>()
+              .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<QuestionRegisterViewModel, Question>();
+            CreateMap<QuestionDescriptionViewModel, QuestionDescription>();
+
+            CreateMap<QuestionDescriptionViewModel, QuestionDescription>()
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<QuizViewModel, Quiz>();
+            CreateMap<QuizUpdateViewModel, Quiz>()
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
+            #endregion
+
 
 
 
