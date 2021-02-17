@@ -3,9 +3,11 @@ using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
+using Moralar.Domain.ViewModels.Course;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
+using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using System.Collections.Generic;
 using AutoMapperProfile = AutoMapper.Profile;
@@ -56,7 +58,23 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
 
             #endregion
+            #region Course
+            CreateMap<CourseRegistrationViewModel, Course>()
+               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            #endregion
+            #region QuizFamily
+            CreateMap<QuizFamilyViewModel, QuizFamily>()
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            #endregion
+            #region QuizAnswer
+            CreateMap<QuestionAnswerRegisterViewModel, QuestionAnswer>()
+             .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
+             .ForMember(dest => dest.FamilyHolderName, opt => opt.MapFrom(src => src.FamilyHolderName))
+             .ForMember(dest => dest.FamilyHolderCpf, opt => opt.MapFrom(src => src.FamilyHolderCpf))
+             .ForMember(dest => dest.ResponsibleForResponsesName, opt => opt.MapFrom(src => src.ResponsibleForResponsesName))
+             .ForMember(dest => dest.ResponsibleForResponsesCpf, opt => opt.MapFrom(src => src.ResponsibleForResponsesCpf));
 
+            #endregion
 
 
 

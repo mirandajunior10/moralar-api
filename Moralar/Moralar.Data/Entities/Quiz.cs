@@ -14,6 +14,7 @@ namespace Moralar.Data.Entities
     {
         public string Title { get; set; }
 
+        public TypeStatusQuiz TypeStatusQuiz { get; set; }
         public override string CollectionName => nameof(Quiz);
 
     }

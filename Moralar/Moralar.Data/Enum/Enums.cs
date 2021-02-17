@@ -232,7 +232,11 @@ namespace Moralar.Data.Enum
         Question=2,
         [EnumMember(Value = "Perfil")]
         [Description("Perfil")]
-        Perfil = 3
+        Perfil = 3,
+        [EnumMember(Value = "Curso")]
+        [Description("Curso")]
+        Curso = 4
+
     }
     public enum TypeResponse
     {
@@ -248,6 +252,24 @@ namespace Moralar.Data.Enum
         [EnumMember(Value = "Lista suspensa")]
         [Description("Lista suspensa")]
         ListaSuspensa = 3
+    }
+    public enum TypeStatusCourse
+    {
+        [EnumMember(Value = "Inscrito")]
+        [Description("Inscrito")]
+        Inscrito = 0,
+        [EnumMember(Value = "Aguardando na lista de espera")]
+        [Description("Aguardando na lista de espera")]
+        ListaEspera = 1
+    }
+    public enum TypeStatusQuiz
+    {
+        [EnumMember(Value = "Respondido")]
+        [Description("Respondido")]
+        Respondido = 0,
+        [EnumMember(Value = "Não Respondido")]
+        [Description("Não Respondido")]
+        NaoRespondido = 1
     }
 
 

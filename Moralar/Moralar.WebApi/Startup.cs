@@ -130,7 +130,7 @@ namespace Moralar.WebApi
             app.UseRequestResponseLoggingLite();
             /*RETORNO COM GZIP*/
             app.UseResponseCompression();
-
+            
             /* TRANSLATE API */
             // app.UseRequestLocalization(new RequestLocalizationOptions
             // {
@@ -149,12 +149,13 @@ namespace Moralar.WebApi
             if (EnableSwagger)
             {
                 app.UseSwagger();
+                
                 app.UseSwaggerUI(c =>
                {
                    c.SwaggerEndpoint($"../swagger/v1/swagger.json".Trim(), $"API {ApplicationName}");
-                   c.EnableFilter();
                    c.EnableDeepLinking();
                    c.DocExpansion(DocExpansion.None);
+                   
                });
             }
 

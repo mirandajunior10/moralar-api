@@ -44,6 +44,8 @@ namespace Moralar.Data.Entities
         public bool IsFirstAcess { get; set; }
         public string ProviderId { get; set; }
         public string Reason { get; set; }
+        public string MotherName { get; set; }
+        public string MotherCityBorned { get; set; }
 
 
         public override string CollectionName => nameof(Family);

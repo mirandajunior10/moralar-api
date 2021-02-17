@@ -14,6 +14,7 @@ using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
+using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
 using System;
 using System.Collections.Generic;
@@ -104,7 +105,7 @@ namespace Moralar.WebApi.Controllers
             }
         }
         /// <summary>
-        /// LISTAGEM DOS CLIENTES
+        /// LISTAGEM DAS FAMÍLIAS
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -128,7 +129,7 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null));
                 if (!string.IsNullOrEmpty(number))
-                    conditions.Add(builder.Where(x => x.Holder.Number == number ));
+                    conditions.Add(builder.Where(x => x.Holder.Number == number));
                 if (!string.IsNullOrEmpty(nameHolder))
                     conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(nameHolder.ToUpper())));
                 if (!string.IsNullOrEmpty(cpf))
@@ -207,8 +208,89 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+
         /// <summary>
-        /// LISTA TODAS PROPRIEDADE
+        /// DETALHES DA FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetUser")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetUser()
+        {
+            try
+            {
+                var userId = Request.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
+
+                var entity = await _familyRepository.FindByIdAsync(userId).ConfigureAwait(false);
+
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileNotFound));
+
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<FamilyCompleteViewModel>(entity)));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// LISTA TODAS FAMÍLIAS
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetFamilyByFilter")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetFamilyByFilter(string number, string name, string cpf)
+        {
+            try
+            {
+                var builder = Builders<Data.Entities.Family>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+
+                conditions.Add(builder.Where(x => x.Created != null));
+                if (!string.IsNullOrEmpty(number))
+                    conditions.Add(builder.Where(x => x.Holder.Number.ToUpper() == number.ToUpper()));
+                if (!string.IsNullOrEmpty(name))
+                    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(name.ToUpper())));
+                if (!string.IsNullOrEmpty(cpf))
+                    conditions.Add(builder.Where(x => x.Holder.Cpf == cpf));
+
+
+                var condition = builder.And(conditions);
+                var entity = await _familyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Family>() { }).ToListAsync();
+                if (entity.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<FamilyHolderListViewModel>>(entity)));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// LISTA TODAS FAMÍLIAS
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -226,14 +308,6 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                //    if (ObjectId.TryParse(id, out var unused) == false)
-                //        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
-                //    var userId = Request.GetUserId();
-
-                //    if (string.IsNullOrEmpty(userId))
-                //        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
                 var entity = await _familyRepository.FindAllAsync().ConfigureAwait(false);
 
                 if (entity == null)
@@ -247,11 +321,13 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+
         /// <summary>
-        /// REGISTRAR FAMÍLIA
+        /// REGISTRAR UMA FAMÍLIA
         /// </summary>
         /// <remarks>
-        ///OBJ DE ENVIO
+        /// OBJ DE ENVIO
+        /// 
         ///         POST
         ///         "holder": {
         ///          "number": "",
@@ -306,10 +382,11 @@ namespace Moralar.WebApi.Controllers
         ///          "involuntaryCohabitation": bool,
         ///          "familyIncomeOfUpTwoMinimumWages": bool
         ///        },
+        ///        "motherName": "string",
+        ///        "motherCityBorned": "string",
         ///        "password": "",
         ///        "isFirstAcess": bool,
         ///        "providerId": "string"
-        /// }
         /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -342,25 +419,29 @@ namespace Moralar.WebApi.Controllers
 
                 var newPassword = Utilities.RandomInt(8);
 
+                var dateBir = Utilities.TimeStampToDateTime(model.Holder.Birthday);
+                var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
+                entity.Holder.Birthday = dateUnix;
 
-                var entityId = await _familyRepository.CreateAsync(entity).ConfigureAwait(false) ;
+
+                var entityId = await _familyRepository.CreateAsync(entity).ConfigureAwait(false);
                 //await _creditCardRepository.FindByAsync(x => x.CustomerId == userId) as List<CreditCard>;
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
 
-                var dataBody = Util.GetTemplateVariables();
-                dataBody.Add("{{ title }}", "Lembrete de senha");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Holder.Name.GetFirstName()}</p>" +
-                                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
-                                            //$"<p><b>Login</b> : {profile.Login}</p>" +
-                                            $"<p><b>Senha</b> :{newPassword}</p>"
-                                            );
+                //var dataBody = Util.GetTemplateVariables();
+                //dataBody.Add("{{ title }}", "Lembrete de senha");
+                //dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Holder.Name.GetFirstName()}</p>" +
+                //                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
+                //                            //$"<p><b>Login</b> : {profile.Login}</p>" +
+                //                            $"<p><b>Senha</b> :{newPassword}</p>"
+                //                            );
 
-                var body = _senderMailService.GerateBody("custom", dataBody);
+                //var body = _senderMailService.GerateBody("custom", dataBody);
 
-                var unused = Task.Run(async () =>
-                {
-                    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
-                });
+                //var unused = Task.Run(async () =>
+                //{
+                //    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
+                //});
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -370,6 +451,49 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// VALIDAR USUÁRIO
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///         {
+        ///          ExistCpf?cpf=25645377079
+        ///          }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ExistCpf")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExistCpf([FromQuery] string cpf)
+        {
+            try
+            {
+                if (cpf.OnlyNumbers().ValidCpf() == false)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInvalid));
+
+                var family = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == cpf.OnlyNumbers()).ConfigureAwait(false);
+                if (family == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfNotFound));
+                family.Password = "";
+                return Ok(Utilities.ReturnSuccess(data: family));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+
         [HttpPost("Edit")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
@@ -377,7 +501,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> Edit([FromBody] FamilyEditViewModel model)
+        public async Task<IActionResult> Edit([FromForm] FamilyEditViewModel model)
         {
             try
             {
@@ -403,16 +527,18 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
         /// <summary>
         /// DELETAR MEMBRO DA FAMÍLIA
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO
+        /// 
         ///         POST
-        ///           {
+        ///             {
         ///             "familyId": "6011d02a4c7c9e71c25df866", Id da família
-        ///             "name": "" // nome 
-        ///            }
+        ///             "name": "" // nome
+        ///             }
         /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -448,13 +574,16 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
+
         /// <summary>
         /// REGISTRA MEMBRO DA FAMÍLIA
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO
+        /// 
         ///         POST
-        ///         {
+        ///             {
         ///           "familyId": "6011d02a4c7c9e71c25df866",
         ///            "members": [
         ///              {
@@ -502,7 +631,7 @@ namespace Moralar.WebApi.Controllers
                 entityFamily.Members.AddRange(_mapper.Map<List<FamilyMember>>(model.Members));
                 await _familyRepository.UpdateOneAsync(entityFamily).ConfigureAwait(false);
 
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Inclusão de membro(s) de nova família {namesMembers}", Request.GetUserId(), Request.GetUserName().Value,  entityFamily._id.ToString());//Request.GetUserName().Value Request.GetUserId()
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Inclusão de membro(s) de nova família {namesMembers}", Request.GetUserId(), Request.GetUserName().Value, entityFamily._id.ToString());//Request.GetUserName().Value Request.GetUserId()
 
                 return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
@@ -520,10 +649,8 @@ namespace Moralar.WebApi.Controllers
         /// 
         ///         POST
         ///             {
-        ///              "login":"string", //optional
-        ///              "password":"string", //optional
-        ///              "providerId":"string", //optional
-        ///              "typeProvider":0 //Enum (optional)
+        ///              "holderCpf":"string", //obrigatório
+        ///              "password":"string" //obrigatório
         ///             }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -552,36 +679,154 @@ namespace Moralar.WebApi.Controllers
 
                 model.TrimStringProperties();
 
-                //if (string.IsNullOrEmpty(model.RefreshToken) == false)
-                //    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
+
 
                 Data.Entities.Family entity;
-                //if (model.TypeProvider != TypeProvider.Password)
-                //{
-                //    entity = await _familyRepository.FindOneByAsync(x => x.ProviderId == model.ProviderId).ConfigureAwait(false);
 
-                //    if (entity == null)
-                //        return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileNotFound, new { IsRegister = true }));
-                //}
-                //else
-                //{
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.HolderCpf), nameof(model.Password));
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Password == model.Password).ConfigureAwait(false);
+
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
+
+
+                claims.Add(new Claim("UserName", entity.Holder.Name));
+                await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
+
+
+                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+        /// <summary>
+        /// LOGIN POR CPF / DATA DE ANIVERSÁRIO
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "holderCpf":"string", //obrigatório
+        ///              "holderBirthday":long //obrigatório
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("TokenByBirthday")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> TokenByBirthday([FromBody] LoginFamilyBirthdayViewModel model)
+        {
+            var claims = new List<Claim>();
+            var claim = Util.SetRole(TypeProfile.Profile);
+            var claimUserName = Request.GetUserName();
+            claims.Add(claim);
+
+            try
+            {
+                if (claimUserName != null)
+                    claims.Add(claimUserName);
+
+                model.TrimStringProperties();
+
+
+
+                Data.Entities.Family entity;
+
                 model.TrimStringProperties();
                 var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.HolderCpf), nameof(model.HolderBirthday));
 
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Holder.Birthday == model.HolderBirthday).ConfigureAwait(false);
-
+                var dateBir = Utilities.TimeStampToDateTime(model.HolderBirthday);
+                var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
+                entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Holder.Birthday == dateUnix).ConfigureAwait(false);
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 
-                //}
+
                 claims.Add(new Claim("UserName", entity.Holder.Name));
-                //if (entity.DataBlocked != null)
-                //    return BadRequest(Utilities.ReturnErro($"Usuário bloqueado : {entity.Reason}"));
+                await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
+
 
                 return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+
+        /// <summary>
+        /// ALTERAR PASSWORD
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "currentPassword":"string",
+        ///              "newPassword":"string",
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ChangePassword")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> ChangePassword([FromBody] ChangePasswordViewModel model)
+        {
+            try
+            {
+                var userId = Request.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest(Utilities.ReturnErro());
+
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelState();
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                var entity = await _familyRepository.FindByIdAsync(userId).ConfigureAwait(false);
+
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                //if (entity.Password != model.CurrentPassword)
+                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.PasswordNoMatch));
+
+                //entity.LastPassword = entity.Password;
+
+                entity.Password = model.NewPassword;
+
+                _familyRepository.Update(entity);
+
+                return Ok(Utilities.ReturnSuccess("Senha alterada com sucesso."));
             }
             catch (Exception ex)
             {

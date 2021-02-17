@@ -34,9 +34,11 @@ namespace Moralar.Domain.ViewModels.Family
         /// Dados de Priorização
         /// </summary>
         public FamilyPriorizationViewModel Priorization { get; set; }
+        public string MotherName { get; set; }
+        public string MotherCityBorned { get; set; }
         //public string Password { get; set; }
         //public bool IsFirstAcess { get; set; }
         //public string ProviderId { get; set; }
-      
+
     }
 }

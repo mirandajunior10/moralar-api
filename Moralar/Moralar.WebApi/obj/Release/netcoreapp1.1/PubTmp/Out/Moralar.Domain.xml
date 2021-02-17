@@ -74,6 +74,31 @@
             Dados de Priorização
             </summary>
         </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Holder">
+            <summary>
+            Dados do Titular da Família
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Spouse">
+            <summary>
+            Dados do Cônjuge
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Members">
+            <summary>
+            Dados do membro da Família
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Financial">
+            <summary>
+            Dados Financeiros
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Priorization">
+            <summary>
+            Dados de Priorização
+            </summary>
+        </member>
         <member name="P:Moralar.Domain.ViewModels.LogActionExportViewModel.Created">
             <summary>
             Data e hora

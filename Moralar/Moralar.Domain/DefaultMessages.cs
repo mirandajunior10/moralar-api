@@ -38,6 +38,7 @@ namespace Moralar.Domain
         public const string InvalidCredencials = "Credênciais inválidas.";
         public const string EmailInvalid = "Informe um email válido.";
         public const string CpfInvalid = "Informe um cpf válido.";
+        
         public const string CnpjInvalid = "Informe um cnpj válido.";
         public const string PhoneInvalid = "Informe um telefone válido.";
         public const string InvalidIdentifier = "Formato de id inválido.";
@@ -47,12 +48,15 @@ namespace Moralar.Domain
 
         /*NOT FOUND*/
         public const string UserAdministratorNotFound = "Usuário de acessso não encontrado";
+        public const string CpfNotFound = "Cpf não encontrado.";
         public const string ProfileNotFound = "Usuário não encontrado";
+        public const string CourseNotFound = "Curso não encontrado";
         public const string ResidencialPropertyNotFound = "Propriedade não encontrado";
         public const string QuizNotFound = "Quiz não encontrado";
         public const string DescriptionNotFound = "Descrição não encontrado";
         public const string QuestionNotFound = "Quiz não encontrado";
         public const string FamilyNotFound = "Família não encontrado";
+        public const string AnyFamilyNotFound = "Alguma família não encontrado";
         public const string MemberNotFound = "Membro da família não encontrado";
         public const string PhotoNotFound = "Membro da família não encontrado";
         public const string CreditCardNotFound = "Cartão não encontrado";
@@ -67,6 +71,7 @@ namespace Moralar.Domain
         public const string OnlyAdministrator = "Você precisa ser administrador para realizar essa ação";
         public const string MessageException = "Ocorreu um erro, verifique e tente novamente";
         public const string LogActionNotFound = "Log de ação não encontrado.";
+        public const string VideoNotFound = "Vídeo não encontrado.";
 
     }
 }

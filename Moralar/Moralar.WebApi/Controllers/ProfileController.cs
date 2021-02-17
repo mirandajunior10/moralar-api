@@ -428,7 +428,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
+        [AllowAnonymous]
         public async Task<IActionResult> BlockUnBlock([FromBody] BlockViewModel model)
         {
             try
@@ -500,8 +500,8 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileNotFound));
 
-                if (entity.Password != model.CurrentPassword)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.PasswordNoMatch));
+                //if (entity.Password != model.CurrentPassword)
+                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.PasswordNoMatch));
 
                 entity.LastPassword = entity.Password;
                 entity.Password = model.NewPassword;
@@ -530,9 +530,11 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model,[FromBody] string name, TypeUserProfile typeUserProfile)
+        [AllowAnonymous]
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model)
         {
+            string name = "sergio";
+            var typeUserProfile = TypeUserProfile.Gestor; 
             var response = new DtResult<ProfileViewModel>();
             try
             {
