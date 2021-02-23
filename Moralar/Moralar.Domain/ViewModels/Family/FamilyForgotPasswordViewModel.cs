@@ -8,9 +8,9 @@ namespace Moralar.Domain.ViewModels.Family
 {
     public class FamilyForgotPasswordViewModel
     {
-        public string NameMother { get; set; }
-        public string City { get; set; }
-
+        public string MotherName { get; set; }
+        public string MotherCityBorned { get; set; }
+        public string Cpf { get; set; }
 
     }
 }

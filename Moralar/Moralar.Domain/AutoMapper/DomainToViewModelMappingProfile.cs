@@ -92,11 +92,15 @@ namespace Moralar.Domain.AutoMapper
 
             CreateMap<Quiz, QuizExportViewModel>()
              .ForMember(dest => dest.Created, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value)));
-            CreateMap<QuizFamily, QuizFamilyViewModel>()
-             .ForMember(dest => dest.Created, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value)));
+            CreateMap<QuizFamily, QuizFamilyViewModel>();
+             //.ForMember(dest => dest.Created, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value)))
 
             CreateMap<QuizFamily, QuizFamilyListViewModel>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Quiz, QuizListViewModel>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
+            
 
             #endregion
             #region Course

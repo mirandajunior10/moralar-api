@@ -224,6 +224,26 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.ForgotPassword(Moralar.Domain.ViewModels.Family.FamilyForgotPasswordViewModel)">
+            <summary>
+            ESQUECI A SENHA
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                           "motherName" :"",
+                           "motherCityBorned" :"",
+                           "cpf": ""
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.Register(Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel)">
             <summary>
             REGISTRAR UMA FAMÍLIA
@@ -285,7 +305,80 @@
                      "involuntaryCohabitation": bool,
                      "familyIncomeOfUpTwoMinimumWages": bool
                    },
-                    "motherName": "string",
+                   "motherName": "string",
+                   "motherCityBorned": "string",
+                   "password": "",
+                   "isFirstAcess": bool,
+                   "providerId": "string"
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.RegisterWeb(Moralar.Domain.ViewModels.Family.FamilyCompleteWebViewModel)">
+            <summary>
+            REGISTRAR UMA FAMÍLIA
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                    "holder": {
+                     "number": "",
+                     "name": "name",
+                     "cpf": "cpf",
+                     "birthday": 1611776217,
+                     "genre":  Enum,
+                     "email": "email",
+                     "phone": "phone",
+                     "scholarity": Enum
+                   },
+                   "spouse": {
+                     "name": "name",
+                     "birthday": 1611776217,
+                     "genre": Enum,
+                     "scholarity": Enum
+                   },
+                   "members": [
+                     {
+                       "name": "name",
+                       "birthday":  1611776217,
+                       "genre":  Enum,
+                       "kinShip": 1,
+                       "scholarity": Enum
+                     }, {
+                       "name": "name2",
+                       "birthday":  1611776217,
+                       "genre":  Enum,
+                       "kinShip": Enum,
+                       "scholarity": Enum
+                     }
+                   ],
+                   "financial": {
+                     "familyIncome": decimal,
+                     "propertyValueForDemolished": decimal,
+                     "maximumPurchase": decimal,
+                     "incrementValue": decimal
+                   },
+                   "priorization": {
+                     "workFront": bool,
+                     "permanentDisabled": bool,
+                     "elderlyOverEighty": bool,
+                     "yearsInSextyAndSeventyNine": bool,
+                     "womanServedByProtectiveMeasure": bool,
+                     "femaleBreadWinner": bool,
+                     "singleParent": bool,
+                     "familyWithMoreThanFivePeople": bool,
+                     "childUnderEighteen": bool,
+                     "headOfHouseholdWithoutIncome": bool,
+                     "benefitOfContinuedProvision": bool,
+                     "familyPurse": bool,
+                     "involuntaryCohabitation": bool,
+                     "familyIncomeOfUpTwoMinimumWages": bool
+                   },
+                   "motherName": "string",
                    "motherCityBorned": "string",
                    "password": "",
                    "isFirstAcess": bool,
@@ -622,7 +715,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.ProfileController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters)">
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,Moralar.Data.Enum.TypeUserProfile)">
             <summary>
             METODO DE LISTAGEM COM DATATABLE - TODOS 
             </summary>
@@ -907,7 +1000,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizController.GetByName(System.String)">
+        <member name="M:Moralar.WebApi.Controllers.QuizController.GetByName(System.String,Moralar.Data.Enum.TypeQuiz)">
             <summary>
             LISTA TODOS OS QUESTIONÁRIOS
             </summary>
@@ -917,7 +1010,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizController.Export(System.String)">
+        <member name="M:Moralar.WebApi.Controllers.QuizController.Export(System.String,Moralar.Data.Enum.TypeQuiz)">
             <summary>
             EXPORTAR PARA EXCEL
             </summary>
@@ -927,7 +1020,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String)">
+        <member name="M:Moralar.WebApi.Controllers.QuizController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,Moralar.Data.Enum.TypeQuiz)">
             <summary>
             LISTAGEM DOS QUESTINÁRIOS DATATABLE
             </summary>
@@ -957,11 +1050,12 @@
                     POST
                     {
                       "title": "string",
+                       "typeQuiz": 0 = Questionário, 1 = Enquete,
                       "questionRegister": {
                         "question": [
                           {
                             "nameQuestion": "string",
-                            "typeResponse": "Texto",
+                            "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
                             "description": [
                               {
                                 "description": "string"
@@ -1006,7 +1100,7 @@
              <response code="500">Exception Error</response>
              <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizController.GetQuizByFamily">
+        <member name="M:Moralar.WebApi.Controllers.QuizController.GetQuizByFamily(Moralar.Data.Enum.TypeQuiz)">
             <summary>
             LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
             </summary>

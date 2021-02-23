@@ -18,7 +18,6 @@ namespace Moralar.Domain.ViewModels.Quiz
         public bool AllFamily { get; set; }
 
 
-        public string Created { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Id da Família")]

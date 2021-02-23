@@ -43,7 +43,7 @@ namespace Moralar.WebApi.Services
 
                     switch (role)
                     {
-                        case nameof(TypeProfile.UserAdministrator):
+                        case nameof(TypeProfile.Gestor):
                             var userAdministratorEntity = await _userAdministratorRepository.FindByIdAsync(userId);
 
                             if (userAdministratorEntity == null)

@@ -10,6 +10,7 @@ using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using System.Collections.Generic;
+using UtilityFramework.Application.Core;
 using AutoMapperProfile = AutoMapper.Profile;
 
 namespace Moralar.Domain.AutoMapper
@@ -32,8 +33,11 @@ namespace Moralar.Domain.AutoMapper
                 CreateMap<FamilyMemberViewModel, FamilyMember>();
                 CreateMap<FamilyFinancialViewModel, FamilyFinancial>();
                 CreateMap<FamilyPriorizationViewModel, FamilyPriorization>();
-                CreateMap<FamilyCompleteViewModel, Family>()
-                     .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<FamilyCompleteViewModel, Family>()
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<FamilyCompleteWebViewModel, Family>()
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
             CreateMap<FamilyEditViewModel, Family>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
                 .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));

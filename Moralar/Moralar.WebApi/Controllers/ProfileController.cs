@@ -244,7 +244,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Register([FromBody] ProfileRegisterViewModel model)
         {
-            var claim = Util.SetRole(TypeProfile.Profile);
+            var claim = Util.SetRole(TypeProfile.Gestor);
             try
             {
                 model.TrimStringProperties();
@@ -353,7 +353,7 @@ namespace Moralar.WebApi.Controllers
         public async Task<IActionResult> Token([FromBody] LoginViewModel model)
         {
             var claims = new List<Claim>();
-            var claim = Util.SetRole(TypeProfile.Profile);
+            var claim = Util.SetRole(TypeProfile.Gestor);
             var claimUserName = Request.GetUserName();
             claims.Add(claim);
 
@@ -386,7 +386,7 @@ namespace Moralar.WebApi.Controllers
                         return BadRequest(isInvalidState);
 
                     entity = await _profileRepository
-                       .FindOneByAsync(x => x.Cpf == model.Login && x.Password == model.Password).ConfigureAwait(false);
+                       .FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password).ConfigureAwait(false);
 
                     if (entity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
@@ -531,10 +531,9 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] TypeUserProfile typeProfile)
         {
-            string name = "sergio";
-            var typeUserProfile = TypeUserProfile.Gestor; 
+            //string name = "sergio";
             var response = new DtResult<ProfileViewModel>();
             try
             {
@@ -542,9 +541,9 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.Profile>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
-                conditions.Add(builder.Where(x => x.TypeProfile == typeUserProfile ));
-                if (!string.IsNullOrEmpty(name))
-                    conditions.Add(builder.Where(x => x.Name.ToUpper().StartsWith(name.ToUpper())));
+                conditions.Add(builder.Where(x => x.TypeProfile == typeProfile));
+                //if (!string.IsNullOrEmpty(name))
+                //    conditions.Add(builder.Where(x => x.Name.ToUpper().StartsWith(name.ToUpper())));
                
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 

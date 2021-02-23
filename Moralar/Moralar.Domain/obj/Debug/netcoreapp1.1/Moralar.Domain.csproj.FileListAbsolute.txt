@@ -23,3 +23,5 @@ D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Domain\obj\Debug\netcoreapp1.1\
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Domain\obj\Debug\netcoreapp1.1\Moralar.Domain.csproj.CopyComplete
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Domain\obj\Debug\netcoreapp1.1\Moralar.Domain.dll
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Domain\obj\Debug\netcoreapp1.1\Moralar.Domain.pdb
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Domain\obj\Debug\netcoreapp1.1\en\Moralar.Domain.resources.cs
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Domain\obj\Debug\netcoreapp1.1\pt\Moralar.Domain.resources.cs

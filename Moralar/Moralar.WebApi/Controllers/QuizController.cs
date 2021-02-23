@@ -125,7 +125,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> GetByName(string nameQuiz)
+        public async Task<IActionResult> GetByName(string nameQuiz, TypeQuiz typeQuiz)
         {
             try
             {
@@ -134,14 +134,16 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.Created != null && x._id != null));
                 if (!string.IsNullOrEmpty(nameQuiz))
                     conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(nameQuiz.ToUpper())));
+
+                conditions.Add(builder.Where(x => x.TypeQuiz == typeQuiz));
                 var condition = builder.And(conditions);
 
 
                 var entityQuiz = await _quizRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Quiz>() { }).ToListAsync();
-                if (entityQuiz == null)
+                if (entityQuiz.Count() ==0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizViewModel>>(entityQuiz)));
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizListViewModel>>(entityQuiz)));
             }
             catch (Exception ex)
             {
@@ -163,7 +165,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> Export([FromForm] string nameQuiz)
+        public async Task<IActionResult> Export([FromForm] string nameQuiz, [FromForm] TypeQuiz typeQuiz)
         {
 
 
@@ -177,6 +179,7 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.Created != null && x._id != null));
                 if (!string.IsNullOrEmpty(nameQuiz))
                     conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(nameQuiz.ToUpper())));
+                conditions.Add(builder.Where(x => x.TypeQuiz == typeQuiz));
                 var condition = builder.And(conditions);
                 var fileName = "Questionario_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
                 var allData = await _quizRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Quiz>() { }).ToListAsync();
@@ -217,7 +220,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
         [AllowAnonymous]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, [FromForm] TypeQuiz typeQuiz)
         {
             var response = new DtResult<QuizViewModel>();
             try
@@ -229,7 +232,7 @@ namespace Moralar.WebApi.Controllers
                 if (!string.IsNullOrEmpty(title))
                     conditions.Add(builder.Where(x => x.Title == title));
 
-
+                conditions.Add(builder.Where(x => x.TypeQuiz == typeQuiz));
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
@@ -312,11 +315,12 @@ namespace Moralar.WebApi.Controllers
         ///        POST
         ///        {
         ///          "title": "string",
+        ///           "typeQuiz": 0 = Questionário, 1 = Enquete,
         ///          "questionRegister": {
         ///            "question": [
         ///              {
         ///                "nameQuestion": "string",
-        ///                "typeResponse": "Texto",
+        ///                "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
         ///                "description": [
         ///                  {
         ///                    "description": "string"
@@ -479,7 +483,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> GetQuizByFamily()
+        public async Task<IActionResult> GetQuizByFamily(TypeQuiz typeQuiz)
         {
             try
             {
@@ -488,11 +492,11 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
-                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId).ConfigureAwait(false);
+                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId ).ConfigureAwait(false);
 
 
-                var entityFamily = await _quizRepository.FindIn("_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList()) as List<Quiz>;
-                if (quizFamilies == null)
+                var entityFamily = await _quizRepository.FindIn("_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId) ).ToList()) as List<Quiz>;
+                if (entityFamily.Count(x => x.TypeQuiz == typeQuiz) == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
                 return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizViewModel>>(entityFamily)));
@@ -532,7 +536,7 @@ namespace Moralar.WebApi.Controllers
                 if (!string.IsNullOrEmpty(cpf))
                     conditions.Add(builder.Where(x => x.HolderCpf == cpf));
 
-
+              
                 var condition = builder.And(conditions);
                 var entity = await _quizFamilyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.QuizFamily>() { }).ToListAsync();
                 if (entity.Count() == 0)

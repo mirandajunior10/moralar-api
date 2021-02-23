@@ -159,17 +159,51 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                //QuestionAnswerListViewModel
+                List<QuestionAnswerListViewModel> listAnswers = new List<QuestionAnswerListViewModel>();
 
-                var questions = await _questionAnswerRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionAnswer>; //GetCollectionAsync().DistinctAsync(q => q.QuestionDescriptionId, new BsonDocument()).ConfigureAwait(false) as List<QuestionAnswer>;
-                var familys = await _familyRepository.FindIn("FamilyId", questions.Select(x => ObjectId.Parse(x.FamilyId)).ToList()) as List<Family>;
-                var entityFamily = await _familyRepository.FindIn("_id", questions.Select(x => ObjectId.Parse(x.FamilyId)).ToList()) as List<Family>;
-
-                for (int i = 0; i < questions.Count(); i++)
+                var quiz = await _quizRepository.FindAllAsync().ConfigureAwait(false) as List<Quiz>;
+                var answers = await _questionAnswerRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionAnswer>;
+                var question = await _questionRepository.FindIn("_id", answers.Select(x => ObjectId.Parse(x.QuestionId)).ToList()) as List<Question>;
+                var questionDescription = await _questionDescriptionRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionDescription>;
+                for (int i = 0; i < answers.Count(); i++)
                 {
-
-                    var question = await _questionRepository.FindByAsync(x => x._id == ObjectId.Parse(questions[i].QuestionId)).ConfigureAwait(false);
+                    var questionAnswerListViewModel = new QuestionAnswerListViewModel()
+                    {
+                        FamilyNumber = answers[i].FamilyNumber,
+                        FamilyHolderName = answers[i].FamilyHolderName,
+                        FamilyHolderCpf = answers[i].FamilyHolderCpf,
+                        Title = quiz.Find(x => question.Any(c => ObjectId.Parse(c.QuizId) == x._id)).Title,
+                        Date = answers[i].Created.Value,
+                        Question = question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).NameQuestion
+                    };
+                    switch (question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).TypeResponse)
+                    {
+                        case TypeResponse.MultiplaEscolha:
+                            {
+                                foreach (var item in answers[i].QuestionDescriptionId)
+                                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
+                                break;
+                            }
+                        case TypeResponse.ListaSuspensa:
+                            {
+                                foreach (var item in answers[i].QuestionDescriptionId)
+                                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
+                                break;
+                            }
+                        case TypeResponse.EscolhaUnica:
+                            {
+                                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(answers[i].QuestionDescriptionId.FirstOrDefault())).Description);
+                                break;
+                            }
+                        case TypeResponse.Texto:
+                            {
+                                questionAnswerListViewModel.Answers.Add(answers[i].AnswerDescription);
+                                break;
+                            }
+                    }
+                    listAnswers.Add(questionAnswerListViewModel);
                 }
+                var p = listAnswers;
                 ////    if (ObjectId.TryParse(id, out var unused) == false)
                 ////        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
@@ -189,7 +223,7 @@ namespace Moralar.WebApi.Controllers
                 //var listQuestion = _mapper.Map<QuestionViewModel>(entityQuestion);
                 //listQuestion.Description = _mapper.Map<List<QuestionDescriptionViewModel>>(entityDescription);
 
-                return Ok(Utilities.ReturnSuccess());
+                return Ok(Utilities.ReturnSuccess(data: listAnswers));
             }
             catch (Exception ex)
             {

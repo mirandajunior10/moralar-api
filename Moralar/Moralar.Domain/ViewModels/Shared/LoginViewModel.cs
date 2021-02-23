@@ -8,7 +8,7 @@ namespace Moralar.Domain.ViewModels
     public class LoginViewModel
     {
 
-
+        public string Cpf { get; set; }
         public string Login { get; set; }
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [EmailAddress(ErrorMessage = DefaultMessages.EmailInvalid)]

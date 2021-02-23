@@ -232,7 +232,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Token([FromBody] LoginAdminViewModel model)
         {
-            var claim = Util.SetRole(TypeProfile.UserAdministrator);
+            var claim = Util.SetRole(TypeProfile.Gestor);
 
             try
             {

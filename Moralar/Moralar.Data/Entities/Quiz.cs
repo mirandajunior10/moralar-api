@@ -13,8 +13,7 @@ namespace Moralar.Data.Entities
     public class Quiz : ModelBase
     {
         public string Title { get; set; }
-
-        public TypeStatusQuiz TypeStatusQuiz { get; set; }
+        public TypeQuiz TypeQuiz { get; set; }
         public override string CollectionName => nameof(Quiz);
 
     }

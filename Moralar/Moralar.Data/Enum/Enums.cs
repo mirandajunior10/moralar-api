@@ -40,7 +40,6 @@ namespace Moralar.Data.Enum
     {
         [EnumMember(Value = "Pessoa Jurídica")]
         [Description("Pessoa Jurídica")]
-
         LegalPerson = 0,
         [EnumMember(Value = "Pessoa Física")]
         [Description("Pessoa Física")]
@@ -53,7 +52,7 @@ namespace Moralar.Data.Enum
         Gestor = 0,
         [EnumMember(Value = "TTS")]
         [Description("TTS")]
-        TTS = 1,
+        TTS = 1
     }
     public enum Language
     {
@@ -98,12 +97,16 @@ namespace Moralar.Data.Enum
     }
     public enum TypeProfile
     {
-        [EnumMember(Value = "Usuário")]
-        [Description("Usuário")]
-        Profile = 0,
-        [EnumMember(Value = "Usuário administrador")]
-        [Description("Usuário administrador")]
-        UserAdministrator = 1
+        [EnumMember(Value = "Usuário TTS")]
+        [Description("Usuário TTS")]
+        TTS = 0,
+        [EnumMember(Value = "Gestor")]
+        [Description("Gestor")]
+        Gestor = 1,
+        [EnumMember(Value = "Família")]
+        [Description("Família")]
+        Familia = 2
+
     }
     public enum TypeScholarity
     {
@@ -238,6 +241,15 @@ namespace Moralar.Data.Enum
         Curso = 4
 
     }
+    public enum TypeQuiz
+    {
+        [EnumMember(Value = "Quiz")]
+        [Description("Quiz")]
+        Quiz = 0,
+        [EnumMember(Value = "Enquete")]
+        [Description("Enquete")]
+        Enquete = 1
+    }
     public enum TypeResponse
     {
         [EnumMember(Value = "Texto")]
@@ -266,10 +278,10 @@ namespace Moralar.Data.Enum
     {
         [EnumMember(Value = "Respondido")]
         [Description("Respondido")]
-        Respondido = 0,
+        NaoRespondido = 0,
         [EnumMember(Value = "Não Respondido")]
         [Description("Não Respondido")]
-        NaoRespondido = 1
+        Respondido = 1
     }
 
 
