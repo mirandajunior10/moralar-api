@@ -5,10 +5,14 @@ using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
 using Moralar.Domain.ViewModels.Course;
 using Moralar.Domain.ViewModels.Family;
+using Moralar.Domain.ViewModels.Informative;
+using Moralar.Domain.ViewModels.Profile;
+using Moralar.Domain.ViewModels.PropertiesInterest;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
+using Moralar.Domain.ViewModels.Schedule;
 using System.Collections.Generic;
 using UtilityFramework.Application.Core;
 using AutoMapperProfile = AutoMapper.Profile;
@@ -26,27 +30,56 @@ namespace Moralar.Domain.AutoMapper
                     .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<ProfileRegisterViewModel, Profile>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<ProfileUpdateViewModel, Profile>()
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
+            CreateMap<ProfileViewModel, Profile>()
+              .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #region Family
-                CreateMap<FamilyHolderViewModel, FamilyHolder>();
-                CreateMap<FamilyHolderMinViewModel, FamilyHolder>();
-                CreateMap<FamilySpouseViewModel, FamilySpouse>();
-                CreateMap<FamilyMemberViewModel, FamilyMember>();
-                CreateMap<FamilyFinancialViewModel, FamilyFinancial>();
-                CreateMap<FamilyPriorizationViewModel, FamilyPriorization>();
+            CreateMap<FamilyHolderViewModel, FamilyHolder>();
+            CreateMap<FamilyHolderMinViewModel, FamilyHolder>();
+            CreateMap<FamilySpouseViewModel, FamilySpouse>();
+            CreateMap<FamilyMemberViewModel, FamilyMember>();
+            CreateMap<FamilyFinancialViewModel, FamilyFinancial>();
+            CreateMap<PriorityRateViewModel, PriorityRate>();
+            CreateMap<FamilyPriorizationViewModel, FamilyPriorization>();
+            //            Missing type map configuration or unsupported mapping.
+
+            //Mapping types:
+            //Boolean->FamilyPriorization
+            //System.Boolean->Moralar.Data.Entities.Auxiliar.FamilyPriorization
+            //            Mapping types:
+            //Boolean->FamilyPriorization
+            //System.Boolean->Moralar.Data.Entities.Auxiliar.FamilyPriorization
+
             CreateMap<FamilyCompleteViewModel, Family>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<FamilyCompleteWebViewModel, Family>()
-                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
+                 .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.Priorization))
+                 ;
+            //            Error mapping types.
 
+            //Mapping types:
+            //FamilyCompleteWebViewModel->Family
+            //Moralar.Domain.ViewModels.Family.FamilyCompleteWebViewModel->Moralar.Data.Entities.Family
+
+            //Type Map configuration:
+            //            FamilyCompleteWebViewModel->Family
+            //Moralar.Domain.ViewModels.Family.FamilyCompleteWebViewModel->Moralar.Data.Entities.Family
+
+            //Property:
+            //            Priorization
+            //            Priorization
             CreateMap<FamilyEditViewModel, Family>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
                 .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));
             #endregion
             #region ResidencialProperty
-               CreateMap<ResidencialPropertyViewModel, ResidencialProperty>()
-                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
-               CreateMap<ResidencialPropertyFeatureViewModel, ResidencialPropertyFeatures>();
-               CreateMap<ResidencialPropertyAdressViewModel, ResidencialPropertyAdress>();
+            CreateMap<ResidencialPropertyViewModel, ResidencialProperty>()
+              .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<ResidencialPropertyFeatureViewModel, ResidencialPropertyFeatures>();
+            CreateMap<ResidencialPropertyAdressViewModel, ResidencialPropertyAdress>();
 
             #endregion
             #region Question
@@ -63,8 +96,9 @@ namespace Moralar.Domain.AutoMapper
 
             #endregion
             #region Course
-            CreateMap<CourseRegistrationViewModel, Course>()
-               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
+            CreateMap<CourseFamilyViewModel, CourseFamily>()
+              .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
             #region QuizFamily
             CreateMap<QuizFamilyViewModel, QuizFamily>()
@@ -79,10 +113,40 @@ namespace Moralar.Domain.AutoMapper
              .ForMember(dest => dest.ResponsibleForResponsesCpf, opt => opt.MapFrom(src => src.ResponsibleForResponsesCpf));
 
             #endregion
+            #region Schedule
+            CreateMap<ScheduleRegisterViewModel, Schedule>()
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<ScheduleChangeSubjectViewModel, Schedule>()
+               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<ScheduleChangeStatusViewModel, Schedule>()
+               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<ScheduleRegisterViewModel, ScheduleHistory>()
+               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<ScheduleChangeStatusViewModel, ScheduleHistory>()
+         .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            
 
+
+            #endregion
+            #region Informative
+            CreateMap<InformativeViewModel, Informative>()
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            CreateMap<InformativeListViewModel, Informative>()
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            #endregion
+            #region PropertiesInterest
+            CreateMap<PropertiesInterestRegisterViewModel, PropertiesInterest>()
+             .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            #endregion
+
+            #region Course
+            CreateMap<CourseViewModel, Course>()
+        .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            #endregion
 
 
 
         }
     }
+
 }

@@ -7,6 +7,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+using Moralar.WebApi.Filter;
 using Moralar.WebApi.Services;
 using System.IO;
 using System.Linq;
@@ -53,7 +54,12 @@ namespace Moralar.WebApi
                 opt.Filters.Add(typeof(CheckJson));
                 opt.Filters.Add(typeof(PreventSpanFilter));
             });
-
+            services.AddMvc(options => {
+                //adicionado por instância 
+                options.Filters.Add(new FilterAsyncToken());
+                //adicionado por tipo  
+                //options.Filters.Add(typeof(CustomActionFilter));
+            });
             /*TRANSLATE I18N*/
             //services.AddLocalization(options => options.ResourcesPath = "Resources");
             //services.AddMvc()

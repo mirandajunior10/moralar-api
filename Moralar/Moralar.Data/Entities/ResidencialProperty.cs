@@ -1,5 +1,6 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
 using Moralar.Data.Entities.Auxiliar;
+using Moralar.Data.Enum;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,6 +18,8 @@ namespace Moralar.Data.Entities
         public ResidencialPropertyAdress ResidencialPropertyAdress { get; set; }
        
         public ResidencialPropertyFeatures ResidencialPropertyFeatures { get; set; }
+        public TypeStatusResidencial TypeStatusResidencialProperty { get; set; }
+        public string FamiliIdResidencialChosen { get; set; }
         public override string CollectionName => nameof(ResidencialProperty);
     }
 }

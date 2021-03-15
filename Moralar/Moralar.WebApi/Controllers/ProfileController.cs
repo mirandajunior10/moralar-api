@@ -11,8 +11,10 @@ using Moralar.Data.Enum;
 using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
+using Moralar.Domain.ViewModels.Profile;
 using Moralar.Repository.Interface;
 using Moralar.WebApi.Services;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
@@ -84,6 +86,157 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileNotFound));
 
                 return Ok(Utilities.ReturnSuccess(data: _mapper.Map<ProfileViewModel>(entity)));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// IMPORTAÇÃO DO GESTOR
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("ImportGestor")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> ImportGestor()
+        {
+            try
+            {
+                var fi = new System.IO.FileInfo(@"D:\Megaleios\Documentos\MOralar\Modelo Importacao Gestor.xlsx");
+                using (var package = new ExcelPackage(fi))
+                {
+                    ExcelWorksheet sheet = package.Workbook.Worksheets[1];
+
+                    for (int linha = 2; linha < 300; linha++)
+                    {
+                        if (package.Workbook.Worksheets[1].Cells[linha, 1].Value  != null)
+                            break;
+                        Data.Entities.Profile profile = new Data.Entities.Profile();
+                        profile.Name = package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString();
+                        profile.JobPost = package.Workbook.Worksheets[1].Cells[linha, 2].Value.ToString();
+                        profile.Cpf = package.Workbook.Worksheets[1].Cells[linha, 3].Value.ToString();
+                        profile.Email = package.Workbook.Worksheets[1].Cells[linha, 4].Value.ToString();
+                        profile.Phone = package.Workbook.Worksheets[1].Cells[linha, 5].Value.ToString();
+                        profile.TypeProfile = TypeUserProfile.Gestor;
+                        profile.Cpf = profile.Cpf.OnlyNumbers();
+
+                        if (await _profileRepository.CheckByAsync(x => x.Cpf == profile.Cpf).ConfigureAwait(false))
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
+                        if (!profile.Cpf.ValidCpf())
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInvalid));
+
+                        profile.Password = Utilities.RandomInt(8);
+
+                        var entityId = await _profileRepository.CreateAsync(profile).ConfigureAwait(false);
+
+                        var dataBody = Util.GetTemplateVariables();
+                        dataBody.Add("{{ title }}", "Lembrete de senha");
+                        dataBody.Add("{{ message }}", $"<p>Caro(a) {profile.Name.GetFirstName()}</p>" +
+                                                    $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
+                                                    //$"<p><b>Login</b> : {profile.Login}</p>" +
+                                                    $"<p><b>Senha</b> :{profile.Password}</p>"
+                                                    );
+
+                        var body = _senderMailService.GerateBody("custom", dataBody);
+
+                        var unused = Task.Run(async () =>
+                        {
+                            await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, profile.Email, body, "Lembrete de senha").ConfigureAwait(false);
+                        });
+
+                    }
+                }
+                //package.Save();
+
+                return Ok(Utilities.ReturnSuccess());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// IMPORTAÇÃO DOS TTS
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("ImportTTS")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> ImportTTS()
+        {
+            try
+            {
+                var fi = new System.IO.FileInfo(@"D:\Megaleios\Documentos\MOralar\Modelo Importacao TTS.xlsx");
+                var listProfilies = new List<Data.Entities.Profile>();
+                using (var package = new ExcelPackage(fi))
+                {
+                    ExcelWorksheet sheet = package.Workbook.Worksheets[1];
+
+                    for (int linha = 2; linha < 300; linha++)
+                    {
+                        if (package.Workbook.Worksheets[1].Cells[linha, 1].Value != null)
+                            break;
+                        Data.Entities.Profile profile = new Data.Entities.Profile();
+                        profile.Name = package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString();
+                        profile.JobPost = package.Workbook.Worksheets[1].Cells[linha, 2].Value.ToString();
+                        profile.Cpf = package.Workbook.Worksheets[1].Cells[linha, 3].Value.ToString();
+                        profile.Email = package.Workbook.Worksheets[1].Cells[linha, 4].Value.ToString();
+                        profile.Phone = package.Workbook.Worksheets[1].Cells[linha, 5].Value.ToString();
+                        profile.TypeProfile = TypeUserProfile.TTS;
+                        profile.Cpf = profile.Cpf.OnlyNumbers();
+
+                        if (await _profileRepository.CheckByAsync(x => x.Cpf == profile.Cpf).ConfigureAwait(false))
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
+                        if (!profile.Cpf.ValidCpf())
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInvalid));
+
+                        profile.Password = Utilities.RandomInt(8);
+                        listProfilies.Add(profile);
+                    }
+                }
+
+                await _profileRepository.CreateAsync(listProfilies).ConfigureAwait(false);
+                foreach (var item in listProfilies)
+                {
+                    var dataBody = Util.GetTemplateVariables();
+                    dataBody.Add("{{ title }}", "Lembrete de senha");
+                    dataBody.Add("{{ message }}", $"<p>Caro(a) {item.Name.GetFirstName()}</p>" +
+                                                $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
+                                                //$"<p><b>Login</b> : {profile.Login}</p>" +
+                                                $"<p><b>Senha</b> :{item.Password}</p>"
+                                                );
+
+                    var body = _senderMailService.GerateBody("custom", dataBody);
+
+                    var unused = Task.Run(async () =>
+                    {
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.Email, body, "Lembrete de senha").ConfigureAwait(false);
+                    });
+                }
+
+              
+                //package.Save();
+
+                return Ok(Utilities.ReturnSuccess());
             }
             catch (Exception ex)
             {
@@ -226,6 +379,66 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+        /// <summary>
+        /// ALTERAR PASSWORD
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "Name" : "",
+        ///              "JobPost" : "",
+        ///              "Cpf" : "",
+        ///              "Email" : "",
+        ///              "Phone" : "",
+        ///              "Password" : "",
+        ///              "id": ""
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("UpdateProfile")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateViewModel model)
+        {
+            try
+            {
+
+                if (string.IsNullOrEmpty(model.Id))
+                    return BadRequest(Utilities.ReturnErro());
+
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelState();
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                var entity = await _profileRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
+
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileNotFound));
+
+                entity = _mapper.Map<Data.Entities.Profile>(model);
+
+
+                _profileRepository.Update(entity);
+
+                return Ok(Utilities.ReturnSuccess("Senha alterada com sucesso."));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
 
         /// <summary>
         /// REGISTRAR USUÁRIO
@@ -249,11 +462,6 @@ namespace Moralar.WebApi.Controllers
             {
                 model.TrimStringProperties();
                 var ignoreValidation = new List<string>();
-                //if (model.TypeProvider != TypeProvider.Password)
-                //{
-                //    ignoreValidation.Add(nameof(model.Login));
-                //    ignoreValidation.Add(nameof(model.Password));
-                //}
 
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
 
@@ -287,19 +495,15 @@ namespace Moralar.WebApi.Controllers
                 if (await _profileRepository.CheckByAsync(x => x.Cpf == model.Cpf).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
 
-                //if (await _profileRepository.CheckByAsync(x => x.Login == model.Login).ConfigureAwait(false))
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.LoginInUse));
 
                 if (await _profileRepository.CheckByAsync(x => x.Email == model.Email).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailInUse));
 
                 var entity = _mapper.Map<Data.Entities.Profile>(model);
 
-                entity.Password =  Utilities.RandomInt(8);
+                entity.Password = Utilities.RandomInt(8);
 
                 var entityId = await _profileRepository.CreateAsync(entity).ConfigureAwait(false);
-                //await _creditCardRepository.FindByAsync(x => x.CustomerId == userId) as List<CreditCard>;
-                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de novo Perfil {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
 
                 var dataBody = Util.GetTemplateVariables();
                 dataBody.Add("{{ title }}", "Lembrete de senha");
@@ -364,7 +568,7 @@ namespace Moralar.WebApi.Controllers
 
                 model.TrimStringProperties();
 
-              
+
                 //if (string.IsNullOrEmpty(model.RefreshToken) == false)
                 //    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
 
@@ -385,11 +589,11 @@ namespace Moralar.WebApi.Controllers
                     if (isInvalidState != null)
                         return BadRequest(isInvalidState);
 
-                    entity = await _profileRepository
-                       .FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password).ConfigureAwait(false);
-
+                    entity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
+                            : await _profileRepository.FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password).ConfigureAwait(false);
                     if (entity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
+
 
                 }
                 claims.Add(new Claim("UserName", entity.Name));
@@ -544,7 +748,7 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.TypeProfile == typeProfile));
                 //if (!string.IsNullOrEmpty(name))
                 //    conditions.Add(builder.Where(x => x.Name.ToUpper().StartsWith(name.ToUpper())));
-               
+
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
@@ -554,10 +758,10 @@ namespace Moralar.WebApi.Controllers
                     : Builders<Data.Entities.Profile>.Sort.Ascending(sortColumn);
 
                 var retorno = await _profileRepository
-                    .LoadDataTableAsync( model.Search.Value, sortBy, model.Start, model.Length, conditions, columns);
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns);
 
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
-                    ? (int)await _profileRepository.CountSearchDataTableAsync( model.Search.Value, conditions, columns)
+                    ? (int)await _profileRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
                 response.Data = _mapper.Map<List<ProfileViewModel>>(retorno);

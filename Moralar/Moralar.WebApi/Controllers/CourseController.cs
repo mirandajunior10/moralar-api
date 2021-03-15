@@ -38,16 +38,26 @@ namespace Moralar.WebApi.Controllers
 
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
+        private readonly IFamilyRepository _familyRepository;
+        private readonly ICourseFamilyRepository _courseFamilyRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUtilService _utilService;
+        private readonly ISenderMailService _senderMailService;
 
-        public CourseController(IMapper mapper, ICourseRepository courseRepository, IHttpContextAccessor httpContextAccessor, IUtilService utilService)
+        public CourseController(IMapper mapper, ICourseRepository courseRepository, IFamilyRepository familyRepository, ICourseFamilyRepository courseFamilyRepository, IHttpContextAccessor httpContextAccessor, IUtilService utilService, ISenderMailService senderMailService)
         {
             _mapper = mapper;
             _courseRepository = courseRepository;
+            _familyRepository = familyRepository;
+            _courseFamilyRepository = courseFamilyRepository;
             _httpContextAccessor = httpContextAccessor;
             _utilService = utilService;
+            _senderMailService = senderMailService;
         }
+
+
+
+
 
 
         /// <summary>
@@ -118,7 +128,7 @@ namespace Moralar.WebApi.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, long startDate, long endDate)
         {
-            var response = new DtResult<CourseViewModel>();
+            var response = new DtResult<CourseListViewModel>();
             try
             {
                 var builder = Builders<Data.Entities.Course>.Filter;
@@ -126,7 +136,7 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null));
                 if (!string.IsNullOrEmpty(title))
-                    conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(title)));
+                    conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(title.ToUpper())));
                 //if (!string.IsNullOrEmpty(nameHolder))
                 //    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(nameHolder.ToUpper())));
                 //if (!string.IsNullOrEmpty(cpf))
@@ -148,7 +158,7 @@ namespace Moralar.WebApi.Controllers
                     ? (int)await _courseRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                response.Data = _mapper.Map<List<CourseViewModel>>(retorno);
+                response.Data = _mapper.Map<List<CourseListViewModel>>(retorno);
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;
@@ -186,7 +196,7 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 //if (ObjectId.TryParse(id, out var unused) == false)
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
+                //return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
                 //var userId = Request.GetUserId();
 
@@ -238,7 +248,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<FamilyHolderListViewModel>>(entity)));
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<CourseViewModel>>(entity)));
             }
             catch (Exception ex)
             {
@@ -292,6 +302,132 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
+        /// <summary>
+        /// REGISTRAR FAMÍLIA
+        /// </summary>
+        /// <remarks>
+        ///OBJ DE ENVIO
+        ///         POST
+        ///        
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("RegisterFamilyToTrainning")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> RegisterFamilyToTrainning([FromBody] CourseFamilyViewModel model)
+        {
+            try
+            {
+                var entityFamily = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
+                if (entityFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                if (await _courseFamilyRepository.CheckByAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false))
+                    return BadRequest(Utilities.ReturnErro("Família já realizou o curso"));
+                var entityCourse = await _courseRepository.FindByIdAsync(model.CourseId).ConfigureAwait(false);
+                if (entityCourse == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
+
+                if (!entityFamily.Members.Exists(x => x.Birthday.TimeStampToDateTime().CalculeAge() >= entityCourse.StartTargetAudienceAge && x.Birthday.TimeStampToDateTime().CalculeAge() <= entityCourse.EndTargetAudienceAge))
+                    return BadRequest(Utilities.ReturnErro("Não é possível realizar a inscrição neste curso, por não condizer com o público a que é destinado"));
+
+                var qtdCourse = await _courseFamilyRepository.FindByAsync(x => x.CourseId == model.CourseId).ConfigureAwait(false) as List<CourseFamily>;
+                if (qtdCourse.Count() >= entityCourse.NumberOfVacancies && model.WaitInTheQueue == false)
+                    return BadRequest(Utilities.ReturnErro("Deseja aguardar na fila de espera?"));
+
+                var entity = _mapper.Map<Data.Entities.CourseFamily>(model);
+                entity.TypeStatusCourse = model.WaitInTheQueue == false ? TypeStatusCourse.Inscrito : TypeStatusCourse.ListaEspera;
+                var entityId = await _courseFamilyRepository.CreateAsync(entity).ConfigureAwait(false);
+
+                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+            }
+            catch (Exception ex)
+            {
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// REGISTRAR FAMÍLIA
+        /// </summary>
+        /// <remarks>
+        ///OBJ DE ENVIO
+        ///         POST
+        ///        
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("CancelFamilyToTrainning")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> CancelFamilyToTrainning([FromBody] CourseCancelViewModel model)
+        {
+            try
+            {
+                var entityFamily = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
+                if (entityFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                var entityCourse = await _courseRepository.FindByIdAsync(model.CourseId).ConfigureAwait(false);
+                if (entityCourse == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
+
+                var courses = await _courseFamilyRepository.FindByAsync(x => x.CourseId == model.CourseId).ConfigureAwait(false);
+                var entityCourseFamily = courses.Where(x => x.FamilyId == model.FamilyId && x.CourseId == model.CourseId).FirstOrDefault();
+                if (entityCourseFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseFamilyNotFound));
+
+                await _courseFamilyRepository.DeleteOneAsync(entityCourseFamily._id.ToString()).ConfigureAwait(false);
+
+                if (courses.ToList().Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera) > 0)
+                {
+                    var familyToCourseAvaliable = courses.ToList().Where(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera).OrderBy(x => x.Created).FirstOrDefault();
+                    if (familyToCourseAvaliable != null)
+                    {
+                        familyToCourseAvaliable.TypeStatusCourse = TypeStatusCourse.Inscrito;
+                        await _courseFamilyRepository.UpdateOneAsync(familyToCourseAvaliable).ConfigureAwait(false);
+
+                        var dataBody = Util.GetTemplateVariables();
+                        dataBody.Add("{{ title }}", "Vaga Liberada");
+                        dataBody.Add("{{ message }}", $"<p>Caro(a) {entityFamily.Holder.Name.GetFirstName()}</p>" +
+                                                    $"<p> A sua vaga para o curso de {entityCourse.Title} foi liberada " 
+                                                    //$"<p><b>Login</b> : {profile.Login}</p>" +
+                                                    );
+
+                        var body = _senderMailService.GerateBody("custom", dataBody);
+
+                        var unused = Task.Run(async () =>
+                        {
+                            await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, entityFamily.Holder.Email, body, "Vaga Liberada").ConfigureAwait(false);
+                        });
+                    }
+                }
+                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+            }
+            catch (Exception ex)
+            {
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
 
         //[HttpPost("Edit")]
         //[Produces("application/json")]

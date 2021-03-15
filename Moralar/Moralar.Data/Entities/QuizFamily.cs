@@ -15,7 +15,7 @@ namespace Moralar.Data.Entities
         public string HolderCpf { get; set; }
         public string HolderNumber { get; set; }
         public string QuizId { get; set; }
-        public TypeStatusQuiz TypeStatusQuiz { get; set; }
+        public TypeStatus TypeStatus { get; set; }
         public override string CollectionName => nameof(QuizFamily);
     }
 }

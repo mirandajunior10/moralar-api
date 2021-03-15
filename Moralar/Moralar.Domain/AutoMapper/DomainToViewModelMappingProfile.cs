@@ -4,9 +4,13 @@ using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
 using Moralar.Domain.ViewModels.Course;
 using Moralar.Domain.ViewModels.Family;
+using Moralar.Domain.ViewModels.Informative;
+using Moralar.Domain.ViewModels.InformativeSended;
+using Moralar.Domain.ViewModels.PropertiesInterest;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.Quiz;
+using Moralar.Domain.ViewModels.Schedule;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Iugu.Core.Models;
@@ -50,7 +54,7 @@ namespace Moralar.Domain.AutoMapper
             #region Family
             CreateMap<FamilyHolder, FamilyHolderViewModel>();
             CreateMap<FamilyHolder, FamilyHolderListViewModel>()
-                ;
+                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<FamilyHolder, FamilyHolderMinViewModel>();
             CreateMap<FamilySpouse, FamilySpouseViewModel>();
             CreateMap<FamilyMember, FamilyMemberViewModel>();
@@ -64,7 +68,7 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Holder.Email))
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Holder.Phone))
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
-                ;
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             //.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<Family, FamilyCompleteViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
@@ -80,7 +84,7 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false));
             CreateMap<ResidencialPropertyAdress, ResidencialPropertyAdressViewModel>();
             CreateMap<ResidencialPropertyFeatures, ResidencialPropertyFeatureViewModel>();
-
+            CreateMap<ResidencialProperty, ResidencialPropertyAdress>();
             #endregion
             #region Quiz
             CreateMap<Quiz, QuizViewModel>()
@@ -93,21 +97,57 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<Quiz, QuizExportViewModel>()
              .ForMember(dest => dest.Created, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value)));
             CreateMap<QuizFamily, QuizFamilyViewModel>();
-             //.ForMember(dest => dest.Created, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value)))
+            //.ForMember(dest => dest.Created, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value)))
 
             CreateMap<QuizFamily, QuizFamilyListViewModel>()
-            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
+            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.TypeStatus == 0 ? "Não respondido" : "Respondido"))
+            ;
             CreateMap<Quiz, QuizListViewModel>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
-            
+
 
             #endregion
             #region Course
-            CreateMap<Course, CourseRegistrationViewModel>()
+           
+            #endregion
+            #region Schedule
+            CreateMap<Schedule, ScheduleRegisterViewModel>()
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Schedule, ScheduleListViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             #endregion
 
+            #region Informative
+            CreateMap<Informative, InformativeListViewModel>()
+              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
+              .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.DataBlocked != null ?"true":"false"));
+            CreateMap<InformativeSended, InformativeSendedDetailViewModel>()
+             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            #endregion
+            #region PropertiesInterest
+            CreateMap<PropertiesInterest, PropertiesInterestRegisterViewModel>()
+             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<PropertiesInterest, PropertiesInterestViewModel>()
+             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
+            //.ForMember(dest => dest.FamilyId, opt => opt.MapFrom(src => src.FamilyId))
+            //.ForMember(dest => dest.ResidelcialPropertyId, opt => opt.MapFrom(src => src.ResidelcialPropertyId))
+            //.ForMember(dest => dest.FamilyId, opt => opt.MapFrom(src => src._id))
+
+
+            #endregion
+            #region Course
+            CreateMap<Course, CourseViewModel>()
+           .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
+            CreateMap<Course, CourseListViewModel>()
+            .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.StartDate)))
+            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.EndDate)));
+           
+            #endregion
 
         }
     }

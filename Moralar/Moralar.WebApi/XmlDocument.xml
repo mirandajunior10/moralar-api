@@ -109,37 +109,7 @@
              <response code="500">Exception Error</response>
              <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.CourseRegistrationController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.Int64,System.Int64)">
-            <summary>
-            LISTAGEM DOS CLIENTES
-            </summary>
-            <response code="200">Returns success</response>
-            <response code="400">Custom Error</response>
-            <response code="401">Unauthorize Error</response>
-            <response code="500">Exception Error</response>
-            <returns></returns>
-        </member>
-        <member name="M:Moralar.WebApi.Controllers.CourseRegistrationController.Detail(System.String)">
-            <summary>
-            DETALHES DA FAMÍLIA
-            </summary>
-            <response code="200">Returns success</response>
-            <response code="400">Custom Error</response>
-            <response code="401">Unauthorize Error</response>
-            <response code="500">Exception Error</response>
-            <returns></returns>
-        </member>
-        <member name="M:Moralar.WebApi.Controllers.CourseRegistrationController.GetAll">
-            <summary>
-            LISTA TODAS PROPRIEDADE
-            </summary>
-            <response code="200">Returns success</response>
-            <response code="400">Custom Error</response>
-            <response code="401">Unauthorize Error</response>
-            <response code="500">Exception Error</response>
-            <returns></returns>
-        </member>
-        <member name="M:Moralar.WebApi.Controllers.CourseRegistrationController.Register(Moralar.Domain.ViewModels.Course.CourseRegistrationViewModel)">
+        <member name="M:Moralar.WebApi.Controllers.CourseController.RegisterFamilyToTrainning(Moralar.Domain.ViewModels.Course.CourseFamilyViewModel)">
              <summary>
              REGISTRAR FAMÍLIA
              </summary>
@@ -153,6 +123,61 @@
              <response code="401">Unauthorize Error</response>
              <response code="500">Exception Error</response>
              <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CourseController.CancelFamilyToTrainning(Moralar.Domain.ViewModels.Course.CourseCancelViewModel)">
+             <summary>
+             REGISTRAR FAMÍLIA
+             </summary>
+             <remarks>
+            OBJ DE ENVIO
+                     POST
+                    
+             </remarks>
+             <response code="200">Returns success</response>
+             <response code="400">Custom Error</response>
+             <response code="401">Unauthorize Error</response>
+             <response code="500">Exception Error</response>
+             <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.DashBoardController.RegisteredFamilies">
+            <summary>
+            LISTA A QUANTIDADE DE FAMÍLIAS CADASTRADAS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.DashBoardController.RegisteredTTS">
+            <summary>
+            LISTA A QUANTIDADE DE TTS CADASTRADOS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.DashBoardController.RegisteredManagers">
+            <summary>
+            LISTA A QUANTIDADE DE GESTORES CADASTRADOS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.DashBoardController.RegisteredResidencialProperty">
+            <summary>
+            LISTA A QUANTIDADE DE RESIDENCIAS CADASTRADAS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.BlockUnBlock(Moralar.Domain.ViewModels.BlockViewModel)">
             <summary>
@@ -184,9 +209,41 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.LoadDataTimeLine(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,Moralar.Data.Enum.TypeSubject)">
+            <summary>
+            TIMELINE DAS FAMÍLIAS
+            </summary>
+             <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "number": "", // required
+                         "holderName": "",
+                         "holderCpf",""
+                         "typeSubject": "" Reunião PGM,Escolha do imóvel,Mudança,Acompanhamento pós-mudança
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.FamilyController.TimeLineOptionalMandatory" -->
         <member name="M:Moralar.WebApi.Controllers.FamilyController.Detail(System.String)">
             <summary>
             DETALHES DA FAMÍLIA
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.Import">
+            <summary>
+            IMPORTAÇÃO DA FAMÍLIA
             </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>
@@ -544,6 +601,65 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.InformativeController.Register(Moralar.Domain.ViewModels.Informative.InformativeViewModel)">
+            <summary>
+            CADASTRAR UM INFORMATIVE
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+                    POST
+                        {
+                          "image": "fasdfasqwerqwe",/// IMAGEM DO VÍDEO
+                          "Description": "", // DESCRIÇÃO
+                          "Date": ,//Data do informativo
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.InformativeController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters)">
+            <summary>
+            METODO DE LISTAGEM COM DATATABLE
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.InformativeController.LoadDataInformativeSended(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.Int64,System.Int64)">
+            <summary>
+            METODO DE LISTAGEM COM DATATABLE
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.InformativeController.Delete(System.String)">
+            <summary>
+            METODO DE REMOVER ITEM
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.InformativeController.BlockUnblock(Moralar.Domain.ViewModels.BlockViewModel)">
+            <summary>
+            BLOQUEIA OU DESBLOQUEIA O INFORMATIVO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.LogActionController.Export">
             <summary>
             EXPORTAR PARA EXCEL
@@ -594,6 +710,26 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.ImportGestor">
+            <summary>
+            IMPORTAÇÃO DO GESTOR
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.ImportTTS">
+            <summary>
+            IMPORTAÇÃO DOS TTS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.ProfileController.GetInfo">
             <summary>
             INFORMAÇÕES  DO USUÁRIO
@@ -632,6 +768,30 @@
                     POST
                         {
                          "email":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ProfileController.UpdateProfile(Moralar.Domain.ViewModels.Profile.ProfileUpdateViewModel)">
+            <summary>
+            ALTERAR PASSWORD
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "Name" : "",
+                         "JobPost" : "",
+                         "Cpf" : "",
+                         "Email" : "",
+                         "Phone" : "",
+                         "Password" : "",
+                         "id": ""
                         }
             </remarks>
             <response code="200">Returns success</response>
@@ -847,6 +1007,48 @@
                             "email":"string"
                         }
             </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.PropertiesInterestController.Register(Moralar.Domain.ViewModels.PropertiesInterest.PropertiesInterestRegisterViewModel)">
+             <summary>
+             REGISTRAR UM INTERESSE AO IMÓVEL
+             </summary>
+             <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                    {
+                      "title": "string",
+                       "typeQuiz": 0 = Questionário, 1 = Enquete,
+                      "questionRegister": {
+                        "question": [
+                          {
+                            "nameQuestion": "string",
+                            "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
+                            "description": [
+                              {
+                                "description": "string"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+             </remarks>
+             <response code="200">Returns success</response>
+             <response code="400">Custom Error</response>
+             <response code="401">Unauthorize Error</response>
+             <response code="500">Exception Error</response>
+             <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.PropertiesInterestController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters)">
+            <summary>
+            LISTAGEM DAS FAMÍLIAS
+            </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>
             <response code="401">Unauthorize Error</response>
@@ -1105,7 +1307,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizController.QuizAvailable(System.String,System.String,System.String)">
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.QuizAvailable(System.String,System.String,System.String,Moralar.Data.Enum.TypeStatus)">
             <summary>
             LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
             </summary>
@@ -1115,27 +1317,8 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.BlockUnBlock(Moralar.Domain.ViewModels.BlockViewModel)">
-            <summary>
-            BLOQUEAR / DESBLOQUEAR PROPRIEDADE
-            </summary>
-            <remarks>
-            OBJ DE ENVIO
-            
-                    POST
-                        {
-                         "id": "string", // required
-                         "block": true,
-                         "reason": "" //motivo de bloquear o usuário
-                        }
-            </remarks>
-            <response code="200">Returns success</response>
-            <response code="400">Custom Error</response>
-            <response code="401">Unauthorize Error</response>
-            <response code="500">Exception Error</response>
-            <returns></returns>
-        </member>
-        <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.Int32,System.Int32)">
+        <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.ResidencialPropertyController.BlockUnBlock(Moralar.Domain.ViewModels.BlockViewModel)" -->
+        <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.Int32)">
             <summary>
             LISTAGEM DOS CLIENTES
             </summary>
@@ -1158,6 +1341,16 @@
         <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.GetAllBy(System.String,System.Int32,System.Int32)">
             <summary>
             LISTA TODAS PROPRIEDADE
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.GetResidencialByFilter(Moralar.Domain.ViewModels.ResidencialProperty.ResidencialPropertyFilterViewModel)">
+            <summary>
+            LISTA AS PROPRIEDADES COM FILTRO
             </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>
@@ -1258,6 +1451,104 @@
             <response code="401">Unauthorize Error</response>
             <response code="500">Exception Error</response>
             <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.GetHistoryByFamily">
+            <summary>
+            DETALHES DA FAMÍLIA
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64},System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeScheduleStatus},Moralar.Data.Enum.TypeSubject)">
+            <summary>
+            LISTAGEM DOS QUESTINÁRIOS DATATABLE
+            </summary>
+            <response code = "200" > Returns success</response>
+            <response code = "400" > Custom Error</response>
+            <response code = "401" > Unauthorize Error</response>
+            <response code = "500" > Exception Error</response>
+            <returns></returns>
+        </member>
+        <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.ScheduleController.Detail(System.String)" -->
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.Register(Moralar.Domain.ViewModels.Schedule.ScheduleRegisterViewModel)">
+             <summary>
+             REGISTRAR UM NOVO QUESTIONÁRIO
+             </summary>
+             <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                    {
+                      "title": "string",
+                       "typeQuiz": 0 = Questionário, 1 = Enquete,
+                      "questionRegister": {
+                        "question": [
+                          {
+                            "nameQuestion": "string",
+                            "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
+                            "description": [
+                              {
+                                "description": "string"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+             </remarks>
+             <response code="200">Returns success</response>
+             <response code="400">Custom Error</response>
+             <response code="401">Unauthorize Error</response>
+             <response code="500">Exception Error</response>
+             <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.RegisterResettlement(Moralar.Domain.ViewModels.Schedule.ScheduleRegisterViewModel)">
+             <summary>
+             REGISTRAR UM NOVO QUESTIONÁRIO
+             </summary>
+             <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                    {
+                      "title": "string",
+                       "typeQuiz": 0 = Questionário, 1 = Enquete,
+                      "questionRegister": {
+                        "question": [
+                          {
+                            "nameQuestion": "string",
+                            "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
+                            "description": [
+                              {
+                                "description": "string"
+                              }
+                            ]
+                          }
+                        ]
+                      }
+                    }
+             </remarks>
+             <response code="200">Returns success</response>
+             <response code="400">Custom Error</response>
+             <response code="401">Unauthorize Error</response>
+             <response code="500">Exception Error</response>
+             <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.ChangeStatus(Moralar.Domain.ViewModels.Schedule.ScheduleChangeStatusViewModel)">
+             <summary>
+             REGISTRAR UM NOVO QUESTIONÁRIO
+             </summary>
+             <remarks>
+            OBJ DE ENVIO
+             </remarks>
+             <response code="200">Returns success</response>
+             <response code="400">Custom Error</response>
+             <response code="401">Unauthorize Error</response>
+             <response code="500">Exception Error</response>
+             <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.GetInfo">
             <summary>

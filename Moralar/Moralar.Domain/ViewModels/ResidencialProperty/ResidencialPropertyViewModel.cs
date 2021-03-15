@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Moralar.Data.Enum;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
@@ -23,6 +25,8 @@ namespace Moralar.Domain.ViewModels.Property
         [Display(Name = "Planta")]
         public string Project { get; set; }
         public bool Blocked { get; set; }
+        [JsonIgnore]
+        public TypeStatusResidencial TypeStatusResidencialProperty { get; set; }
         public ResidencialPropertyAdressViewModel ResidencialPropertyAdress { get; set; }
 
 

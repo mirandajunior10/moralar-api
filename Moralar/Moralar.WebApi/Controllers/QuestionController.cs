@@ -360,7 +360,7 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
 
 
-                foreach (var item in model.Question)
+                foreach (var item in model.QuestionRegister.Question)
                 {
                     var entity = _mapper.Map<Question>(item);
                     var findToUpdateOrIncludeQuestion = questionEntity.Find(x => x._id == ObjectId.Parse(item.Id));

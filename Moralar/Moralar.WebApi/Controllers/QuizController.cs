@@ -140,7 +140,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityQuiz = await _quizRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Quiz>() { }).ToListAsync();
-                if (entityQuiz.Count() ==0)
+                if (entityQuiz.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
                 return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizListViewModel>>(entityQuiz)));
@@ -285,20 +285,38 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                if (ObjectId.TryParse(id, out var unused) == false)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
-                var userId = Request.GetUserId();
-
-                if (string.IsNullOrEmpty(userId))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
                 var entity = await _quizRepository.FindByIdAsync(id).ConfigureAwait(false);
-
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<QuizViewModel>(entity)));
+                var question = await _questionRepository.FindByAsync(x => x.QuizId == entity._id.ToString()).ConfigureAwait(false) as List<Question>;
+                if (question.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
+
+                var _quizViewModel = new QuizDetailViewModel()
+                {
+                    Id = entity._id.ToString(),
+                    Title = entity.Title,
+                    TypeQuiz = entity.TypeQuiz
+                };
+
+                var questionDescription = await _questionDescriptionRepository.FindIn("QuestionId", question.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<QuestionDescription>;
+                for (int i = 0; i < question.Count(); i++)
+                {
+                    _quizViewModel.QuestionViewModel.Add(_mapper.Map<QuestionViewModel>(question[i]));
+                    foreach (var item in questionDescription.Where(x => x.QuestionId == question[i]._id.ToString()))
+                    {
+                        if (item != null)
+                            _quizViewModel.QuestionViewModel[i].Description.Add(new QuestionDescriptionViewModel()
+                            {
+                                Id = item._id.ToString(),
+                                Description = item.Description,
+                                QuestionId = item.QuestionId
+                            });
+                    }
+                }
+                var pc = questionDescription;
+                return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
             }
             catch (Exception ex)
             {
@@ -448,7 +466,7 @@ namespace Moralar.WebApi.Controllers
                         HolderName = item.Holder.Name,
                         HolderCpf = item.Holder.Cpf,
                         HolderNumber = item.Holder.Number,
-                        TypeStatusQuiz = TypeStatusQuiz.NaoRespondido
+                        TypeStatus = TypeStatus.NaoRespondido
                     };
                     if (await _quizFamilyRepository.CheckByAsync(x => x.QuizId == model.QuizId && x.FamilyId == item._id.ToString()) == false)
                         await _quizFamilyRepository.CreateAsync(entityQuizFamily).ConfigureAwait(false);
@@ -492,57 +510,14 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
-                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId ).ConfigureAwait(false);
+                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId).ConfigureAwait(false);
 
 
-                var entityFamily = await _quizRepository.FindIn("_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId) ).ToList()) as List<Quiz>;
+                var entityFamily = await _quizRepository.FindIn("_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList()) as List<Quiz>;
                 if (entityFamily.Count(x => x.TypeQuiz == typeQuiz) == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
                 return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizViewModel>>(entityFamily)));
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.ReturnErro());
-            }
-        }
-        /// <summary>
-        /// LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
-        /// </summary>
-        /// <response code="200">Returns success</response>
-        /// <response code="400">Custom Error</response>
-        /// <response code="401">Unauthorize Error</response>
-        /// <response code="500">Exception Error</response>
-        /// <returns></returns>
-        [HttpGet("QuizAvailable")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(ReturnViewModel), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> QuizAvailable(string number, string name, string cpf)
-        {
-            try
-            {
-                var builder = Builders<Data.Entities.QuizFamily>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.QuizFamily>>();
-
-                conditions.Add(builder.Where(x => x.Created != null));
-                if (!string.IsNullOrEmpty(number))
-                    conditions.Add(builder.Where(x => x.HolderNumber.ToUpper() == number.ToUpper()));
-                if (!string.IsNullOrEmpty(name))
-                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(name.ToUpper())));
-                if (!string.IsNullOrEmpty(cpf))
-                    conditions.Add(builder.Where(x => x.HolderCpf == cpf));
-
-              
-                var condition = builder.And(conditions);
-                var entity = await _quizFamilyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.QuizFamily>() { }).ToListAsync();
-                if (entity.Count() == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
-
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizFamilyListViewModel>>(entity)));
             }
             catch (Exception ex)
             {

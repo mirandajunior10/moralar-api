@@ -16,6 +16,6 @@ namespace Moralar.Domain.ViewModels.Quiz
         public string HolderName { get; set; }
         public string HolderCpf { get; set; }
         public string HolderNumber { get; set; }
-        public TypeStatusQuiz TypeStatusQuiz { get; set; }
+        public string Status { get; set; }
     }
 }

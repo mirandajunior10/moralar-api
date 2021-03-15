@@ -15,7 +15,7 @@ namespace Moralar.Domain.ViewModels.Family
         public long Birthday { get; set; }
 
         [Display(Name = "Gênero")]
-        public string Genre { get; set; }
+        public TypeGenre Genre { get; set; }
 
         [Display(Name = "Escolaridade")]
         public TypeScholarity Scholarity { get; set; }

@@ -104,7 +104,7 @@ namespace Moralar.WebApi.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] QuestionAnswerRegisterViewModel model)
         {
-
+            
             try
             {
                 var typeRegister = TypeAction.Register;
@@ -131,8 +131,11 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(model.ResponsibleForResponsesId) == false)
                 {
                     profileResponsibleForResponse = await _profileRepository.FindByIdAsync(model.ResponsibleForResponsesId).ConfigureAwait(false);
-                    model.ResponsibleForResponsesCpf = profileResponsibleForResponse.Cpf;
-                    model.ResponsibleForResponsesName = profileResponsibleForResponse.Name;
+                    if (profileResponsibleForResponse != null)
+                    {
+                        model.ResponsibleForResponsesCpf = profileResponsibleForResponse.Cpf;
+                        model.ResponsibleForResponsesName = profileResponsibleForResponse.Name;
+                    }
                 }
 
                 var entityNewAnswer = _mapper.Map<QuestionAnswer>(model);
@@ -203,26 +206,6 @@ namespace Moralar.WebApi.Controllers
                     }
                     listAnswers.Add(questionAnswerListViewModel);
                 }
-                var p = listAnswers;
-                ////    if (ObjectId.TryParse(id, out var unused) == false)
-                ////        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
-                ////    var userId = Request.GetUserId();
-
-                ////    if (string.IsNullOrEmpty(userId))
-                ////        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
-                //var entityQuestion = await _questionRepository.FindOneByAsync(x => x._id == ObjectId.Parse(id) && x.Disabled == null).ConfigureAwait(false);
-                //if (entityQuestion == null)
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
-
-                //var entityDescription = await _questionDescriptionRepository.FindByAsync(x => x.QuestionId == id).ConfigureAwait(false) as List<QuestionDescription>;
-                //if (entityDescription.Count() == 0)
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.DescriptionNotFound));
-
-                //var listQuestion = _mapper.Map<QuestionViewModel>(entityQuestion);
-                //listQuestion.Description = _mapper.Map<List<QuestionDescriptionViewModel>>(entityDescription);
-
                 return Ok(Utilities.ReturnSuccess(data: listAnswers));
             }
             catch (Exception ex)

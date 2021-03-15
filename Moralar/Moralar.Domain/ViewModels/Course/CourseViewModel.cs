@@ -58,10 +58,13 @@ namespace Moralar.Domain.ViewModels.Course
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Idade do público alvo")]
-        public string TargetAudienceAge { get; set; }
+        [Display(Name = "Idade mínima do público alvo")]
+        public int StartTargetAudienceAge { get; set; }
 
 
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "Idade máxima do público alvo")]
+        public int EndTargetAudienceAge { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Gênero")]

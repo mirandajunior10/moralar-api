@@ -14,8 +14,10 @@ using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
+using Moralar.Domain.ViewModels.Import;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
+using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -38,18 +40,23 @@ namespace Moralar.WebApi.Controllers
 
         private readonly IMapper _mapper;
         private readonly IFamilyRepository _familyRepository;
+        private readonly IScheduleRepository _scheduleRepository;
+        private readonly ICourseFamilyRepository _courseFamilyRepository;
+        private readonly IQuizFamilyRepository _quizFamilyRepository;
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public FamilyController(IMapper mapper, IFamilyRepository familyRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
+        public FamilyController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
         {
             _mapper = mapper;
             _familyRepository = familyRepository;
+            _scheduleRepository = scheduleRepository;
             _utilService = utilService;
             _senderMailService = senderMailService;
             _httpContextAccessor = httpContextAccessor;
         }
+
 
 
         /// <summary>
@@ -121,6 +128,7 @@ namespace Moralar.WebApi.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf)
         {
+            //, 
             var response = new DtResult<FamilyHolderListViewModel>();
 
             try
@@ -168,7 +176,157 @@ namespace Moralar.WebApi.Controllers
                 return Ok(response);
             }
         }
+        /// <summary>
+        /// TIMELINE DAS FAMÍLIAS
+        /// </summary>
+        ///  <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "number": "", // required
+        ///              "holderName": "",
+        ///              "holderCpf",""
+        ///              "typeSubject": "" Reunião PGM,Escolha do imóvel,Mudança,Acompanhamento pós-mudança
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("LoadDataTimeLine")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        //[ApiExplorerSettings(IgnoreApi = true)]
+        [AllowAnonymous]
+        public async Task<IActionResult> LoadDataTimeLine([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject typeSubject)
+        {
+            var response = new DtResult<FamilyHolderListViewModel>();
 
+            try
+            {
+                var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
+
+                if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
+
+                var builder = Builders<Data.Entities.Family>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+
+                conditions.Add(builder.Where(x => x.Created != null));
+                if (!string.IsNullOrEmpty(number))
+                    conditions.Add(builder.Where(x => x.Holder.Number == number));
+                if (!string.IsNullOrEmpty(holderName))
+                    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(holderName.ToUpper())));
+                if (!string.IsNullOrEmpty(holderCpf))
+                    conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
+
+                var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == typeSubject).ConfigureAwait(false) as List<Schedule>;
+                var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
+
+                var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
+                var totalRecords = (int)await _familyRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                    ? Builders<Data.Entities.Family>.Sort.Descending(sortColumn)
+                    : Builders<Data.Entities.Family>.Sort.Ascending(sortColumn);
+
+                var retorno = await _familyRepository
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Family>;
+
+                var filterFamilyWithSchedule = retorno.Find(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
+                var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
+                    ? (int)await _familyRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
+                    : totalRecords;
+
+                response.Data = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
+                response.Draw = model.Draw;
+                response.RecordsFiltered = totalrecordsFiltered;
+                response.RecordsTotal = totalRecords;
+
+                return Ok(response);
+
+            }
+            catch (Exception ex)
+            {
+                response.Erro = true;
+                response.MessageEx = $"{ex.InnerException} {ex.Message}".Trim();
+
+                return Ok(response);
+            }
+        }
+
+        ///// <summary>
+        /// DETALHES DO QUIZ
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        //[HttpGet("TimeLineProcessMandatory/{familyId}")]
+        //[Produces("application/json")]
+        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
+        //[ProducesResponseType(400)]
+        //[ProducesResponseType(401)]
+        //[ProducesResponseType(500)]
+        //[AllowAnonymous]
+        //public async Task<IActionResult> TimeLineProcessMandatory([FromRoute] string familyId)
+        //{
+        //    try
+        //    {
+                
+
+        //        var entity = await _scheduleRepository.FindByIdAsync(id).ConfigureAwait(false);
+
+        //        if (entity == null)
+        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
+
+        //        return Ok(Utilities.ReturnSuccess(data: _mapper.Map<ScheduleListViewModel>(entity)));
+        //    }
+        //    catch (Exception ex)
+        //    {
+        //        return BadRequest(ex.ReturnErro());
+        //    }
+        //}
+
+
+        ///// <summary>
+        /// DETALHES DO QUIZ
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("TimeLineOptionalMandatory")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> TimeLineOptionalMandatory()
+        {
+            try
+            {
+
+                //new QuizController().
+                //var entity = await _scheduleRepository.FindByIdAsync(id).ConfigureAwait(false);
+
+                //if (entity == null)
+                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
+                //_mapper.Map<ScheduleListViewModel>(entity)
+                return Ok(Utilities.ReturnSuccess(data: ""));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
 
         /// <summary>
         /// DETALHES DA FAMÍLIA
@@ -184,10 +342,12 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
+
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
             {
+
                 if (ObjectId.TryParse(id, out var unused) == false)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
@@ -208,7 +368,223 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+        /// <summary>
+        /// IMPORTAÇÃO DA FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("Import")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> Import()
+        {
+            try
+            {
+                var fi = new System.IO.FileInfo(@"D:\Megaleios\Documentos\MOralar\Modelo Importação Familias.xlsx");
+                using (var package = new ExcelPackage(fi))
+                {
+                    ExcelWorksheet sheet = package.Workbook.Worksheets[1];
 
+                    for (int linha = 2; linha < 300; linha++)
+                    {
+                        if (string.IsNullOrEmpty(package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString()))
+                            break;
+
+                        var vw = new FamilyCompleteViewModel();
+                        vw.Holder = new FamilyHolderViewModel();
+                        vw.Spouse = new FamilySpouseViewModel();
+                        vw.Financial = new FamilyFinancialViewModel();
+                        vw.Priorization = new FamilyPriorizationViewModel();
+                        vw.Members = new List<FamilyMemberViewModel>();
+
+                        vw.Holder.Number = package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString();
+                        vw.Holder.Name = package.Workbook.Worksheets[1].Cells[linha, 2].Value.ToString();
+                        vw.Holder.Cpf = package.Workbook.Worksheets[1].Cells[linha, 3].Value.ToString();
+                        vw.Holder.Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 4].Value.ToString()));
+                        vw.Holder.Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 5].Value.ToString());
+                        vw.Holder.Email = package.Workbook.Worksheets[1].Cells[linha, 6].Value.ToString();
+                        vw.Holder.Phone = package.Workbook.Worksheets[1].Cells[linha, 7].Value.ToString();
+                        vw.Holder.Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 8].Value.ToString()); ;
+
+                        //conjuge
+                        vw.Spouse.Name = package.Workbook.Worksheets[1].Cells[linha, 9].Value.ToString();
+                        vw.Spouse.Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 10].Value.ToString()));
+                        vw.Spouse.Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 11].Value.ToString());
+                        vw.Spouse.Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 12].Value.ToString());
+
+                        //membro 1
+                        if (package.Workbook.Worksheets[1].Cells[linha, 13].Value != null)
+                        {
+                            vw.Members.Add(new FamilyMemberViewModel()
+                            {
+                                Name = package.Workbook.Worksheets[1].Cells[linha, 13].Value.ToString(),
+                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 14].Value.ToString())),
+                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 15].Value.ToString()),
+                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 16].Value.ToString()),
+                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 17].Value.ToString())
+                            });
+                        }
+
+                        //membro 2
+                        if (package.Workbook.Worksheets[1].Cells[linha, 18].Value != null)
+                        {
+                            vw.Members.Add(new FamilyMemberViewModel()
+                            {
+                                Name = package.Workbook.Worksheets[1].Cells[linha, 18].Value.ToString(),
+                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 19].Value.ToString())),
+                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 20].Value.ToString()),
+                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 21].Value.ToString()),
+                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 22].Value.ToString())
+                            });
+                        }
+
+                        //membro 3
+                        if (package.Workbook.Worksheets[1].Cells[linha, 23].Value != null)
+                        {
+                            vw.Members.Add(new FamilyMemberViewModel()
+                            {
+                                Name = package.Workbook.Worksheets[1].Cells[linha, 23].Value.ToString(),
+                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 24].Value.ToString())),
+                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 25].Value.ToString()),
+                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 26].Value.ToString()),
+                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 27].Value.ToString())
+                            });
+                        }
+
+
+                        //membro 4
+                        if (package.Workbook.Worksheets[1].Cells[linha, 28].Value != null)
+                        {
+                            vw.Members.Add(new FamilyMemberViewModel()
+                            {
+                                Name = package.Workbook.Worksheets[1].Cells[linha, 28].Value.ToString(),
+                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 29].Value.ToString())),
+                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 30].Value.ToString()),
+                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 31].Value.ToString()),
+                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 32].Value.ToString())
+                            });
+                        }
+
+                        //membro 5
+                        if (package.Workbook.Worksheets[1].Cells[linha, 33].Value != null)
+                        {
+                            vw.Members.Add(new FamilyMemberViewModel()
+                            {
+                                Name = package.Workbook.Worksheets[1].Cells[linha, 33].Value.ToString(),
+                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 34].Value.ToString())),
+                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 35].Value.ToString()),
+                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 36].Value.ToString()),
+                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 37].Value.ToString())
+                            });
+                        }
+
+                        //Financeiro
+                        vw.Financial.FamilyIncome = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 38].Value.ToString());
+                        vw.Financial.PropertyValueForDemolished = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 39].Value.ToString());
+                        vw.Financial.MaximumPurchase = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 40].Value.ToString());
+                        vw.Financial.IncrementValue = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 41].Value.ToString());
+
+                        //Priorização
+                        vw.Priorization.WorkFront = new PriorityRateViewModel()
+                        {
+                            Rate = 1,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 42].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.PermanentDisabled = new PriorityRateViewModel()
+                        {
+                            Rate = 2,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 43].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.ElderlyOverEighty = new PriorityRateViewModel()
+                        {
+                            Rate = 3,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 44].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.WomanServedByProtectiveMeasure = new PriorityRateViewModel()
+                        {
+                            Rate = 4,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 46].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.FemaleBreadWinner = new PriorityRateViewModel()
+                        {
+                            Rate = 5,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 48].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.SingleParent = new PriorityRateViewModel()
+                        {
+                            Rate = 6,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 47].Value.ToString() == "Sim" ? true : false
+                        };
+
+                        vw.Priorization.FamilyWithMoreThanFivePeople = new PriorityRateViewModel()
+                        {
+                            Rate = 7,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 49].Value.ToString() == "Sim" ? true : false
+                        };
+
+                        vw.Priorization.ChildUnderEighteen = new PriorityRateViewModel()
+                        {
+                            Rate = 8,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 50].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.HeadOfHouseholdWithoutIncome = new PriorityRateViewModel()
+                        {
+                            Rate = 9,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 51].Value.ToString() == "Sim" ? true : false
+                        };
+
+                        vw.Priorization.BenefitOfContinuedProvision = new PriorityRateViewModel()
+                        {
+                            Rate = 10,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 52].Value.ToString() == "Sim" ? true : false
+                        };
+
+                        vw.Priorization.FamilyPurse = new PriorityRateViewModel()
+                        {
+                            Rate = 11,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 53].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.InvoluntaryCohabitation = new PriorityRateViewModel()
+                        {
+                            Rate = 12,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 54].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.FamilyIncomeOfUpTwoMinimumWages = new PriorityRateViewModel()
+                        {
+                            Rate = 13,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 55].Value.ToString() == "Sim" ? true : false
+                        };
+                        vw.Priorization.YearsInSextyAndSeventyNine = new PriorityRateViewModel()
+                        {
+                            Rate = 14,
+                            Value = package.Workbook.Worksheets[1].Cells[linha, 45].Value.ToString() == "Sim" ? true : false
+                        };
+
+                        var family = _mapper.Map<Data.Entities.Family>(vw);
+                        var dateBir = Utilities.TimeStampToDateTime(vw.Holder.Birthday);
+                        var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
+                        family.Holder.Birthday = dateUnix;
+                        family.Holder.Cpf = vw.Holder.Cpf.OnlyNumbers();
+
+                        var entityId = await _familyRepository.CreateAsync(family).ConfigureAwait(false);
+                    }
+                }
+                //package.Save();
+
+                return Ok(Utilities.ReturnSuccess());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
 
         /// <summary>
         /// DETALHES DA FAMÍLIA
@@ -370,7 +746,7 @@ namespace Moralar.WebApi.Controllers
                 var condition = builder.And(conditions);
 
                 var profile = await _familyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Family>() { }).ToListAsync();
-                if (profile.Count() == 0 || profile.Count() >1)
+                if (profile.Count() == 0 || profile.Count() > 1)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
 
@@ -494,8 +870,7 @@ namespace Moralar.WebApi.Controllers
                 if (family == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
                 var familiId = family._id;
-                //if (await _familyRepository.CheckByAsync(x => x.Holder.Email == model.Holder.Email &&  ).ConfigureAwait(false))
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailInUse));
+
 
                 family = _mapper.Map<Data.Entities.Family>(model);
                 family._id = familiId;
@@ -506,23 +881,6 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityId = await _familyRepository.UpdateOneAsync(family).ConfigureAwait(false);
-                //await _creditCardRepository.FindByAsync(x => x.CustomerId == userId) as List<CreditCard>;
-                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
-
-                //var dataBody = Util.GetTemplateVariables();
-                //dataBody.Add("{{ title }}", "Lembrete de senha");
-                //dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Holder.Name.GetFirstName()}</p>" +
-                //                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
-                //                            //$"<p><b>Login</b> : {profile.Login}</p>" +
-                //                            $"<p><b>Senha</b> :{newPassword}</p>"
-                //                            );
-
-                //var body = _senderMailService.GerateBody("custom", dataBody);
-
-                //var unused = Task.Run(async () =>
-                //{
-                //    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
-                //});
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -618,7 +976,7 @@ namespace Moralar.WebApi.Controllers
                 if (!model.Holder.Cpf.OnlyNumbers().ValidCpf())
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInvalid));
 
-                if ( await _familyRepository.CheckByAsync(x => x.Holder.Cpf == model.Holder.Cpf.OnlyNumbers()).ConfigureAwait(false) )
+                if (await _familyRepository.CheckByAsync(x => x.Holder.Cpf == model.Holder.Cpf.OnlyNumbers()).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
 
                 var family = _mapper.Map<Data.Entities.Family>(model);
@@ -626,13 +984,13 @@ namespace Moralar.WebApi.Controllers
                 var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
                 family.Holder.Birthday = dateUnix;
                 family.Holder.Cpf = model.Holder.Cpf.OnlyNumbers();
-
+                family.CanChooseProperty = false;
 
                 var newPassword = Utilities.RandomString(8);
                 family.Password = newPassword;
                 var entityId = await _familyRepository.CreateAsync(family).ConfigureAwait(false);
                 //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
-                
+
                 var dataBody = Util.GetTemplateVariables();
                 dataBody.Add("{{ title }}", "Lembrete de senha");
                 dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Holder.Name.GetFirstName()}</p>" +
@@ -706,7 +1064,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> Edit([FromForm] FamilyEditViewModel model)
+        public async Task<IActionResult> Edit([FromBody] FamilyEditViewModel model)
         {
             try
             {
@@ -714,17 +1072,15 @@ namespace Moralar.WebApi.Controllers
                 if (entityFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                var validOnly = _httpContextAccessor.GetFieldsFromBody();
-
-                var p = entityFamily.SetIfDifferent(model.Holder, validOnly);
-                var t = entityFamily.SetIfDifferent(model.Members, validOnly);
-                var fast = model.SetIfDifferent(entityFamily.Members, validOnly);
                 var entity = _mapper.Map<Data.Entities.Family>(model);
+                entity.Holder.Number = entityFamily.Holder.Number;
+                entity.Holder.Cpf = entityFamily.Holder.Cpf;
+                entity.Holder.Birthday = entityFamily.Holder.Birthday;
 
                 var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
 
-                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+                return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
             catch (Exception ex)
             {

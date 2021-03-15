@@ -19,7 +19,8 @@ namespace Moralar.Data.Entities
         public string Place { get; set; }
         public string WorkLoad { get; set; }
         public string Description { get; set; }
-        public string TargetAudienceAge { get; set; }
+        public int StartTargetAudienceAge { get; set; }
+        public int EndTargetAudienceAge { get; set; }
         public TypeGenre TypeGenre { get; set; }
         public int NumberOfVacancies{get;set;}
 

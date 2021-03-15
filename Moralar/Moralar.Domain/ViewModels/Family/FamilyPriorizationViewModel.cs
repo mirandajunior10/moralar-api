@@ -9,72 +9,72 @@ namespace Moralar.Domain.ViewModels.Family
     {
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Frente de obras")]
-        public bool WorkFront { get; set; }
+        public PriorityRateViewModel WorkFront { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Deficiência permanente que demande imóvel acessível")]
-        public bool PermanentDisabled { get; set; }
+        public PriorityRateViewModel PermanentDisabled { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Idoso mais de 80 anos")]
-        public bool ElderlyOverEighty { get; set; }
+        public PriorityRateViewModel ElderlyOverEighty { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Idoso 60 - 79 anos")]
-        public bool YearsInSextyAndSeventyNine { get; set; }
+        public PriorityRateViewModel YearsInSextyAndSeventyNine { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Mulher atendida por medida protetiva")]
-        public bool WomanServedByProtectiveMeasure { get; set; }
+        public PriorityRateViewModel WomanServedByProtectiveMeasure { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Mulher chefe de família")]
-        public bool FemaleBreadWinner { get; set; }
+        public PriorityRateViewModel FemaleBreadWinner { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Monoparental (pai e mãe)")]
-        public bool SingleParent { get; set; }
+        public PriorityRateViewModel SingleParent { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Família com mais de 5 pessoas")]
-        public bool FamilyWithMoreThanFivePeople { get; set; }
+        public PriorityRateViewModel FamilyWithMoreThanFivePeople { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Filho(s) menor(es) de 18 anos na composição familiar")]
-        public bool ChildUnderEighteen { get; set; }
+        public PriorityRateViewModel ChildUnderEighteen { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Chefe de família sem renda *")]
-        public bool HeadOfHouseholdWithoutIncome { get; set; }
+        public PriorityRateViewModel HeadOfHouseholdWithoutIncome { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Benefício de prestação continuada - BPC")]
-        public bool BenefitOfContinuedProvision { get; set; }
+        public PriorityRateViewModel BenefitOfContinuedProvision { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Bolsa família")]
-        public bool FamilyPurse { get; set; }
+        public PriorityRateViewModel FamilyPurse { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Coabitação involuntária")]
-        public bool InvoluntaryCohabitation { get; set; }
+        public PriorityRateViewModel InvoluntaryCohabitation { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Renda familiar de até 2 salários mínimos")]
-        public bool FamilyIncomeOfUpTwoMinimumWages { get; set; }
+        public PriorityRateViewModel FamilyIncomeOfUpTwoMinimumWages { get; set; }
 
     }
 }

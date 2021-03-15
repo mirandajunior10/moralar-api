@@ -42,16 +42,22 @@ namespace Moralar.WebApi.Controllers
         private readonly ISenderMailService _senderMailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IResidencialPropertyRepository _residencialPropertyRepository;
+        private readonly IFamilyRepository _familyRepository;
+        private readonly IPropertiesInterestRepository _propertiesInterestRepository;
 
-        public ResidencialPropertyController(IMapper mapper, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor, IResidencialPropertyRepository residencialPropertyRepository)
+        public ResidencialPropertyController(IMapper mapper, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor, IResidencialPropertyRepository residencialPropertyRepository, IFamilyRepository familyRepository, IPropertiesInterestRepository propertiesInterestRepository)
         {
             _mapper = mapper;
             _utilService = utilService;
             _senderMailService = senderMailService;
             _httpContextAccessor = httpContextAccessor;
             _residencialPropertyRepository = residencialPropertyRepository;
+            _familyRepository = familyRepository;
+            _propertiesInterestRepository = propertiesInterestRepository;
         }
-        /// <summary>
+
+
+
         /// BLOQUEAR / DESBLOQUEAR PROPRIEDADE
         /// </summary>
         /// <remarks>
@@ -117,7 +123,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string code, int status, int availableForSale)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string code, string status, int availableForSale)
         {
             var response = new DtResult<ResidencialPropertyViewModel>();
             try
@@ -128,10 +134,11 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.Created != null));
                 if (!string.IsNullOrEmpty(code))
                     conditions.Add(builder.Where(x => x.Code.ToUpper() == code.ToUpper()));
-                if (status == 0)
-                    conditions.Add(builder.Where(x => x.DataBlocked == null));
-                else if (status == 1)
-                    conditions.Add(builder.Where(x => x.DataBlocked != null));
+                if (!string.IsNullOrEmpty(status))
+                    if (status == "0")
+                        conditions.Add(builder.Where(x => x.DataBlocked == null));
+                    else if (status == "1")
+                        conditions.Add(builder.Where(x => x.DataBlocked != null));
                 //var condition = builder.And(conditions);
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
@@ -181,6 +188,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
+        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -249,7 +257,61 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+        /// <summary>
+        /// LISTA AS PROPRIEDADES COM FILTRO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetResidencialByFilter")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetResidencialByFilter([FromQuery] ResidencialPropertyFilterViewModel model)
+        {
+            try
+            {
+                var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
+                conditions.Add(builder.Where(x => x.Created != null));
+                if (model.TypeProperty == TypeProperty.Apartamento || model.TypeProperty == TypeProperty.Casa)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
+
+
+                if (model.StartSquareFootage > 0 && model.EndSquareFootage > 0)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.SquareFootage >= model.StartSquareFootage && x.ResidencialPropertyFeatures.SquareFootage<= model.EndSquareFootage));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
+
+
+                if (model.StartIptuValue > 0 && model.EndIptuValue > 0)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.IptuValue >= model.StartIptuValue && x.ResidencialPropertyFeatures.IptuValue <= model.EndIptuValue));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
+             
+
+                if (!string.IsNullOrEmpty(model.Neighborhood))
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
+            
+                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasGarage == model.HasGarage));
+                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessLadder == model.HasAccessLadder));
+                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessRamp == model.HasAccessRamp));
+                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd));
+
+                var condition = builder.And(conditions);
+                var entity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
+                if (entity.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
+
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ResidencialPropertyViewModel>>(entity)));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
 
         /// <summary>
         /// REGISTRAR NOVA PROPRIEDADE
@@ -330,9 +392,15 @@ namespace Moralar.WebApi.Controllers
 
                 for (int i = 0; i < model.Photo.Count(); i++)
                     model.Photo[i] = model.Photo[i].SetPathImage();
+                model.Project = model.Project.SetPathImage();
                 var entity = _mapper.Map<Data.Entities.ResidencialProperty>(model);
+                entity.TypeStatusResidencialProperty = TypeStatusResidencial.AEscolher;
 
                 var entityId = await _residencialPropertyRepository.CreateAsync(entity).ConfigureAwait(false);
+
+
+               
+
                 await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de novo imóvel {entity.Code}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
@@ -344,39 +412,59 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
-        //[HttpPost("Edit")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(401)]
-        //[ProducesResponseType(500)]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Edit([FromBody] FamilyEditViewModel model)
-        //{
-        //    try
-        //    {
-        //        var entityFamily = await _familyRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
-        //        if (entityFamily == null)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+        [HttpPost("ChoiceProperty")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> ChoiceProperty([FromBody] ResidencialPropertyChoicePropertyViewModel model)
+        {
+            try
+            {
+                var entityResidencial = await _residencialPropertyRepository.FindByIdAsync(model.ResidencialPropertyId).ConfigureAwait(false);
+                if (entityResidencial == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-        //        var validOnly = _httpContextAccessor.GetFieldsFromBody();
+                var entityFamily = await _familyRepository.FindByIdAsync(model.FamiliIdResidencialChosen).ConfigureAwait(false);
+                if (entityFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-        //        var p = entityFamily.SetIfDifferent(model.Holder, validOnly);
-        //        var t = entityFamily.SetIfDifferent(model.Members, validOnly);
-        //        var fast = model.SetIfDifferent(entityFamily.Members, validOnly);
-        //        var entity = _mapper.Map<Data.Entities.Family>(model);
+                var validOnly = _httpContextAccessor.GetFieldsFromBody();
 
-        //        var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
-        //        await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
+                entityResidencial.FamiliIdResidencialChosen = model.FamiliIdResidencialChosen;
+                entityResidencial.TypeStatusResidencialProperty = TypeStatusResidencial.Vendido;
+                await _residencialPropertyRepository.UpdateAsync(entityResidencial).ConfigureAwait(false);
 
-        //        return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
-        //        return BadRequest(ex.ReturnErro());
-        //    }
-        //}
+                var sendInformation =await _propertiesInterestRepository.FindByAsync(x => x.ResidelcialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false);
+                foreach (var item in sendInformation)
+                {
+
+                    var dataBody = Util.GetTemplateVariables();
+                    dataBody.Add("{{ title }}", "Imóvel escolhido");
+                    dataBody.Add("{{ message }}", $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
+                                                $"<p> O imóvel {entityResidencial.ResidencialPropertyAdress.Location} foi escolhido por outra pessoa "
+                                                );
+
+                    var body = _senderMailService.GerateBody("custom", dataBody);
+
+                    var unused = Task.Run(async () =>
+                    {
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.HolderEmail, body, "Imóvel Escolhido").ConfigureAwait(false);
+                    });
+                }
+
+                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
+
+                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+            }
+            catch (Exception ex)
+            {
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
+                return BadRequest(ex.ReturnErro());
+            }
+        }
         /// <summary>
         /// DELETAR FOTO
         /// </summary>

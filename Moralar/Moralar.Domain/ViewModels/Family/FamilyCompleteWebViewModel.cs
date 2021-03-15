@@ -8,6 +8,7 @@ namespace Moralar.Domain.ViewModels.Family
 {
     public class FamilyCompleteWebViewModel : BaseViewModel
     {
+      
         /// <summary>
         /// Dados do Titular
         /// </summary>

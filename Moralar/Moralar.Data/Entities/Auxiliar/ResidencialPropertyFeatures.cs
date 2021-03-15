@@ -10,9 +10,9 @@ namespace Moralar.Data.Entities.Auxiliar
     {
         public decimal PropertyValue { get; set; }
         public TypeProperty TypeProperty { get; set; }
-        public decimal SquareFootage { get; set; }
-        public decimal CondominiumValue { get; set; }
-        public decimal IptuValue { get; set; }
+        public double SquareFootage { get; set; }
+        public double CondominiumValue { get; set; }
+        public double IptuValue { get; set; }
         public string Neighborhood { get; set; }
         public int NumberFloors { get; set; }
         public int FloorLocation { get; set; }

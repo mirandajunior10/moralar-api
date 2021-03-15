@@ -95,6 +95,18 @@ namespace Moralar.Data.Enum
         [Description("Botijão")]
         Botijao = 1
     }
+    public enum TypeStatusResidencial
+    {
+        [EnumMember(Value = "A Escolher")]
+        [Description("A Escolher")]
+        AEscolher = 0,
+        [EnumMember(Value = "Vendido")]
+        [Description("Vendido")]
+        Vendido = 1,
+        [EnumMember(Value = "Bloqueado")]
+        [Description("Bloqueado")]
+        Bloqueado = 2
+    }
     public enum TypeProfile
     {
         [EnumMember(Value = "Usuário TTS")]
@@ -229,10 +241,10 @@ namespace Moralar.Data.Enum
         Familia = 0,
         [EnumMember(Value = "Propriedade Residencial")]
         [Description("Propriedade Residencial")]
-        ResidencialProperty=1,
+        ResidencialProperty = 1,
         [EnumMember(Value = "Questionário")]
         [Description("Questionário")]
-        Question=2,
+        Question = 2,
         [EnumMember(Value = "Perfil")]
         [Description("Perfil")]
         Perfil = 3,
@@ -274,7 +286,16 @@ namespace Moralar.Data.Enum
         [Description("Aguardando na lista de espera")]
         ListaEspera = 1
     }
-    public enum TypeStatusQuiz
+    public enum TypeStatusActiveInactive
+    {
+        [EnumMember(Value = "Ativo")]
+        [Description("Ativo")]
+        Ativo = 0,
+        [EnumMember(Value = "Inativo")]
+        [Description("Inativo")]
+        Inativo = 1
+    }
+    public enum TypeStatus
     {
         [EnumMember(Value = "Respondido")]
         [Description("Respondido")]
@@ -282,6 +303,54 @@ namespace Moralar.Data.Enum
         [EnumMember(Value = "Não Respondido")]
         [Description("Não Respondido")]
         Respondido = 1
+    }
+    public enum TypeSubject
+    {
+        [EnumMember(Value = " Visita do TTS")]
+        [Description(" Visita do TTS")]
+        VisitaTTS = 0,
+        [EnumMember(Value = "Reunião com TTS")]
+        [Description("Reunião com TTS")]
+        ReuniaoTTS = 1,
+        [EnumMember(Value = "Reunião PGM")]
+        [Description("Reunião PGM")]
+        ReuniaoPGM = 2,
+        [EnumMember(Value = "Visita ao imóvel")]
+        [Description("Visita ao imóvel")]
+        VisitaImovel = 3,
+        [EnumMember(Value = "Mudança")]
+        [Description("Mudança")]
+        Mudanca = 4,
+        [EnumMember(Value = "Demolição")]
+        [Description("Demolição")]
+        Demolicão = 5,
+        [EnumMember(Value = "Outros")]
+        [Description("Outros")]
+        Outros = 6,
+        [EnumMember(Value = "Escolha do imóvel")]
+        [Description("Escolha do imóvel")]
+        EscolhaDoImovel = 7,
+        [EnumMember(Value = "Acompanhamento pós-mudança")]
+        [Description("Acompanhamento pós-mudança")]
+        AcompanhamentoPosMudança = 8
+    }
+    public enum TypeScheduleStatus
+    {
+        [EnumMember(Value = "Aguardando confirmação")]
+        [Description("Aguardando confirmação")]
+        AguardandoConfirmacao = 0,
+        [EnumMember(Value = "Confirmado")]
+        [Description("Confirmado")]
+        Confirmado = 1,
+        [EnumMember(Value = "Aguardando reagendamento")]
+        [Description("Aguardando reagendamento")]
+        AguardandoReagendamento = 2,
+        [EnumMember(Value = "Reagendado")]
+        [Description("Reagendado")]
+        Reagendado = 3,
+        [EnumMember(Value = "Finalizado")]
+        [Description("Finalizado")]
+        Finalizado = 4
     }
 
 

@@ -7,6 +7,7 @@ namespace Moralar.Data.Entities.Auxiliar
 {
     public class FamilyHolder
     {
+        public string _id { get; set; }
         public string Number { get; set; }
         public string Name { get; set; }
         public string Cpf { get; set; }

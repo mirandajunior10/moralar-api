@@ -6,18 +6,20 @@ namespace Moralar.Data.Entities.Auxiliar
 {
     public class FamilyPriorization
     {
-        public bool WorkFront { get; set; }
-        public bool PermanentDisabled { get; set; }
-        public bool ElderlyOverEighty { get; set; }
-        public bool WomanServedByProtectiveMeasure { get; set; }
-        public bool FemaleBreadwinner { get; set; }
-        public bool SingleParent { get; set; }
-        public bool FamilyWithMoreThanFivePeople { get; set; }
-        public bool ChildUnderEighteen { get; set; }
-        public bool HeadOfHouseholdWithoutIncome { get; set; }
-        public bool BenefitOfContinuedProvision { get; set; }
-        public bool FamilyPurse { get; set; }
-        public bool InvoluntaryCohabitation { get; set; }
-        public bool FamilyIncomeOfUpTwoMinimumWages { get; set; }
+        public PriorityRate WorkFront { get; set; }
+        public PriorityRate PermanentDisabled{ get; set; }
+        public PriorityRate ElderlyOverEighty { get; set; }
+        public PriorityRate WomanServedByProtectiveMeasure { get; set; }
+        public PriorityRate FemaleBreadwinner { get; set; }
+        public PriorityRate SingleParent { get; set; }
+        public PriorityRate FamilyWithMoreThanFivePeople { get; set; }
+        public PriorityRate ChildUnderEighteen { get; set; }
+        public PriorityRate HeadOfHouseholdWithoutIncome { get; set; }
+        public PriorityRate BenefitOfContinuedProvision { get; set; }
+        public PriorityRate FamilyPurse { get; set; }
+        public PriorityRate InvoluntaryCohabitation { get; set; }
+        public PriorityRate FamilyIncomeOfUpTwoMinimumWages { get; set; }
+        public PriorityRate YearsInSextyAndSeventyNine { get; set; }
     }
+
 }

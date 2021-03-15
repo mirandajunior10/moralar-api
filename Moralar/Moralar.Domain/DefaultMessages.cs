@@ -33,29 +33,35 @@ namespace Moralar.Domain
         public const string FacebookInUse = "Ja existe um usuário com essa conta do facebook.";
         public const string GoogleIdInUse = "Ja existe um usuário com essa conta do google plus.";
         public const string MemberInUse = "Membro da família já cadastrado";
+        public const string FamilyInUse = "Família já registrou interesse nesse imóvel";
 
         /*INVALID*/
         public const string InvalidCredencials = "Credênciais inválidas.";
         public const string EmailInvalid = "Informe um email válido.";
         public const string CpfInvalid = "Informe um cpf válido.";
-        
+        public const string EnumInvalid = "Enumerado inválido.";
+
         public const string CnpjInvalid = "Informe um cnpj válido.";
         public const string PhoneInvalid = "Informe um telefone válido.";
         public const string InvalidIdentifier = "Formato de id inválido.";
         public const string InvalidEntityMap = "Mapeamento inválido.";
         public const string InvalidLogin = "Login e/ou senha inválidos.";
         public const string InvalidCredentials = "Credênciais inválidas.";
+        public const string DateInvalidToSchedule = "A data deve ser posterior a atual.";
+        public const string DateInvalid = "Data Inválida.";
 
         /*NOT FOUND*/
         public const string UserAdministratorNotFound = "Usuário de acessso não encontrado";
         public const string CpfNotFound = "Cpf não encontrado.";
         public const string ProfileNotFound = "Usuário não encontrado";
         public const string CourseNotFound = "Curso não encontrado";
+        public const string CourseFamilyNotFound = "Família não encontrada para este curso";
         public const string ResidencialPropertyNotFound = "Propriedade não encontrado";
         public const string QuizNotFound = "Quiz não encontrado";
         public const string DescriptionNotFound = "Descrição não encontrado";
         public const string QuestionNotFound = "Quiz não encontrado";
         public const string FamilyNotFound = "Família não encontrado";
+        public const string ScheduleNotFound = "Agendamento não encontrado";
         public const string AnyFamilyNotFound = "Alguma família não encontrado";
         public const string MemberNotFound = "Membro da família não encontrado";
         public const string PhotoNotFound = "Membro da família não encontrado";
@@ -72,6 +78,7 @@ namespace Moralar.Domain
         public const string MessageException = "Ocorreu um erro, verifique e tente novamente";
         public const string LogActionNotFound = "Log de ação não encontrado.";
         public const string VideoNotFound = "Vídeo não encontrado.";
+        public const string InformativeNotFound = "Informativo não encontrado.";
 
     }
 }
