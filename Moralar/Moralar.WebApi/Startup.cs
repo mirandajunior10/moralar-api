@@ -53,13 +53,9 @@ namespace Moralar.WebApi
             {
                 opt.Filters.Add(typeof(CheckJson));
                 opt.Filters.Add(typeof(PreventSpanFilter));
+                opt.Filters.Add(new FilterAsyncToken());
             });
-            services.AddMvc(options => {
-                //adicionado por instância 
-                options.Filters.Add(new FilterAsyncToken());
-                //adicionado por tipo  
-                //options.Filters.Add(typeof(CustomActionFilter));
-            });
+            
             /*TRANSLATE I18N*/
             //services.AddLocalization(options => options.ResourcesPath = "Resources");
             //services.AddMvc()
