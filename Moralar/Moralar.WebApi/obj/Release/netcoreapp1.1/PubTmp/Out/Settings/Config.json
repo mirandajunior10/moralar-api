@@ -15,9 +15,9 @@
       "EnableAdvance": true
     }
   },
-  "smsDev":{
+  "smsDev": {
     // CONTA DE TESTE (MEGALEIOS)
-    "apiKey":"5TZVPUYO9XP0567QY2FY1AUW"
+    "apiKey": "5TZVPUYO9XP0567QY2FY1AUW"
   },
   "infobip": {
     // CONTA DE TESTE (MEGALEIOS)
@@ -29,9 +29,10 @@
     "username": "", //login
     "password": "" // senha
   },
-  "allowAccess":[], //lista de IP liberado para visualizar dashborad hangfire caso ativo
-  "suportEmail":["fabricio@megaleios.com"],
-  "contactEmail":"contato@contato.com",
+  "allowAccess": [], //lista de IP liberado para visualizar dashborad hangfire caso ativo
+  "googleMapsKey": "AIzaSyBdb-EN9Kd44xbvpsZGgjzxRFsQmbQtWOY",
+  "suportEmail": [ "fabricio@megaleios.com" ],
+  "contactEmail": "contato@contato.com",
   "FirebaseSettings": {
     "urlDataBase": "", // URL DO BANCO DE DADOS
     "apiKey": "", //CHAVE DA CONTA DO FIREBASE

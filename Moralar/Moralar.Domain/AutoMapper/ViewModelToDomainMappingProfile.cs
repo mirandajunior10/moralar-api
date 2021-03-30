@@ -6,6 +6,7 @@ using Moralar.Domain.ViewModels.Admin;
 using Moralar.Domain.ViewModels.Course;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Informative;
+using Moralar.Domain.ViewModels.Notification;
 using Moralar.Domain.ViewModels.Profile;
 using Moralar.Domain.ViewModels.PropertiesInterest;
 using Moralar.Domain.ViewModels.Property;
@@ -13,6 +14,7 @@ using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.Schedule;
+using Moralar.Domain.ViewModels.Video;
 using System.Collections.Generic;
 using UtilityFramework.Application.Core;
 using AutoMapperProfile = AutoMapper.Profile;
@@ -43,14 +45,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<FamilyFinancialViewModel, FamilyFinancial>();
             CreateMap<PriorityRateViewModel, PriorityRate>();
             CreateMap<FamilyPriorizationViewModel, FamilyPriorization>();
-            //            Missing type map configuration or unsupported mapping.
-
-            //Mapping types:
-            //Boolean->FamilyPriorization
-            //System.Boolean->Moralar.Data.Entities.Auxiliar.FamilyPriorization
-            //            Mapping types:
-            //Boolean->FamilyPriorization
-            //System.Boolean->Moralar.Data.Entities.Auxiliar.FamilyPriorization
+            CreateMap<FamilyAddressViewModel, FamilyAddress>();
 
             CreateMap<FamilyCompleteViewModel, Family>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
@@ -124,7 +119,9 @@ namespace Moralar.Domain.AutoMapper
                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<ScheduleChangeStatusViewModel, ScheduleHistory>()
          .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
-            
+            CreateMap<ScheduleChangeSubjectViewModel, ScheduleHistory>()
+        .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
 
 
             #endregion
@@ -132,6 +129,10 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<InformativeViewModel, Informative>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<InformativeListViewModel, Informative>()
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            #endregion
+            #region Notification
+            CreateMap<NotificationViewModel, Notification>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
             #region PropertiesInterest
@@ -142,6 +143,10 @@ namespace Moralar.Domain.AutoMapper
             #region Course
             CreateMap<CourseViewModel, Course>()
         .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            #endregion
+            #region Video
+            CreateMap<VideoViewModel, Video>()
+       .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
 
 

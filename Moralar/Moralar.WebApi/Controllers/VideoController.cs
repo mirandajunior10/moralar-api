@@ -62,18 +62,19 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var userId = Request.GetUserId();
+                //var userId = Request.GetUserId();
 
-                if (string.IsNullOrEmpty(userId))
-                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InvalidCredentials)));
+                //if (string.IsNullOrEmpty(userId))
+                //    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InvalidCredentials)));
 
                 var videoEntity = await _videoRepository.FindByIdAsync(id).ConfigureAwait(false);
                 if (videoEntity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.VideoNotFound)));
 
-                var vieoViewModel = _mapper.Map<VideoViewModel>(videoEntity);
+                var vwViewModel = _mapper.Map<VideoViewModel>(videoEntity);
+                
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: vwViewModel));
             }
             catch (Exception ex)
             {
@@ -140,7 +141,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Save([FromBody] VideoViewModel model)
         {
             try
@@ -185,7 +185,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model)
         {
             var response = new DtResult<VideoViewModel>();
@@ -194,7 +193,7 @@ namespace Moralar.WebApi.Controllers
                 var builder = Builders<Video>.Filter;
                 var conditions = new List<FilterDefinition<Video>>();
 
-                conditions.Add(builder.Where(x => x.Disabled == null));
+                conditions.Add(builder.Where(x => x.Disabled == null && x.DataBlocked == null));
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 

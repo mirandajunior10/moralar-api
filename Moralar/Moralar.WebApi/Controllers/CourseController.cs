@@ -38,16 +38,20 @@ namespace Moralar.WebApi.Controllers
 
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
+        private readonly INotificationRepository  _notificationRepository;
+        private readonly INotificationSendedRepository _notificationSendedRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly ICourseFamilyRepository _courseFamilyRepository;
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
 
-        public CourseController(IMapper mapper, ICourseRepository courseRepository, IFamilyRepository familyRepository, ICourseFamilyRepository courseFamilyRepository, IHttpContextAccessor httpContextAccessor, IUtilService utilService, ISenderMailService senderMailService)
+        public CourseController(IMapper mapper, ICourseRepository courseRepository, INotificationRepository notificationRepository, INotificationSendedRepository notificationSendedRepository, IFamilyRepository familyRepository, ICourseFamilyRepository courseFamilyRepository, IHttpContextAccessor httpContextAccessor, IUtilService utilService, ISenderMailService senderMailService)
         {
             _mapper = mapper;
             _courseRepository = courseRepository;
+            _notificationRepository = notificationRepository;
+            _notificationSendedRepository = notificationSendedRepository;
             _familyRepository = familyRepository;
             _courseFamilyRepository = courseFamilyRepository;
             _httpContextAccessor = httpContextAccessor;
@@ -60,8 +64,10 @@ namespace Moralar.WebApi.Controllers
 
 
 
+
+
         /// <summary>
-        /// BLOQUEAR / DESBLOQUEAR AGENTE - ADMIN
+        /// BLOQUEAR / DESBLOQUEAR CURSO 
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO
@@ -102,7 +108,7 @@ namespace Moralar.WebApi.Controllers
 
                 await _courseRepository.UpdateAsync(entity);
                 var typeAction = model.Block == true ? TypeAction.Block : TypeAction.UnBlock;
-                await _utilService.RegisterLogAction(LocalAction.Curso, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família { Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, model.TargetId);
+                await _utilService.RegisterLogAction(LocalAction.Curso, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueou/Desbloqueu o curso {entity.Title}", Request.GetUserId(), Request.GetUserName().Value, model.TargetId);
                 return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
@@ -177,8 +183,16 @@ namespace Moralar.WebApi.Controllers
 
 
         /// <summary>
-        /// DETALHES DA FAMÍLIA
+        /// DETALHES DO CURSO 
         /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         GET
+        ///             {
+        ///              "id": "string", // required
+        ///             }
+        /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
         /// <response code="401">Unauthorize Error</response>
@@ -190,18 +204,10 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
             {
-                //if (ObjectId.TryParse(id, out var unused) == false)
-                //return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
-                //var userId = Request.GetUserId();
-
-                //if (string.IsNullOrEmpty(userId))
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
                 var entity = await _courseRepository.FindByIdAsync(id).ConfigureAwait(false);
 
@@ -217,7 +223,7 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// LISTA TODAS PROPRIEDADE
+        /// LISTA TODOS OS CURSOS
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -230,19 +236,11 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             try
             {
-                //    if (ObjectId.TryParse(id, out var unused) == false)
-                //        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
-                //    var userId = Request.GetUserId();
-
-                //    if (string.IsNullOrEmpty(userId))
-                //        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
+                
                 var entity = await _courseRepository.FindAllAsync().ConfigureAwait(false);
 
                 if (entity == null)
@@ -257,12 +255,27 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// REGISTRAR FAMÍLIA
+        /// REGISTRAR UM NOVO CURSO
         /// </summary>
         /// <remarks>
         ///OBJ DE ENVIO
-        ///         POST
-        ///        
+        ///
+        ///        POST
+        ///        {
+        ///          "title": "string",
+        ///          "img": "string",
+        ///          "startDate": 0,
+        ///          "endDate": 0,
+        ///          "schedule": "string",
+        ///          "place": "string",
+        ///          "workLoad": "string",
+        ///          "description": "string",
+        ///          "startTargetAudienceAge": 0,
+        ///          "endTargetAudienceAge": 0,
+        ///          "typeGenre": "Feminino",
+        ///          "numberOfVacancies": 0,
+        ///          "id": "string"
+        ///        }
         /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -275,7 +288,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] CourseViewModel model)
         {
             //var claim = Util.SetRole(TypeProfile.Profile);
@@ -285,31 +297,39 @@ namespace Moralar.WebApi.Controllers
                 model.TrimStringProperties();
                 var ignoreValidation = new List<string>();
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
-
+             
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
                 var entity = _mapper.Map<Data.Entities.Course>(model);
                 entity.Img = model.Img.SetPathImage();
                 var entityId = await _courseRepository.CreateAsync(entity).ConfigureAwait(false);
-                //await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+
+              
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou novo curso {model.Title}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar novo curso", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
 
         /// <summary>
-        /// REGISTRAR FAMÍLIA
+        /// REGISTRAR FAMÍLIA PARA O CURSO
         /// </summary>
         /// <remarks>
         ///OBJ DE ENVIO
+        ///
         ///         POST
-        ///        
+        ///        {
+        ///          "familyId": "string",
+        ///          "courseId": "string",
+        ///          "waitInTheQueue": true, AGUARDAR NA FILA DE ESPERA
+        ///          "id": "string"
+        ///        }
         /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -348,6 +368,16 @@ namespace Moralar.WebApi.Controllers
                 entity.TypeStatusCourse = model.WaitInTheQueue == false ? TypeStatusCourse.Inscrito : TypeStatusCourse.ListaEspera;
                 var entityId = await _courseFamilyRepository.CreateAsync(entity).ConfigureAwait(false);
 
+
+                await _notificationSendedRepository.CreateAsync(new NotificationSended
+                {
+                    Title = "Confirmação de inscrição em curso",
+                    Description = $"Olá {  entityFamily.Holder.Name }!"+
+                                  $"Sua inscrição no curso {  entityCourse.Title }"+
+                                  "foi realizada com sucesso!Fique atento, seu curso começará em breve.",
+                    FamilyId=entity._id.ToString(),
+                });
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou família  {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -358,12 +388,16 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// REGISTRAR FAMÍLIA
+        /// CANCELA CURSO DA FAMÍLIA
         /// </summary>
         /// <remarks>
         ///OBJ DE ENVIO
+        ///
         ///         POST
-        ///        
+        ///        {
+        ///        "familyId": "string",
+        ///        "courseId": "string"
+        ///        }
         /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -376,7 +410,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> CancelFamilyToTrainning([FromBody] CourseCancelViewModel model)
         {
             try
@@ -396,6 +429,7 @@ namespace Moralar.WebApi.Controllers
 
                 await _courseFamilyRepository.DeleteOneAsync(entityCourseFamily._id.ToString()).ConfigureAwait(false);
 
+               
                 if (courses.ToList().Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera) > 0)
                 {
                     var familyToCourseAvaliable = courses.ToList().Where(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera).OrderBy(x => x.Created).FirstOrDefault();
@@ -404,21 +438,26 @@ namespace Moralar.WebApi.Controllers
                         familyToCourseAvaliable.TypeStatusCourse = TypeStatusCourse.Inscrito;
                         await _courseFamilyRepository.UpdateOneAsync(familyToCourseAvaliable).ConfigureAwait(false);
 
-                        var dataBody = Util.GetTemplateVariables();
-                        dataBody.Add("{{ title }}", "Vaga Liberada");
-                        dataBody.Add("{{ message }}", $"<p>Caro(a) {entityFamily.Holder.Name.GetFirstName()}</p>" +
-                                                    $"<p> A sua vaga para o curso de {entityCourse.Title} foi liberada " 
-                                                    //$"<p><b>Login</b> : {profile.Login}</p>" +
-                                                    );
 
-                        var body = _senderMailService.GerateBody("custom", dataBody);
-
-                        var unused = Task.Run(async () =>
+                        await _notificationSendedRepository.CreateAsync(new NotificationSended
                         {
-                            await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, entityFamily.Holder.Email, body, "Vaga Liberada").ConfigureAwait(false);
+                            Title = "Liberação de vaga em curso",
+                            Description = $"Olá {  entityFamily.Holder.Name }!" +
+                                          $" Sua inscrição para o curso {  entityCourse.Title }" +
+                                           " que estava aguardando na lista de espera foi confirmada com sucesso! Fique atento, seu curso começará em breve.",
+                            FamilyId = entityFamily._id.ToString(),
                         });
                     }
                 }
+                await _notificationSendedRepository.CreateAsync(new NotificationSended
+                {
+                    Title = "Cancelamento de inscrição em curso",
+                    Description = $"Olá {  entityFamily.Holder.Name }!" +
+                                 $" Seu curso {  entityCourse.Title }" +
+                                 " foi realizada com sucesso!Fique atento, seu curso começará em breve.",
+                    FamilyId = entityFamily._id.ToString(),
+                });
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cancelou o curso {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), Request.GetUserName().Value, model.CourseId, "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -427,41 +466,5 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
-
-
-        //[HttpPost("Edit")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(401)]
-        //[ProducesResponseType(500)]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Edit([FromBody] FamilyEditViewModel model)
-        //{
-        //    try
-        //    {
-        //        var entityFamily = await _courseRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
-        //        if (entityFamily == null)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
-
-        //        var validOnly = _httpContextAccessor.GetFieldsFromBody();
-
-        //        var p = entityFamily.SetIfDifferent(model.Holder, validOnly);
-        //        var t = entityFamily.SetIfDifferent(model.Members, validOnly);
-
-        //        var entity = _mapper.Map<Data.Entities.Family>(model);
-
-        //        var entityId = await _courseRepository.UpdateAsync(entity).ConfigureAwait(false);
-        //        await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
-
-        //        return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
-        //        return BadRequest(ex.ReturnErro());
-        //    }
-        //}
-
     }
 }

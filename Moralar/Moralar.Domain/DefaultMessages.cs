@@ -22,6 +22,7 @@ namespace Moralar.Domain
         public const string InvalidRegisterAddress = "Não é possível registrar esse tipo de endereço.";
         public const string AmountPhoto = "A foto deve ter no mínimo 1 e no máximo 15 imagens";
         public const string AmountPhotoInclude = "A inclusão das fotos está acima do máximo de 15 imagens";
+        public const string ChangeSubject = "A mudança de assunto só pode ser feita se a situação estiver finalizada.";
 
         /*IN USE*/
         public const string CpfInUse = "Cpf em uso.";
@@ -49,6 +50,8 @@ namespace Moralar.Domain
         public const string InvalidCredentials = "Credênciais inválidas.";
         public const string DateInvalidToSchedule = "A data deve ser posterior a atual.";
         public const string DateInvalid = "Data Inválida.";
+        public const string ScheduleNotInChooseProperty = "Família não pode escolher o imóvel, pois não está na fase correspondente.";
+        public const string ResidencialSaled = "O morador não pode ter dois ou mais imóveis comprados.";
 
         /*NOT FOUND*/
         public const string UserAdministratorNotFound = "Usuário de acessso não encontrado";
@@ -58,6 +61,7 @@ namespace Moralar.Domain
         public const string CourseFamilyNotFound = "Família não encontrada para este curso";
         public const string ResidencialPropertyNotFound = "Propriedade não encontrado";
         public const string QuizNotFound = "Quiz não encontrado";
+        public const string QuizFamilyNotFound = "Não foi encontrado essa disponibilização de questionário para a família";
         public const string DescriptionNotFound = "Descrição não encontrado";
         public const string QuestionNotFound = "Quiz não encontrado";
         public const string FamilyNotFound = "Família não encontrado";
@@ -79,6 +83,9 @@ namespace Moralar.Domain
         public const string LogActionNotFound = "Log de ação não encontrado.";
         public const string VideoNotFound = "Vídeo não encontrado.";
         public const string InformativeNotFound = "Informativo não encontrado.";
+        public const string NotificationNotFound = "Notificação não encontrada.";
+        public const string LocationNotFound = "Localização não encontrada.";
+        public const string PropertySaledNotFound = "Propriedade vendida não encontrada.";
 
     }
 }

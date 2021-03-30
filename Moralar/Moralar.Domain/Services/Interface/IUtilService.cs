@@ -1,6 +1,8 @@
 ﻿
+using Microsoft.AspNetCore.Mvc;
 using Moralar.Data.Entities;
 using Moralar.Data.Enum;
+using Moralar.Domain.ViewModels;
 using System;
 using System.Threading.Tasks;
 
@@ -12,5 +14,6 @@ namespace Moralar.Domain.Services.Interface
         Task LogUserAdministrationAction(string userId, string message, TypeAction typeAction, LocalAction localAction, string referenceId = null);
         void UpdateCascate(Family familyEntity);
         string GetFlag(string flag);
+        Task<InfoAddressViewModel> GetInfoFromZipCode(string zipCode);
     }
 }

@@ -9,6 +9,11 @@ namespace Moralar.Domain.ViewModels.Family
     public class FamilyCompleteViewModel : BaseViewModel
     {
         /// <summary>
+        /// Dados do Endereço
+        /// </summary>
+        public FamilyAddressViewModel Address { get; set; }
+
+        /// <summary>
         /// Dados do Titular
         /// </summary>
         public FamilyHolderViewModel Holder { get; set; }

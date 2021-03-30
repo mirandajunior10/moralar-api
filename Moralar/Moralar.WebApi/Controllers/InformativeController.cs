@@ -45,14 +45,16 @@ namespace Moralar.WebApi.Controllers
         private readonly IInformativeSendedRepository _informativeSendedRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly ISenderMailService _senderMailService;
+        private readonly IUtilService _utilService;
 
-        public InformativeController(IMapper mapper, IInformativeRepository informativeRepository, IInformativeSendedRepository informativeSendedRepository, IFamilyRepository familyRepository, ISenderMailService senderMailService)
+        public InformativeController(IMapper mapper, IInformativeRepository informativeRepository, IInformativeSendedRepository informativeSendedRepository, IFamilyRepository familyRepository, ISenderMailService senderMailService, IUtilService utilService)
         {
             _mapper = mapper;
             _informativeRepository = informativeRepository;
             _informativeSendedRepository = informativeSendedRepository;
             _familyRepository = familyRepository;
             _senderMailService = senderMailService;
+            _utilService = utilService;
         }
 
 
@@ -60,20 +62,20 @@ namespace Moralar.WebApi.Controllers
 
 
         ///// <summary>
-        ///// METODO DE DETALHES DO ITEM
+        ///// DETALHES DO INFORMATIVO
         ///// </summary>
         ///// <response code="200">Returns success</response>
         ///// <response code="400">Custom Error</response>
         ///// <response code="401">Unauthorize Error</response>
         ///// <response code="500">Exception Error</response>
         ///// <returns></returns>
-        [HttpGet("Detail/{id}")]
+        [HttpGet("DetailInformative/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Detail([FromRoute] string id)
+        public async Task<IActionResult> DetailInformative([FromRoute] string id)
         {
             try
             {
@@ -91,7 +93,7 @@ namespace Moralar.WebApi.Controllers
             }
         }
         ///// <summary>
-        ///// METODO DE DETALHES DO ITEM
+        ///// METODO DE DETALHES DO INFORMATIVO ENVIADO
         ///// </summary>
         ///// <response code="200">Returns success</response>
         ///// <response code="400">Custom Error</response>
@@ -114,13 +116,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-
-                var entityFamily = await _familyRepository.FindIn("_id", entity.FamilyId.Select(x => ObjectId.Parse(x)).ToList()) as List<Family>;
-
                 var informativeViewModel = _mapper.Map<InformativeSendedDetailViewModel>(entity);
-
-                var listFamily = _mapper.Map<List<FamilyHolderListViewModel>>(entityFamily);
-                informativeViewModel.FamilyHolders.AddRange(listFamily);
 
                 return Ok(Utilities.ReturnSuccess(data: informativeViewModel));
             }
@@ -130,24 +126,56 @@ namespace Moralar.WebApi.Controllers
             }
         }
         ///// <summary>
-        ///// METODO DE DETALHES DO ITEM
+        ///// LISTA TODOS OS INFORMATIVOS
         ///// </summary>
         ///// <response code="200">Returns success</response>
         ///// <response code="400">Custom Error</response>
         ///// <response code="401">Unauthorize Error</response>
         ///// <response code="500">Exception Error</response>
         ///// <returns></returns>
-        [HttpGet("GetAll")]
+        [HttpGet("GetAllInformative")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> GetAll()
+        public async Task<IActionResult> GetAllInformative()
         {
             try
             {
-                var entity = await _informativeRepository.FindAllAsync().ConfigureAwait(false);
+                var entity = await _informativeRepository.FindByAsync(x => x.DataBlocked == null).ConfigureAwait(false);
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
+
+                var vieoViewModel = _mapper.Map<List<InformativeViewModel>>(entity);
+
+                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
+            }
+        }
+        ///// <summary>
+        ///// LISTA TODOS OS INFORMATIVOS POR FAMÍLIA
+        ///// </summary>
+        ///// <response code="200">Returns success</response>
+        ///// <response code="400">Custom Error</response>
+        ///// <response code="401">Unauthorize Error</response>
+        ///// <response code="500">Exception Error</response>
+        ///// <returns></returns>
+        [HttpGet("GetAllInformativeByFamily")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetAllInformativeByFamily()
+        {
+            try
+            {
+                var familyId = Request.GetUserId();
+                var entity = await _informativeSendedRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
@@ -165,14 +193,6 @@ namespace Moralar.WebApi.Controllers
         /// CADASTRAR UM INFORMATIVE
         /// </summary>
         /// <remarks>
-        /// OBJ DE ENVIO
-        ///         POST
-        ///             {
-        ///               "image": "fasdfasqwerqwe",/// IMAGEM DO VÍDEO
-        ///               "Description": "", // DESCRIÇÃO
-        ///               "Date": ,//Data do informativo
-        ///             }
-        /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
         /// <response code="401">Unauthorize Error</response>
@@ -184,77 +204,67 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] InformativeViewModel model)
         {
             try
             {
-                var dateModel = Utilities.TimeStampToDateTime(model.Date);
-                if (dateModel >= DateTime.Now)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalid));
                 var entity = _mapper.Map<Data.Entities.Informative>(model);
                 entity.Image = model.Image.SetPathImage();
                 entity.Status = TypeStatusActiveInactive.Ativo;
-                await _informativeRepository.CreateAsync(entity).ConfigureAwait(false);
-                var entityFamily = await _familyRepository.FindIn("_id", model.FamilyId.Select(x => ObjectId.Parse(x)).ToList()) as List<Family>;
+                var informativeId = await _informativeRepository.CreateAsync(entity).ConfigureAwait(false);
+
+                var entityFamily = await _familyRepository.FindAllAsync().ConfigureAwait(false);
                 foreach (var item in entityFamily)
                 {
-                    var dataBody = Util.GetTemplateVariables();
-                    dataBody.Add("{{ title }}", "Informativo");
-                    dataBody.Add("{{ message }}", $"<p>Caro(a) {item.Holder.Name.GetFirstName()}</p>" +
-                                                $"<p>Segue o informativo  {model.Description}</p>");
-
-                    var body = _senderMailService.GerateBody("custom", dataBody);
-
-                    var unused = Task.Run(async () =>
+                    var informationSended = new InformativeSended()
                     {
-                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.Holder.Email, body, "Informativo").ConfigureAwait(false);
-                    });
+                        FamilyId = item._id.ToString(),
+                        InformativeId = informativeId
+                    };
+                    await _informativeSendedRepository.CreateAsync(informationSended);
                 }
-
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
 
             }
             catch (Exception ex)
             {
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
             }
         }
-
-        [HttpPost("Send")]
+        /// <summary>
+        /// MUDAR A SITUAÇÃO PARA INFORMATIVO VISTO
+        /// </summary>
+        /// <remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ChangeStatusViewed/{informativeId}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> Send([FromBody] InformativeSendedViewModel model)
+        public async Task<IActionResult> ChangeStatusViewed([FromRoute] string informativeId)
         {
             try
             {
 
-                var entityInformative = await _informativeRepository.FindByIdAsync(model.InformativeId).ConfigureAwait(false);
-                if (entityInformative == null)
+                var informativeSended = await _informativeSendedRepository.FindByIdAsync(informativeId).ConfigureAwait(false);
+                if (informativeSended == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InformativeNotFound));
+                informativeSended.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
+                await _informativeSendedRepository.UpdateOneAsync(informativeSended).ConfigureAwait(false);
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Mudou a situação para visualizada {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
+                return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated));
 
-                //var families = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
-                //var b = model.FamilyId.Find(x => families.Exists(c => c._id == ObjectId.Parse( x)));
-                //retorno.Find(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
-                //if (!await _familyRepository.CheckByAsync(x => x._id == ObjectId.Parse(model.FamilyId)).ConfigureAwait(false))
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
-
-                var InformativeSended = new InformativeSended()
-                {
-                    Description = entityInformative.Description,
-                    FamilyId = model.FamilyId,
-                    InformativeId = model.InformativeId
-                };
-                await _informativeSendedRepository.CreateAsync(InformativeSended).ConfigureAwait(false);
-
-                return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
             }
             catch (Exception ex)
             {
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Não foi possível mudar a situação para visualizada", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
             }
         }
@@ -275,7 +285,7 @@ namespace Moralar.WebApi.Controllers
         [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model)
         {
-            var response = new DtResult<InformativeViewModel>();
+            var response = new DtResult<InformativeListViewModel>();
             try
             {
                 var builder = Builders<Informative>.Filter;
@@ -299,7 +309,7 @@ namespace Moralar.WebApi.Controllers
                    ? (int)await _informativeRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                    : totalRecords;
 
-                response.Data = _mapper.Map<List<InformativeViewModel>>(retorno.OrderBy(x => x.Date));
+                response.Data = _mapper.Map<List<InformativeListViewModel>>(retorno.OrderBy(x => x.Created));
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;
@@ -400,9 +410,11 @@ namespace Moralar.WebApi.Controllers
                 await _informativeRepository.DeleteOneAsync(id).ConfigureAwait(false);
 
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Deleted)));
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Deletou o registro {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, id);
             }
             catch (Exception ex)
             {
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Não foi possível excluir informativo", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
             }
         }
@@ -429,20 +441,21 @@ namespace Moralar.WebApi.Controllers
                 if (ObjectId.TryParse(model.TargetId, out var unused) == false)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidIdentifier));
 
-                var entityVideo = await _informativeRepository.FindOneByAsync(x => x._id == ObjectId.Parse(model.TargetId)).ConfigureAwait(false);
+                var entityInformative = await _informativeRepository.FindOneByAsync(x => x._id == ObjectId.Parse(model.TargetId)).ConfigureAwait(false);
 
-                if (entityVideo == null)
+                if (entityInformative == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.VideoNotFound));
 
-                entityVideo.DataBlocked = model.Block ? DateTimeOffset.Now.ToUnixTimeSeconds() : (long?)null;
+                entityInformative.DataBlocked = model.Block ? DateTimeOffset.Now.ToUnixTimeSeconds() : (long?)null;
 
 
-                var entityId = await _informativeRepository.UpdateOneAsync(entityVideo).ConfigureAwait(false);
-
+                var entityId = await _informativeRepository.UpdateOneAsync(entityInformative).ConfigureAwait(false);
+                await _utilService.RegisterLogAction(LocalAction.Informativo, model.Block==true? TypeAction.Block: TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Cadastrou novo curso {model.Title}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
                 return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
             }
             catch (Exception ex)
             {
+                await _utilService.RegisterLogAction(LocalAction.Informativo, model.Block == true ? TypeAction.Block : TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Não foi bloquear/desbloquear o informativo", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }

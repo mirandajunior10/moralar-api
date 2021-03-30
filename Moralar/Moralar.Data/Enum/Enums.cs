@@ -203,12 +203,15 @@ namespace Moralar.Data.Enum
         [EnumMember(Value = "Download")]
         [Description("Download")]
         Download,
-        [EnumMember(Value = "UnBlock")]
+        [EnumMember(Value = "Block")]
         [Description("Block")]
         Block,
         [EnumMember(Value = "UnBlock")]
         [Description("UnBlock")]
         UnBlock,
+        [EnumMember(Value = "Importação de Família")]
+        [Description("Importação de Família")]
+        ImportFamily,
     }
     public enum TypeResposible
     {
@@ -250,7 +253,13 @@ namespace Moralar.Data.Enum
         Perfil = 3,
         [EnumMember(Value = "Curso")]
         [Description("Curso")]
-        Curso = 4
+        Curso = 4,
+        [EnumMember(Value = "Notificação")]
+        [Description("Notificação")]
+        Notificacao = 4,
+        [EnumMember(Value = "Informativo")]
+        [Description("Informativo")]
+        Informativo = 4
 
     }
     public enum TypeQuiz
@@ -318,18 +327,18 @@ namespace Moralar.Data.Enum
         [EnumMember(Value = "Visita ao imóvel")]
         [Description("Visita ao imóvel")]
         VisitaImovel = 3,
-        [EnumMember(Value = "Mudança")]
-        [Description("Mudança")]
-        Mudanca = 4,
+        [EnumMember(Value = "Escolha do imóvel")]
+        [Description("Escolha do imóvel")]
+        EscolhaDoImovel = 4,
         [EnumMember(Value = "Demolição")]
         [Description("Demolição")]
         Demolicão = 5,
         [EnumMember(Value = "Outros")]
         [Description("Outros")]
         Outros = 6,
-        [EnumMember(Value = "Escolha do imóvel")]
-        [Description("Escolha do imóvel")]
-        EscolhaDoImovel = 7,
+        [EnumMember(Value = "Mudança")]
+        [Description("Mudança")]
+        Mudanca = 7,
         [EnumMember(Value = "Acompanhamento pós-mudança")]
         [Description("Acompanhamento pós-mudança")]
         AcompanhamentoPosMudança = 8
@@ -351,6 +360,24 @@ namespace Moralar.Data.Enum
         [EnumMember(Value = "Finalizado")]
         [Description("Finalizado")]
         Finalizado = 4
+    }
+    public enum TypeReadUnread
+    {
+        [EnumMember(Value = "Não Lido")]
+        [Description("Não Lido")]
+        NaoLido = 0,
+        [EnumMember(Value = "Lido")]
+        [Description("Lido")]
+        Lido = 1,
+    }
+    public enum TypeNotification
+    {
+        [EnumMember(Value = "Manual")]
+        [Description("Manual")]
+        Manual = 0,
+        [EnumMember(Value = "Automática")]
+        [Description("Automática")]
+        Automatica = 1,
     }
 
 

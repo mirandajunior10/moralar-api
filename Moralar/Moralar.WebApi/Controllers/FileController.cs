@@ -25,7 +25,7 @@ namespace Moralar.WebApi.Controllers
         public FileController(IHostingEnvironment env)
         {
             _env = env;
-            _acceptedFiles = new List<string>() { ".png", ".jpeg", ".jpg", ".gif" };
+            _acceptedFiles = new List<string>() { ".png", ".jpeg", ".jpg", ".gif",".xlsx"};
         }
 
         /// <summary>

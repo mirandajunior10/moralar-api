@@ -12,8 +12,8 @@ namespace Moralar.Data.Entities
     public class InformativeSended : ModelBase
     {
         public string InformativeId { get; set; }
-        public List<string> FamilyId { get; set; }
-        public string Description { get; set; }
+        public string FamilyId { get; set; }
+        public long DateViewed { get; set; }
         public override string CollectionName => nameof(InformativeSended);
     }
 }

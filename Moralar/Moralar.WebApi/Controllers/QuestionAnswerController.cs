@@ -70,25 +70,18 @@ namespace Moralar.WebApi.Controllers
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO
+        /// 
         ///POST
-        ///{
-        ///  "id": "601955ee7d765d74ec11a33a",// ID DO QUIZ
-        ///  "questionRegister": {
-        ///    "question": [
-        ///      {
-        ///        "nameQuestion": "teste nova questão",
-        ///        "typeResponse": 1,
-        ///        "description": [
-        ///          {
-        ///            "description": "Idade 5 anos"
-        ///          },
-        ///          {
-        ///            "description": "Idade 6 anos"
-        ///          },
-        ///        ]
-        ///      }
-        ///    ]
-        ///  }
+        ///       {
+        ///         "questionDescriptionId": [
+        ///           "string"
+        ///         ],
+        ///         "questionId": "string",
+        ///         "answerDescription": "string",
+        ///         "familyId": "string",
+        ///         "responsibleForResponsesId": "string",
+        ///         "id": "string"
+        ///       }
         /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -101,10 +94,9 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] QuestionAnswerRegisterViewModel model)
         {
-            
+
             try
             {
                 var typeRegister = TypeAction.Register;
@@ -151,13 +143,20 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// BUSCA AS RESPOSTAS
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
         [HttpGet("GetResponses")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetResponses()
         {
             try

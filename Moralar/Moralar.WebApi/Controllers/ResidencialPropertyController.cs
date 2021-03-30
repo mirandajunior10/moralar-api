@@ -44,8 +44,9 @@ namespace Moralar.WebApi.Controllers
         private readonly IResidencialPropertyRepository _residencialPropertyRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly IPropertiesInterestRepository _propertiesInterestRepository;
+        private readonly IScheduleRepository _scheduleRepository;
 
-        public ResidencialPropertyController(IMapper mapper, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor, IResidencialPropertyRepository residencialPropertyRepository, IFamilyRepository familyRepository, IPropertiesInterestRepository propertiesInterestRepository)
+        public ResidencialPropertyController(IMapper mapper, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor, IResidencialPropertyRepository residencialPropertyRepository, IFamilyRepository familyRepository, IPropertiesInterestRepository propertiesInterestRepository, IScheduleRepository scheduleRepository)
         {
             _mapper = mapper;
             _utilService = utilService;
@@ -54,10 +55,13 @@ namespace Moralar.WebApi.Controllers
             _residencialPropertyRepository = residencialPropertyRepository;
             _familyRepository = familyRepository;
             _propertiesInterestRepository = propertiesInterestRepository;
+            _scheduleRepository = scheduleRepository;
         }
 
 
 
+
+        /// <summary>
         /// BLOQUEAR / DESBLOQUEAR PROPRIEDADE
         /// </summary>
         /// <remarks>
@@ -110,7 +114,7 @@ namespace Moralar.WebApi.Controllers
             }
         }
         /// <summary>
-        /// LISTAGEM DOS CLIENTES
+        /// LISTAGEM DOS RESIDÊNCIAS
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -188,7 +192,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -214,7 +217,54 @@ namespace Moralar.WebApi.Controllers
             }
         }
         /// <summary>
-        /// LISTA TODAS PROPRIEDADE
+        /// DASHBOARD
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("Dashboard")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> Dashboard()
+        {
+            try
+            {
+                int amount = await _familyRepository.CountAsync(x => x.Created != null).ConfigureAwait(false);
+                decimal amoutReuniaoPgm = await _scheduleRepository.CountAsync(x => x.TypeSubject == TypeSubject.ReuniaoPGM).ConfigureAwait(false);
+                decimal amoutChooseProperty = await _scheduleRepository.CountAsync(x => x.TypeSubject == TypeSubject.EscolhaDoImovel).ConfigureAwait(false);
+                decimal amoutChangeProperty = await _scheduleRepository.CountAsync(x => x.TypeSubject == TypeSubject.Mudanca).ConfigureAwait(false);
+                decimal amoutPosMudanca = await _scheduleRepository.CountAsync(x => x.TypeSubject == TypeSubject.AcompanhamentoPosMudança).ConfigureAwait(false);
+                int availableForSale = await _residencialPropertyRepository.CountAsync(x => x.TypeStatusResidencialProperty == TypeStatusResidencial.AEscolher).ConfigureAwait(false);
+                int residencialPropertySaled = await _residencialPropertyRepository.CountAsync(x => x.TypeStatusResidencialProperty == TypeStatusResidencial.Vendido).ConfigureAwait(false);
+
+                decimal percentageAmoutReuniaoPgm = amount == 0 ? 0 : amoutReuniaoPgm / decimal.Parse(amount.ToString());
+                decimal percentageAmoutChooseProperty = amount == 0 ? 0 : amoutChooseProperty / decimal.Parse(amount.ToString());
+                decimal percentageAmoutChangeProperty = amount == 0 ? 0 : amoutChangeProperty / decimal.Parse(amount.ToString());
+                decimal percentageAmoutPosMudanca = amount == 0 ? 0 : amoutPosMudanca / decimal.Parse(amount.ToString());
+                var vwDashBoard = new ResidencialPropertyDashboardViewModel()
+                {
+                    AmountFamilies = amount,
+                    AvailableForSale = availableForSale,
+                    ResidencialPropertySaled = residencialPropertySaled,
+                    PercentageAmoutChangeProperty = percentageAmoutChangeProperty,
+                    PercentageAmoutChooseProperty = percentageAmoutChooseProperty,
+                    PercentageAmoutPosMudanca = percentageAmoutPosMudanca,
+                    PercentageAmoutReuniaoPgm = percentageAmoutReuniaoPgm
+                };
+                return Ok(Utilities.ReturnSuccess(data: vwDashBoard));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+        /// <summary>
+        /// LISTA TODAS PROPRIEDADES
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -227,12 +277,16 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAllBy([FromQuery] string code, [FromQuery] int status, [FromQuery] int availableForSale)
         {
             try
             {
                 //[FromRoute] long startDate, [FromQuery] bool onlyConfigured, [FromQuery] string cityId
+
+
+                var userId = Request.GetUserId();
+                if (!await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel).ConfigureAwait(false))
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty));
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
@@ -271,7 +325,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetResidencialByFilter([FromQuery] ResidencialPropertyFilterViewModel model)
         {
             try
@@ -285,16 +338,16 @@ namespace Moralar.WebApi.Controllers
 
 
                 if (model.StartSquareFootage > 0 && model.EndSquareFootage > 0)
-                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.SquareFootage >= model.StartSquareFootage && x.ResidencialPropertyFeatures.SquareFootage<= model.EndSquareFootage));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.SquareFootage >= model.StartSquareFootage && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
 
 
                 if (model.StartIptuValue > 0 && model.EndIptuValue > 0)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.IptuValue >= model.StartIptuValue && x.ResidencialPropertyFeatures.IptuValue <= model.EndIptuValue));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
-             
+
 
                 if (!string.IsNullOrEmpty(model.Neighborhood))
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
-            
+
                 conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasGarage == model.HasGarage));
                 conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessLadder == model.HasAccessLadder));
                 conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessRamp == model.HasAccessRamp));
@@ -399,7 +452,7 @@ namespace Moralar.WebApi.Controllers
                 var entityId = await _residencialPropertyRepository.CreateAsync(entity).ConfigureAwait(false);
 
 
-               
+
 
                 await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de novo imóvel {entity.Code}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
 
@@ -411,7 +464,16 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
-
+        /// <summary>
+        /// GESTOR REALIZA A VENDA PARA DETERMINADA PESSOA
+        /// </summary>
+        /// <remarks>
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
         [HttpPost("ChoiceProperty")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
@@ -437,7 +499,25 @@ namespace Moralar.WebApi.Controllers
                 entityResidencial.TypeStatusResidencialProperty = TypeStatusResidencial.Vendido;
                 await _residencialPropertyRepository.UpdateAsync(entityResidencial).ConfigureAwait(false);
 
-                var sendInformation =await _propertiesInterestRepository.FindByAsync(x => x.ResidelcialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false);
+                var scheduleEntity = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == model.FamiliIdResidencialChosen).ConfigureAwait(false); ;
+                if (scheduleEntity==null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+                scheduleEntity.Date = Utilities.ToTimeStamp(DateTime.Now);
+                scheduleEntity.TypeSubject = TypeSubject.Mudanca;
+                scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
+                await _scheduleRepository.UpdateAsync(scheduleEntity).ConfigureAwait(false);
+
+
+                //var scheduleHistoryList = await _scheduleHistoryRepository.FindByAsync(x => x.TypeSubject == scheduleEntity.TypeSubject && x.FamilyId == model.FamilyId).ConfigureAwait(false) as List<ScheduleHistory>;
+                //if (scheduleHistoryList.Exists(x => x.TypeSubject == TypeSubject.EscolhaDoImovel || x.TypeSubject == TypeSubject.Mudanca || x.TypeSubject == TypeSubject.AcompanhamentoPosMudança))
+                //{
+                //    //var c = scheduleHistoryList.Where(x => x.TypeSubject == scheduleEntity.TypeSubject);
+                //    await _scheduleHistoryRepository.UpdateOneAsync(scheduleHistoryList.FirstOrDefault()).ConfigureAwait(false);
+                //}
+
+
+
+                var sendInformation = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false);
                 foreach (var item in sendInformation)
                 {
 
@@ -533,7 +613,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> RegisterNewPhoto([FromBody] ResidencialPropertyAddPhoto model)
         {
             try

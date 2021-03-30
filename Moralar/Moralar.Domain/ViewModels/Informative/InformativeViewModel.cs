@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
 using UtilityFramework.Application.Core.ViewModels;
 
@@ -7,9 +8,14 @@ namespace Moralar.Domain.ViewModels.Informative
 {
     public class InformativeViewModel : BaseViewModel
     {
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "Data do informativo")]
+        public string DatePublish { get; set; }
         public string Image { get; set; }
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "Descrição do informativo")]
         public string Description { get; set; }
-        public long Date { get; set; }
-        public List<string> FamilyId { get; set; }
+
+        //public List<string> FamilyId { get; set; }
     }
 }

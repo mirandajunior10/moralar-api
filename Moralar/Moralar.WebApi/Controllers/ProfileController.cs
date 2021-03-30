@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
@@ -18,6 +19,7 @@ using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
 using System.IdentityModel.Tokens.Jwt;
+using System.IO;
 using System.Linq;
 using System.Net;
 using System.Reflection;
@@ -38,19 +40,21 @@ namespace Moralar.WebApi.Controllers
 
     public class ProfileController : Controller
     {
-
+        private readonly IHostingEnvironment _env;
         private readonly IMapper _mapper;
         private readonly IProfileRepository _profileRepository;
         private readonly ISenderMailService _senderMailService;
         private readonly IUtilService _utilService;
 
-        public ProfileController(IMapper mapper, IProfileRepository profileRepository, ISenderMailService senderMailService, IUtilService utilService)
+        public ProfileController(IHostingEnvironment env, IMapper mapper, IProfileRepository profileRepository, ISenderMailService senderMailService, IUtilService utilService)
         {
+            _env = env;
             _mapper = mapper;
             _profileRepository = profileRepository;
             _senderMailService = senderMailService;
             _utilService = utilService;
         }
+
 
 
 
@@ -101,18 +105,25 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpGet("ImportGestor")]
+        [HttpGet("ImportGestor/{file}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> ImportGestor()
+        public async Task<IActionResult> ImportGestor([FromRoute] string file)
         {
             try
             {
-                var fi = new System.IO.FileInfo(@"D:\Megaleios\Documentos\MOralar\Modelo Importacao Gestor.xlsx");
+                var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
+
+                var exists = Directory.Exists(folder);
+
+                if (!exists)
+                    Directory.CreateDirectory(folder);
+
+                var fi = new System.IO.FileInfo(folder + "\\" + file);
                 using (var package = new ExcelPackage(fi))
                 {
                     ExcelWorksheet sheet = package.Workbook.Worksheets[1];
@@ -174,18 +185,25 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpGet("ImportTTS")]
+        [HttpGet("ImportTTS/{file}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> ImportTTS()
+        public async Task<IActionResult> ImportTTS([FromRoute] string file)
         {
             try
             {
-                var fi = new System.IO.FileInfo(@"D:\Megaleios\Documentos\MOralar\Modelo Importacao TTS.xlsx");
+                var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
+
+                var exists = Directory.Exists(folder);
+
+                if (!exists)
+                    Directory.CreateDirectory(folder);
+
+                var fi = new System.IO.FileInfo(folder + "\\" + file);
                 var listProfilies = new List<Data.Entities.Profile>();
                 using (var package = new ExcelPackage(fi))
                 {

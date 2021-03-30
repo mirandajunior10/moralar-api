@@ -4,6 +4,11 @@
         <name>Moralar.Data</name>
     </assembly>
     <members>
+        <member name="P:Moralar.Data.Entities.Family.Address">
+            <summary>
+            Endereço do Titular
+            </summary>
+        </member>
         <member name="P:Moralar.Data.Entities.Family.Holder">
             <summary>
             Dados do Titular

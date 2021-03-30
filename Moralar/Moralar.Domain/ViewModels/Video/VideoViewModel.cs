@@ -11,5 +11,6 @@ namespace Moralar.Domain.ViewModels.Video
         public string Title { get; set; }
         public string URL { get; set; }
         public bool Blocked { get; set; }
+        public string Name { get; set; }
     }
 }

@@ -8,6 +8,5 @@ namespace Moralar.Domain.ViewModels.InformativeSended
     public class InformativeSendedViewModel : BaseViewModel
     {
         public string InformativeId { get; set; }
-        public List<string> FamilyId { get; set; }
     }
 }

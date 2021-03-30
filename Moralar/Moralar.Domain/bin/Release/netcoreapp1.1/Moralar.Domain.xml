@@ -49,6 +49,36 @@
             
             </summary>
         </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteListViewModel.Holder">
+            <summary>
+            Dados do Titular
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteListViewModel.Spouse">
+            <summary>
+            Dados do conjuge
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteListViewModel.Members">
+            <summary>
+            Dados do membro da Família
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteListViewModel.Financial">
+            <summary>
+            Dados Financeiros
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteListViewModel.Priorization">
+            <summary>
+            Dados de Priorização
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Address">
+            <summary>
+            Dados do Endereço
+            </summary>
+        </member>
         <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteViewModel.Holder">
             <summary>
             Dados do Titular
@@ -74,6 +104,11 @@
             Dados de Priorização
             </summary>
         </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteWebViewModel.Address">
+            <summary>
+            Dados do Endereço
+            </summary>
+        </member>
         <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteWebViewModel.Holder">
             <summary>
             Dados do Titular
@@ -97,6 +132,11 @@
         <member name="P:Moralar.Domain.ViewModels.Family.FamilyCompleteWebViewModel.Priorization">
             <summary>
             Dados de Priorização
+            </summary>
+        </member>
+        <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Address">
+            <summary>
+            Dados do Endereço
             </summary>
         </member>
         <member name="P:Moralar.Domain.ViewModels.Family.FamilyEditViewModel.Holder">

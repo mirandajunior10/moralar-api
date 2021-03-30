@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
@@ -15,11 +16,14 @@ using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Import;
+using Moralar.Domain.ViewModels.Schedule;
+using Moralar.Domain.ViewModels.ScheduleHistory;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
 using OfficeOpenXml;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -37,30 +41,38 @@ namespace Moralar.WebApi.Controllers
 
     public class FamilyController : Controller
     {
-
+        private readonly IHostingEnvironment _env;
         private readonly IMapper _mapper;
         private readonly IFamilyRepository _familyRepository;
         private readonly IScheduleRepository _scheduleRepository;
+        private readonly IScheduleHistoryRepository _scheduleHistoryRepository;
         private readonly ICourseFamilyRepository _courseFamilyRepository;
         private readonly IQuizFamilyRepository _quizFamilyRepository;
+        private readonly IResidencialPropertyRepository _residencialPropertyRepository;
+        private readonly IPropertiesInterestRepository _propertiesInterestRepository;
+        private readonly ICityRepository _cityRepository;
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public FamilyController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
+        public FamilyController(IHostingEnvironment env, IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, ICourseFamilyRepository courseFamilyRepository, IQuizFamilyRepository quizFamilyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, ICityRepository cityRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
         {
+            _env = env;
             _mapper = mapper;
             _familyRepository = familyRepository;
             _scheduleRepository = scheduleRepository;
+            _scheduleHistoryRepository = scheduleHistoryRepository;
+            _courseFamilyRepository = courseFamilyRepository;
+            _quizFamilyRepository = quizFamilyRepository;
+            _residencialPropertyRepository = residencialPropertyRepository;
+            _propertiesInterestRepository = propertiesInterestRepository;
+            _cityRepository = cityRepository;
             _utilService = utilService;
             _senderMailService = senderMailService;
             _httpContextAccessor = httpContextAccessor;
         }
-
-
-
         /// <summary>
-        /// BLOQUEAR / DESBLOQUEAR AGENTE - ADMIN
+        /// BLOQUEAR / DESBLOQUEAR FAMÍLIA
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO
@@ -111,6 +123,8 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
+
         /// <summary>
         /// LISTAGEM DAS FAMÍLIAS
         /// </summary>
@@ -125,7 +139,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf)
         {
             //, 
@@ -176,33 +189,24 @@ namespace Moralar.WebApi.Controllers
                 return Ok(response);
             }
         }
+
+
+
         /// <summary>
         /// TIMELINE DAS FAMÍLIAS
         /// </summary>
-        ///  <remarks>
-        /// OBJ DE ENVIO
-        /// 
-        ///         POST
-        ///             {
-        ///              "number": "", // required
-        ///              "holderName": "",
-        ///              "holderCpf",""
-        ///              "typeSubject": "" Reunião PGM,Escolha do imóvel,Mudança,Acompanhamento pós-mudança
-        ///             }
-        /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("LoadDataTimeLine")]
+        [HttpPost("TimeLineLoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoadDataTimeLine([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject typeSubject)
+        public async Task<IActionResult> TimeLineLoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject typeSubject)
         {
             var response = new DtResult<FamilyHolderListViewModel>();
 
@@ -237,7 +241,7 @@ namespace Moralar.WebApi.Controllers
                 var retorno = await _familyRepository
                     .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Family>;
 
-                var filterFamilyWithSchedule = retorno.Find(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
+                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
                     ? (int)await _familyRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
@@ -259,68 +263,111 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
-        ///// <summary>
-        /// DETALHES DO QUIZ
+
+
+        /// <summary>
+        /// TIME LINE DO PROCESSO OBRIGATÓRIO
         /// </summary>
-        /// <response code="200">Returns success</response>
-        /// <response code="400">Custom Error</response>
-        /// <response code="401">Unauthorize Error</response>
-        /// <response code="500">Exception Error</response>
-        /// <returns></returns>
-        //[HttpGet("TimeLineProcessMandatory/{familyId}")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(401)]
-        //[ProducesResponseType(500)]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> TimeLineProcessMandatory([FromRoute] string familyId)
-        //{
-        //    try
-        //    {
-                
-
-        //        var entity = await _scheduleRepository.FindByIdAsync(id).ConfigureAwait(false);
-
-        //        if (entity == null)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
-
-        //        return Ok(Utilities.ReturnSuccess(data: _mapper.Map<ScheduleListViewModel>(entity)));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.ReturnErro());
-        //    }
-        //}
-
-
-        ///// <summary>
-        /// DETALHES DO QUIZ
-        /// </summary>
-        /// <response code="200">Returns success</response>
-        /// <response code="400">Custom Error</response>
-        /// <response code="401">Unauthorize Error</response>
-        /// <response code="500">Exception Error</response>
-        /// <returns></returns>
-        [HttpGet("TimeLineOptionalMandatory")]
+        ///  <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "familyId": "", // required
+        ///             }
+        /// </remarks>
+        //// <response code = "200" > Returns success</response>
+        //// <response code = "400" > Custom Error</response>
+        //// <response code = "401" > Unauthorize Error</response>
+        //// <response code = "500" > Exception Error</response>
+        //// <returns></returns>
+        [HttpGet("TimeLineProcessMandatory/{familyId}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        public async Task<IActionResult> TimeLineOptionalMandatory()
+        public async Task<IActionResult> TimeLineProcessMandatory([FromRoute] string familyId)
         {
             try
             {
+                //Reunião PGM -  ReuniaoPGM = 2,
+                //Escolha do imóvel -  EscolhaDoImovel = 4,
+                //Mudança -    Mudanca = 7,
+                //Acompanhamento pós-mudança -  AcompanhamentoPosMudança = 8
+                List<int> enumsValid = new List<int> { (int)TypeSubject.ReuniaoPGM, (int)TypeSubject.EscolhaDoImovel, (int)TypeSubject.Mudanca, (int)TypeSubject.AcompanhamentoPosMudança };
+                var scheduleHistories = await _scheduleHistoryRepository.FindIn(x => x.FamilyId == familyId, "TypeSubject", enumsValid.ToList(), Builders<ScheduleHistory>.Sort.Ascending(nameof(ScheduleHistory.LastUpdate))) as List<ScheduleHistory>;
+                if (scheduleHistories.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
-                //new QuizController().
-                //var entity = await _scheduleRepository.FindByIdAsync(id).ConfigureAwait(false);
+                var schedule = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                if (schedule == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+                var objReturn = new
+                {
+                    data = _mapper.Map<List<ScheduleHistoryViewModel>>(scheduleHistories.Where(x => x.ParentId == null)).OrderBy(c => c.TypeSubject).ToList(),
+                    schedule = _mapper.Map<ScheduleListViewModel>(schedule)
+                };
+                var parentIds = scheduleHistories.Where(x => x.ParentId != null).ToList();
+                for (int i = 0; i < parentIds.Count(); i++)
+                {
+                    objReturn.data.Find(x => x.Id == parentIds[i].ParentId).Children.Add(_mapper.Map<ScheduleHistoryViewModel>(parentIds[i]));
+                }
+                return Ok(Utilities.ReturnSuccess(data: objReturn));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
 
-                //if (entity == null)
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
-                //_mapper.Map<ScheduleListViewModel>(entity)
-                return Ok(Utilities.ReturnSuccess(data: ""));
+
+        /// <summary>
+        /// TIME LINE DO PROCESSO OPCIONAL
+        /// </summary>
+        ///  <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "familyId": "", // required
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("TimeLineProcessOptional/{familyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> TimeLineProcessOptional([FromRoute] string familyId)
+        {
+            try
+            {
+                bool course = true;
+                bool enquete = true;
+                bool video = true;
+                bool jogos = true;
+
+                if (!await _courseFamilyRepository.CheckByAsync(x => x.FamilyId == familyId).ConfigureAwait(false))
+                    course = false;
+
+                if (!await _quizFamilyRepository.CheckByAsync(x => x.FamilyId == familyId && x.TypeStatus == TypeStatus.Respondido).ConfigureAwait(false))
+                    enquete = false;
+
+                var objReturn = new
+                {
+                    course,
+                    enquete
+                };
+
+                return Ok(Utilities.ReturnSuccess(data: objReturn));
             }
             catch (Exception ex)
             {
@@ -331,6 +378,14 @@ namespace Moralar.WebApi.Controllers
         /// <summary>
         /// DETALHES DA FAMÍLIA
         /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "id": "", // required
+        ///             }
+        /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
         /// <response code="401">Unauthorize Error</response>
@@ -342,20 +397,10 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
             {
-
-                if (ObjectId.TryParse(id, out var unused) == false)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
-                var userId = Request.GetUserId();
-
-                if (string.IsNullOrEmpty(userId))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
-
                 var entity = await _familyRepository.FindByIdAsync(id).ConfigureAwait(false);
 
                 if (entity == null)
@@ -371,23 +416,37 @@ namespace Moralar.WebApi.Controllers
         /// <summary>
         /// IMPORTAÇÃO DA FAMÍLIA
         /// </summary>
+        /// <remarks>
+        ///  OBJ DE ENVIO
+        /// 
+        ///         GET
+        ///             {
+        ///              "file": "", // Arquivo a ser importado
+        ///             }
+        /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpGet("Import")]
+        [HttpGet("Import/{file}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> Import()
+        public async Task<IActionResult> Import([FromRoute] string file)
         {
             try
             {
-                var fi = new System.IO.FileInfo(@"D:\Megaleios\Documentos\MOralar\Modelo Importação Familias.xlsx");
+                var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
+
+                var exists = Directory.Exists(folder);
+
+                if (!exists)
+                    Directory.CreateDirectory(folder);
+
+                var fi = new System.IO.FileInfo(folder + "\\" + file);
                 using (var package = new ExcelPackage(fi))
                 {
                     ExcelWorksheet sheet = package.Workbook.Worksheets[1];
@@ -577,6 +636,7 @@ namespace Moralar.WebApi.Controllers
                     }
                 }
                 //package.Save();
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.ImportFamily, TypeResposible.UserAdminstratorGestor, $"Importou as famílias {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
 
                 return Ok(Utilities.ReturnSuccess());
             }
@@ -586,8 +646,10 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+
+
         /// <summary>
-        /// DETALHES DA FAMÍLIA
+        /// BUSCA OS DADOS DO USUÁRIO LOGADO
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -621,9 +683,141 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+        /// <summary>
+        /// DISTÂNCIA DA RESIDÊNCIA ATÉ O IMÓVEL ESCOLHIDO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DisplacementMap/{familyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> DisplacementMap([FromRoute] string familyId)
+        {
+            try
+            {
+
+                var family = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
+                if (family == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                var infoOrigin = await _utilService.GetInfoFromZipCode(family.Address.CEP).ConfigureAwait(false);
+                if (infoOrigin == null)
+                    return BadRequest(Utilities.ReturnErro("Cep não encontrado"));
+
+                var residencialOrigin = Utilities.GetInfoFromAdressLocation(infoOrigin.StreetAddress + " " + infoOrigin.Complement + " " + infoOrigin.Neighborhood + " " + infoOrigin.CityName + " " + infoOrigin.StateUf);
+                if (residencialOrigin.Erro == true)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.LocationNotFound));
+
+
+
+                var propertyInterest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                var residencialDestination = await _residencialPropertyRepository.FindIn(c => c.TypeStatusResidencialProperty == TypeStatusResidencial.Vendido, "_id", propertyInterest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList(), Builders<ResidencialProperty>.Sort.Ascending(nameof(ResidencialProperty.LastUpdate))) as List<ResidencialProperty>;
+                if (residencialDestination.FirstOrDefault() == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
+                if (residencialDestination.Count() > 1)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialSaled));
+
+                var infoDestination = await _utilService.GetInfoFromZipCode(residencialDestination.FirstOrDefault().ResidencialPropertyAdress.CEP).ConfigureAwait(false);
+                if (infoDestination == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
+
+                var destination = Utilities.GetInfoFromAdressLocation(infoDestination.StreetAddress + " " + infoDestination.Complement + " " + infoDestination.Neighborhood + " " + infoDestination.CityName + " " + infoDestination.StateUf);
+                var distanceM = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'M');
+                var distanceK = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'K');
+
+                var familyVw = _mapper.Map<FamilyHolderDistanceViewModel>(family);
+                familyVw.AddressPropertyDistanceMeters = distanceM;
+                familyVw.AddressPropertyDistanceKilometers = distanceK;
+                familyVw.AddressPropertyOrigin = residencialOrigin.FormatedAddress;
+                familyVw.AddressPropertyDestination = destination.FormatedAddress;
+                return Ok(Utilities.ReturnSuccess(data: familyVw));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
 
         /// <summary>
-        /// LISTA TODAS FAMÍLIAS
+        /// DISTÂNCIA DA RESIDÊNCIA ATÉ O IMÓVEL ESCOLHIDO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DisplacementMapAllFamilies")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> DisplacementMapAllFamilies()
+        {
+            try
+            {
+
+                var family = await _familyRepository.FindAllAsync().ConfigureAwait(false);
+                if (family.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                var listDisplacement = new List<FamilyHolderDistanceViewModel>();
+
+                foreach (var item in family)
+                {
+                    var propertyInterest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == item._id.ToString()).ConfigureAwait(false);
+                    var residencialDestination = await _residencialPropertyRepository.FindIn(c => c.TypeStatusResidencialProperty == TypeStatusResidencial.Vendido, "_id", propertyInterest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList(), Builders<ResidencialProperty>.Sort.Ascending(nameof(ResidencialProperty.LastUpdate))) as List<ResidencialProperty>;
+                    if (residencialDestination.Count() == 1)
+                    {
+                        var infoOrigin = await _utilService.GetInfoFromZipCode(item.Address.CEP).ConfigureAwait(false);
+                        if (infoOrigin == null)
+                            return BadRequest(Utilities.ReturnErro("Cep não encontrado"));
+
+                        var residencialOrigin = Utilities.GetInfoFromAdressLocation(infoOrigin.StreetAddress + " " + infoOrigin.Complement + " " + infoOrigin.Neighborhood + " " + infoOrigin.CityName + " " + infoOrigin.StateUf);
+                        if (residencialOrigin.Erro == true)
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.LocationNotFound));
+
+
+                        if (residencialDestination.FirstOrDefault() == null)
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
+                        if (residencialDestination.Count() > 1)
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialSaled));
+
+                        var infoDestination = await _utilService.GetInfoFromZipCode(residencialDestination.FirstOrDefault().ResidencialPropertyAdress.CEP).ConfigureAwait(false);
+                        if (infoDestination == null)
+                            return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
+
+                        var destination = Utilities.GetInfoFromAdressLocation(infoDestination.StreetAddress + " " + infoDestination.Complement + " " + infoDestination.Neighborhood + " " + infoDestination.CityName + " " + infoDestination.StateUf);
+                        var distanceM = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'M');
+                        var distanceK = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'K');
+
+                        var familyVw = _mapper.Map<FamilyHolderDistanceViewModel>(item);
+                        familyVw.AddressPropertyDistanceMeters = distanceM;
+                        familyVw.AddressPropertyDistanceKilometers = distanceK;
+                        familyVw.AddressPropertyOrigin = residencialOrigin.FormatedAddress;
+                        familyVw.AddressPropertyDestination = destination.FormatedAddress;
+                        listDisplacement.Add(familyVw);
+                    }
+
+                }
+                
+                return Ok(Utilities.ReturnSuccess(data: listDisplacement));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+        /// <summary>
+        /// LISTA FAMÍLIAS POR FILTRO
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -771,11 +965,12 @@ namespace Moralar.WebApi.Controllers
                     await _familyRepository.UpdateAsync(profile.FirstOrDefault());
 
                 });
-
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
                 return Ok(Utilities.ReturnSuccess("Verifique seu e-mail"));
             }
             catch (Exception ex)
             {
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Não foi possível atualizar a senha", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -786,6 +981,17 @@ namespace Moralar.WebApi.Controllers
         /// OBJ DE ENVIO
         /// 
         ///         POST
+        ///          "address": {
+        ///            "streetAddress": "string",
+        ///            "number": "string",
+        ///            "cityName": "string",
+        ///            "cityId": "string",
+        ///            "stateName": "string",
+        ///            "stateUf": "string",
+        ///            "neighborhood": "string",
+        ///            "complement": "string",
+        ///            "location": "string"
+        ///          },
         ///         "holder": {
         ///          "number": "",
         ///          "name": "name",
@@ -881,6 +1087,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityId = await _familyRepository.UpdateOneAsync(family).ConfigureAwait(false);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Registrou uma família {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -984,7 +1191,6 @@ namespace Moralar.WebApi.Controllers
                 var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
                 family.Holder.Birthday = dateUnix;
                 family.Holder.Cpf = model.Holder.Cpf.OnlyNumbers();
-                family.CanChooseProperty = false;
 
                 var newPassword = Utilities.RandomString(8);
                 family.Password = newPassword;
@@ -1005,6 +1211,8 @@ namespace Moralar.WebApi.Controllers
                 {
                     await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
                 });
+
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Criadoa família {model.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId);
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -1015,7 +1223,7 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// VALIDAR USUÁRIO
+        /// VERIFICA SE A FAMÍLIA JÁ ESTÁ CADASTRADA ATRAVÉS DO CPF
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO
@@ -1056,7 +1264,108 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
-
+        /// <summary>
+        /// EDITA FAMÍLIA
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///         {
+        ///       "holder": {
+        ///       "name": "string",
+        ///       "genre": "Feminino",
+        ///       "email": "string",
+        ///       "phone": "string",
+        ///       "scholarity": "Não possui"
+        ///       },
+        ///       "spouse": {
+        ///       "name": "string",
+        ///       "birthday": 0,
+        ///       "genre": "Feminino",
+        ///       "scholarity": "Não possui"
+        ///       },
+        ///       "members": [
+        ///       {
+        ///       "name": "string",
+        ///       "birthday": 0,
+        ///       "genre": "Feminino",
+        ///       "kinShip": "Filha",
+        ///       "scholarity": "Não possui"
+        ///       }
+        ///       ],
+        ///       "financial": {
+        ///       "familyIncome": 0,
+        ///       "propertyValueForDemolished": 0,
+        ///       "maximumPurchase": 0,
+        ///       "incrementValue": 0
+        ///       },
+        ///       "priorization": {
+        ///       "workFront": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "permanentDisabled": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "elderlyOverEighty": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "yearsInSextyAndSeventyNine": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "womanServedByProtectiveMeasure": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "femaleBreadWinner": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "singleParent": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "familyWithMoreThanFivePeople": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "childUnderEighteen": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "headOfHouseholdWithoutIncome": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "benefitOfContinuedProvision": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "familyPurse": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "involuntaryCohabitation": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       },
+        ///       "familyIncomeOfUpTwoMinimumWages": {
+        ///       "rate": 0,
+        ///       "value": true
+        ///       }
+        ///       },
+        ///       "id": "string"
+        ///       }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
         [HttpPost("Edit")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
@@ -1386,11 +1695,12 @@ namespace Moralar.WebApi.Controllers
                 entity.Password = model.NewPassword;
 
                 _familyRepository.Update(entity);
-
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, userId);
                 return Ok(Utilities.ReturnSuccess("Senha alterada com sucesso."));
             }
             catch (Exception ex)
             {
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }

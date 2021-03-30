@@ -10,7 +10,11 @@ namespace Moralar.Domain.ViewModels.Family
 {
     public class FamilyEditViewModel: BaseViewModel
     {
-       
+
+        /// <summary>
+        /// Dados do Endereço
+        /// </summary>
+        public FamilyAddressViewModel Address { get; set; }
         /// <summary>
         /// Dados do Titular da Família
         /// </summary>

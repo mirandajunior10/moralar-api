@@ -16,6 +16,11 @@ namespace Moralar.Data.Entities
         {
             Members = new List<FamilyMember>();
         }
+
+        /// <summary>
+        /// Endereço do Titular
+        /// </summary>
+        public FamilyAddress Address { get; set; }
         /// <summary>
         /// Dados do Titular
         /// </summary>
@@ -46,9 +51,6 @@ namespace Moralar.Data.Entities
         public string Reason { get; set; }
         public string MotherName { get; set; }
         public string MotherCityBorned { get; set; }
-        public bool CanChooseProperty { get; set; }
-
-
         public override string CollectionName => nameof(Family);
 
     }

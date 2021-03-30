@@ -179,34 +179,7 @@ namespace Moralar.WebApi.Controllers
                     }
                     itensAdded.Add(itemAdded);
                 }
-                //var entityAddNewQuestion = _mapper.Map<Question>(model.Question);
-                //entityAddNewQuestion.NameTitle = model.NameTitle;
-
-
-
-
-
-
-
-                //List<string> itensAdded = new List<string>();
-                //foreach (var item in model.Question)
-                //{
-
-                //    var entity = _mapper.Map<Question>(item);
-                //    item.NameTitle = model.NameTitle;
-                //    var itemAdded = await _questionRepository.UpdateOneAsync(entity).ConfigureAwait(false);
-
-                //    foreach (var itemDescription in item.Description)
-                //    {
-                //        var description = new QuestionDescription()
-                //        {
-                //            Description = itemDescription.Description,
-                //            QuestionId = itemAdded
-                //        };
-                //        await _questionDescriptionRepository.CreateAsync(description).ConfigureAwait(false);
-                //    }
-                //    itensAdded.Add(itemAdded);
-                //}
+              
                 //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
@@ -216,14 +189,20 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
-
+        /// <summary>
+        /// BUSCA A QUESTÃO PELO ID DA RESPOSTA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
         [HttpGet("GetQuestionByIdToResponse")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetQuestionByIdToResponse(string id)
         {
             try
@@ -254,7 +233,14 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
-
+        /// <summary>
+        /// DELETA A QUESTÃO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
         [HttpPost("Delete")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
@@ -334,7 +320,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] QuizUpdateViewModel model)
         {
 

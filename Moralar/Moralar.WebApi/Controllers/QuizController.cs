@@ -111,7 +111,7 @@ namespace Moralar.WebApi.Controllers
 
 
         /// <summary>
-        /// LISTA TODOS OS QUESTIONÁRIOS
+        /// LISTA OS QUESTIONÁRIOS/ENQUETES POR NOME E TIPO
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
@@ -124,7 +124,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetByName(string nameQuiz, TypeQuiz typeQuiz)
         {
             try
@@ -164,7 +163,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Export([FromForm] string nameQuiz, [FromForm] TypeQuiz typeQuiz)
         {
 
@@ -219,7 +217,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, [FromForm] TypeQuiz typeQuiz)
         {
             var response = new DtResult<QuizViewModel>();
@@ -280,7 +277,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -315,7 +311,6 @@ namespace Moralar.WebApi.Controllers
                             });
                     }
                 }
-                var pc = questionDescription;
                 return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
             }
             catch (Exception ex)
@@ -371,7 +366,7 @@ namespace Moralar.WebApi.Controllers
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
-
+                var families = await _familyRepository.FindByAsync(x => x.DataBlocked == null).ConfigureAwait(false);
                 var quizEntity = _mapper.Map<Quiz>(model);
                 var quizEntityId = await _quizRepository.CreateAsync(quizEntity).ConfigureAwait(false);
 
@@ -392,6 +387,21 @@ namespace Moralar.WebApi.Controllers
                         await _questionDescriptionRepository.CreateAsync(description).ConfigureAwait(false);
                     }
                     itensAdded.Add(itemAdded);
+                }
+                if (model.TypeQuiz == TypeQuiz.Enquete)
+                {
+                    foreach (var item in families)
+                    {
+                        _quizFamilyRepository.Create(new QuizFamily()
+                        {
+                            FamilyId = item._id.ToString(),
+                            QuizId =quizEntityId,
+                            HolderName = item.Holder.Name,
+                            HolderCpf = item.Holder.Cpf,
+                            HolderNumber = item.Holder.Number,
+                            TypeStatus= TypeStatus.NaoRespondido
+                        });
+                    }
                 }
                 //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
 
@@ -436,7 +446,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> RegisterQuizToFamily([FromBody] QuizFamilyViewModel model)
         {
 

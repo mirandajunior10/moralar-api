@@ -12,10 +12,12 @@ namespace Moralar.Domain.ViewModels.Quiz
     {
         public string Id{get;set;}
         public string QuizId { get; set; }
+        public string Title { get; set; }
         public string Created { get; set; }
         public string HolderName { get; set; }
         public string HolderCpf { get; set; }
         public string HolderNumber { get; set; }
         public string Status { get; set; }
+        public TypeQuiz TypeQuiz { get; set; }
     }
 }

@@ -14,9 +14,11 @@ using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
+using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.Schedule;
+using Moralar.Domain.ViewModels.ScheduleHistory;
 using Moralar.Repository.Interface;
 using System;
 using System.Collections.Generic;
@@ -46,8 +48,15 @@ namespace Moralar.WebApi.Controllers
         private readonly IScheduleHistoryRepository _scheduleHistoryRepository;
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
+        private readonly IQuizRepository _quizRepository;
+        private readonly IQuizFamilyRepository _quizFamilyRepository;
+        private readonly ICourseFamilyRepository _courseFamilyRepository;
+        private readonly ICourseRepository _courseRepository;
+        private readonly IPropertiesInterestRepository _propertiesInterestRepository;
+        private readonly IResidencialPropertyRepository _residencialPropertyRepository;
+        private readonly INotificationSendedRepository _notificationSendedRepository;
 
-        public ScheduleController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, IUtilService utilService, ISenderMailService senderMailService)
+        public ScheduleController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, IUtilService utilService, ISenderMailService senderMailService, IQuizRepository quizRepository, IQuizFamilyRepository quizFamilyRepository, ICourseFamilyRepository courseFamilyRepository, ICourseRepository courseRepository, IPropertiesInterestRepository propertiesInterestRepository, IResidencialPropertyRepository residencialPropertyRepository, INotificationSendedRepository notificationSendedRepository)
         {
             _mapper = mapper;
             _familyRepository = familyRepository;
@@ -55,36 +64,42 @@ namespace Moralar.WebApi.Controllers
             _scheduleHistoryRepository = scheduleHistoryRepository;
             _utilService = utilService;
             _senderMailService = senderMailService;
+            _quizRepository = quizRepository;
+            _quizFamilyRepository = quizFamilyRepository;
+            _courseFamilyRepository = courseFamilyRepository;
+            _courseRepository = courseRepository;
+            _propertiesInterestRepository = propertiesInterestRepository;
+            _residencialPropertyRepository = residencialPropertyRepository;
+            _notificationSendedRepository = notificationSendedRepository;
         }
 
 
 
 
         /// <summary>
-        /// DETALHES DA FAMÍLIA
+        /// RETORNA O HISTÓRICO DOS AGENDAMENTOS POR FAMÍLIA
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpGet("GetHistoryByFamily")]
+        [HttpGet("GetHistoryByFamily/{familyId}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> GetHistoryByFamily()
+        public async Task<IActionResult> GetHistoryByFamily([FromRoute] string familyId)
         {
             try
             {
-                var userId = Request.GetUserId();
-                var entity = await _scheduleRepository.FindByAsync(x => x.FamilyId == userId).ConfigureAwait(false);
+                var entity = await _scheduleHistoryRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
 
                 if (entity == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleListViewModel>>(entity.OrderBy(x => x.Created).ToList())));
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleHistoryViewModel>>(entity.OrderBy(x => x.TypeSubject).ThenBy(x=> x.Created).ToList())));
             }
             catch (Exception ex)
             {
@@ -105,8 +120,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus ?status, [FromForm] TypeSubject typeSubject)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus? status, [FromForm] TypeSubject typeSubject)
         {
             var response = new DtResult<ScheduleListViewModel>();
             try
@@ -165,7 +179,7 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
-        ///// <summary>
+        /// <summary>
         /// DETALHES DO QUIZ
         /// </summary>
         /// <response code="200">Returns success</response>
@@ -179,7 +193,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -200,28 +213,19 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// REGISTRAR UM NOVO QUESTIONÁRIO
+        /// REGISTRAR UM NOVO AGENDAMENTO
         /// </summary>
         /// <remarks>
         ///OBJ DE ENVIO
         ///
         ///        POST
         ///        {
-        ///          "title": "string",
-        ///           "typeQuiz": 0 = Questionário, 1 = Enquete,
-        ///          "questionRegister": {
-        ///            "question": [
-        ///              {
-        ///                "nameQuestion": "string",
-        ///                "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
-        ///                "description": [
-        ///                  {
-        ///                    "description": "string"
-        ///                  }
-        ///                ]
-        ///              }
-        ///            ]
-        ///          }
+        ///        "date": 0,
+        ///        "place": "string",
+        ///        "description": "string",
+        ///        "familyId": "string",
+        ///        "typeSubject": " Visita do TTS",
+        ///        "id": "string"
         ///        }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -235,7 +239,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] ScheduleRegisterViewModel model)
         {
 
@@ -261,24 +264,54 @@ namespace Moralar.WebApi.Controllers
                 scheduleEntity.HolderName = family.Holder.Name;
                 scheduleEntity.HolderNumber = family.Holder.Number;
                 scheduleEntity.TypeSubject = model.TypeSubject;
+
+
+
                 scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
 
 
-                await _scheduleRepository.CreateAsync(scheduleEntity).ConfigureAwait(false);
+                var scheduleId = await _scheduleRepository.CreateAsync(scheduleEntity).ConfigureAwait(false);
+
 
 
                 var scheduleHistoryEntity = _mapper.Map<ScheduleHistory>(model);
+                scheduleHistoryEntity.HolderCpf = family.Holder.Cpf;
+                scheduleHistoryEntity.HolderName = family.Holder.Name;
+                scheduleHistoryEntity.HolderNumber = family.Holder.Number;
+                scheduleHistoryEntity.TypeSubject = model.TypeSubject;
+                scheduleHistoryEntity.ScheduleId = scheduleId;
                 await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
+                if (model.TypeSubject == TypeSubject.ReuniaoPGM)
+                {
+                    scheduleHistoryEntity._id = new ObjectId();
+                    scheduleHistoryEntity.TypeSubject = TypeSubject.EscolhaDoImovel;
+                    await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
 
+                    scheduleHistoryEntity._id = new ObjectId();
+                    scheduleHistoryEntity.TypeSubject = TypeSubject.Mudanca;
+                    await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
+
+                    scheduleHistoryEntity._id = new ObjectId();
+                    scheduleHistoryEntity.TypeSubject = TypeSubject.AcompanhamentoPosMudança;
+                    await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
+                }
                 var dataBody = Util.GetTemplateVariables();
-
-
-                dataBody.Add("{{ title }}", $"Olá {family.Holder.Name.GetFirstName()}!");
-                dataBody.Add("{{ message }}", $"<p>Sua agenda { Utilities.ToEnum<TypeSubject>(model.TypeSubject.ToString())} foi marcada</p>" +
-                                            $"<p>Dia { Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("dd/MM/yyyy")}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("HH:mm")} , endereço {{xxx}}</p>" +
-                                            $"Aguardamos você!"
-                                            );
-
+                if (model.TypeSubject == TypeSubject.ReuniaoPGM)
+                {
+                    //_notificationSendedRepository
+                    dataBody.Add("{{ title }}", "Cadastro de Agendamento");
+                    dataBody.Add("{{ message }}", $"<p>Caro(a) {family.Holder.Name.GetFirstName()}</p>" +
+                                                $"<p>Foi cadastrado um agendamento para o horário {dateToSchedule.ToString("dd/MM/yyyy")}</p>"
+                                                );
+                }
+                else
+                {
+                    dataBody.Add("{{ title }}", $"Olá {family.Holder.Name.GetFirstName()}!");
+                    dataBody.Add("{{ message }}", $"<p>Sua agenda { Utilities.ToEnum<TypeSubject>(model.TypeSubject.ToString())} foi marcada</p>" +
+                                                $"<p>Dia { Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("dd/MM/yyyy")}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("HH:mm")} , endereço {{xxx}}</p>" +
+                                                $"Aguardamos você!"
+                                                );
+                }
                 var body = _senderMailService.GerateBody("custom", dataBody);
 
                 var unused = Task.Run(async () =>
@@ -301,21 +334,12 @@ namespace Moralar.WebApi.Controllers
         ///
         ///        POST
         ///        {
-        ///          "title": "string",
-        ///           "typeQuiz": 0 = Questionário, 1 = Enquete,
-        ///          "questionRegister": {
-        ///            "question": [
-        ///              {
-        ///                "nameQuestion": "string",
-        ///                "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
-        ///                "description": [
-        ///                  {
-        ///                    "description": "string"
-        ///                  }
-        ///                ]
-        ///              }
-        ///            ]
-        ///          }
+        ///          "date": 0,
+        ///          "place": "string",
+        ///          "description": "string",
+        ///          "familyId": "string",
+        ///          "typeSubject": " Visita do TTS",
+        ///          "id": "string"
         ///        }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -329,7 +353,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> RegisterResettlement([FromBody] ScheduleRegisterViewModel model)
         {
 
@@ -380,8 +403,260 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+
+
         /// <summary>
-        /// REGISTRAR UM NOVO QUESTIONÁRIO
+        /// RETORNA OS  DETALHES DA LINHA DO TEMPO DA FAMÍLIA - ESCOLHA DO IMÓVEL
+        /// </summary>
+        /// <response code = "200" > Returns success</response>
+        /// <response code = "400" > Custom Error</response>
+        /// <response code = "401" > Unauthorize Error</response>
+        /// <response code = "500" > Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DetailTimeLineProcessChooseProperty/{familyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DetailTimeLineProcessChooseProperty([FromRoute] string familyId)
+        {
+            try
+            {
+                var vwScheduleDetailTimeLineChoosePropertyViewModel = new ScheduleDetailTimeLineChoosePropertyViewModel();
+                var family = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
+                if (family == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                vwScheduleDetailTimeLineChoosePropertyViewModel = _mapper.Map<ScheduleDetailTimeLineChoosePropertyViewModel>(family);
+
+                var schedule = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == familyId && x.TypeSubject == TypeSubject.EscolhaDoImovel);
+                if (schedule == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+
+                var interest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<PropertiesInterest>;
+                if (interest.Count() >0)
+                {
+                    var residencialPropertyInterest = await _residencialPropertyRepository.FindIn("_id", interest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                    vwScheduleDetailTimeLineChoosePropertyViewModel.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialPropertyInterest);
+
+                    var scheduleHistory = _scheduleHistoryRepository.FindBy(x => x.FamilyId == familyId).OrderBy(x => x.TypeSubject).ThenBy(x => x.Created).ToList();
+                    vwScheduleDetailTimeLineChoosePropertyViewModel.Schedules = _mapper.Map<List<ScheduleHistoryViewModel>>(scheduleHistory);
+                }
+
+
+                var listQuizByFamily = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId, Builders<QuizFamily>.Sort.Descending(nameof(QuizFamily.Created))) as List<QuizFamily>;
+                var listQuiz = await _quizRepository.FindIn("_id", listQuizByFamily.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
+
+                for (int i = 0; i < listQuizByFamily.Count(); i++)
+                {
+                    if (listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).TypeQuiz == TypeQuiz.Quiz)
+                    {
+                        vwScheduleDetailTimeLineChoosePropertyViewModel.DetailQuiz.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
+                        {
+                            Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
+                            Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                            HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                            QuizId = listQuizByFamily[i].QuizId,
+                            QuizFamilyId = listQuizByFamily[i]._id.ToString()
+                        });
+                    }
+                    else
+                    {
+                        vwScheduleDetailTimeLineChoosePropertyViewModel.DetailEnquete.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
+                        {
+                            Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
+                            Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                            HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                            QuizId = listQuizByFamily[i].QuizId,
+                            QuizFamilyId = listQuizByFamily[i]._id.ToString()
+                        });
+                    }
+                }
+
+                var courseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<CourseFamily>; ;
+                var course = await _courseRepository.FindIn("_id", courseFamily.Select(x => ObjectId.Parse(x.CourseId.ToString())).ToList()) as List<Course>;
+                for (int i = 0; i < courseFamily.Count(); i++)
+                {
+                    vwScheduleDetailTimeLineChoosePropertyViewModel.Courses.Add(new ScheduleCourseViewModel()
+                    {
+                        Title = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).Title,
+                        StartDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).StartDate,
+                        EndDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).EndDate,
+                        TypeStatusCourse = courseFamily[i].TypeStatusCourse
+                    });
+                }
+                return Ok(Utilities.ReturnSuccess(data: vwScheduleDetailTimeLineChoosePropertyViewModel));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// RETORNA OS  DETALHES DA LINHA DO TEMPO DA FAMÍLIA - ESCOLHA DO IMÓVEL 1 e 2
+        /// </summary>
+        /// <response code = "200" > Returns success</response>
+        /// <response code = "400" > Custom Error</response>
+        /// <response code = "401" > Unauthorize Error</response>
+        /// <response code = "500" > Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DetailTimeLineProcessChoosePropertyOneAndTwo/{familyId}/{typeSubject}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DetailTimeLineProcessChoosePropertyOneAndTwo([FromRoute] string familyId, [FromRoute] TypeSubject typeSubject)
+        {
+            try
+            {
+                typeSubject = TypeSubject.Mudanca;
+                List<int> enumsValid = new List<int> { (int)TypeSubject.Mudanca, (int)TypeSubject.AcompanhamentoPosMudança };
+                if (!enumsValid.Contains((int)typeSubject))
+                    return BadRequest(Utilities.ReturnErro("Tipo de Assunto inválido! Deve-se utilizar( Mudança e Acompanhamento pós mudança)"));
+
+                var _vwcheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel = new ScheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel();
+                var family = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
+                if (family == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                _vwcheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel = _mapper.Map<ScheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel>(family);
+
+                var scheduleHistory = _scheduleHistoryRepository.FindBy(x => x.FamilyId == familyId && x.TypeSubject == typeSubject).OrderBy(x => x.TypeSubject).ThenBy(x => x.Created).ToList();
+                _vwcheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel.Schedules = _mapper.Map<List<ScheduleHistoryViewModel>>(scheduleHistory);
+
+                var listQuizByFamily = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId, Builders<QuizFamily>.Sort.Descending(nameof(QuizFamily.Created))) as List<QuizFamily>;
+                var listQuiz = await _quizRepository.FindIn("_id", listQuizByFamily.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
+
+                for (int i = 0; i < listQuizByFamily.Count(); i++)
+                {
+                    if (listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).TypeQuiz == TypeQuiz.Quiz)
+                    {
+                        _vwcheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel.DetailQuiz.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
+                        {
+                            Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
+                            Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                            HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                            QuizId = listQuizByFamily[i].QuizId,
+                            QuizFamilyId = listQuizByFamily[i]._id.ToString()
+                        });
+                    }
+                    else
+                    {
+                        _vwcheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel.DetailEnquete.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
+                        {
+                            Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
+                            Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                            HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                            QuizId = listQuizByFamily[i].QuizId,
+                            QuizFamilyId = listQuizByFamily[i]._id.ToString()
+                        });
+                    }
+                }
+
+                var courseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<CourseFamily>; ;
+                var course = await _courseRepository.FindIn("_id", courseFamily.Select(x => ObjectId.Parse(x.CourseId.ToString())).ToList()) as List<Course>;
+                for (int i = 0; i < courseFamily.Count(); i++)
+                {
+                    _vwcheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel.Courses.Add(new ScheduleCourseViewModel()
+                    {
+                        Title = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).Title,
+                        StartDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).StartDate,
+                        EndDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).EndDate,
+                        TypeStatusCourse = courseFamily[i].TypeStatusCourse
+                    });
+                }
+                return Ok(Utilities.ReturnSuccess(data: _vwcheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+
+
+        /// <summary>
+        /// RETORNA OS  DETALHES DA LINHA DO TEMPO DA FAMÍLIA - REUNIÃO PGM
+        /// </summary>
+        /// <response code = "200" > Returns success</response>
+        /// <response code = "400" > Custom Error</response>
+        /// <response code = "401" > Unauthorize Error</response>
+        /// <response code = "500" > Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DetailTimeLineProcessReunionPGM/{familyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> DetailTimeLineProcessReunionPGM([FromRoute] string familyId)
+        {
+            try
+            {
+                var family = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
+                if (family == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+                var schedule = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == familyId && x.TypeSubject == TypeSubject.ReuniaoPGM);
+                if (schedule == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+
+                var listQuizByFamily = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId, Builders<QuizFamily>.Sort.Descending(nameof(QuizFamily.Created))) as List<QuizFamily>;
+                var listQuiz = await _quizRepository.FindIn("_id", listQuizByFamily.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
+
+
+                var vwTimeLine = _mapper.Map<ScheduleDetailTimeLinePGMViewModel>(schedule);
+                for (int i = 0; i < listQuizByFamily.Count(); i++)
+                {
+                    if (listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).TypeQuiz == TypeQuiz.Quiz)
+                    {
+                        vwTimeLine.DetailQuiz.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
+                        {
+                            Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
+                            Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                            HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                            QuizId = listQuizByFamily[i].QuizId,
+                            QuizFamilyId = listQuizByFamily[i]._id.ToString()
+                        });
+                    }
+                    else
+                    {
+                        vwTimeLine.DetailEnquete.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
+                        {
+                            Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
+                            Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                            HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                            QuizId = listQuizByFamily[i].QuizId,
+                            QuizFamilyId = listQuizByFamily[i]._id.ToString()
+                        });
+                    }
+                }
+
+                var courseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<CourseFamily>; ;
+                var course = await _courseRepository.FindIn("_id", courseFamily.Select(x => ObjectId.Parse(x.CourseId.ToString())).ToList()) as List<Course>;
+                for (int i = 0; i < courseFamily.Count(); i++)
+                {
+                    vwTimeLine.Courses.Add(new ScheduleCourseViewModel()
+                    {
+                        Title = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).Title,
+                        StartDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).StartDate,
+                        EndDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).EndDate,
+                        TypeStatusCourse = courseFamily[i].TypeStatusCourse
+                    });
+                }
+                return Ok(Utilities.ReturnSuccess(data: vwTimeLine));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// MUDA A SITUAÇÃO DA ETAPA - Aguardando confirmação = 0 - Confirmado = 1 - Aguardando reagendamento = 2 - Reagendado = 3 - Finalizado = 4
         /// </summary>
         /// <remarks>
         ///OBJ DE ENVIO
@@ -417,24 +692,31 @@ namespace Moralar.WebApi.Controllers
                 if (family == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                
+
                 var scheduleEntity = await _scheduleRepository.FindByIdAsync(model.Id).ConfigureAwait(false); ;
                 scheduleEntity.Date = model.Date;
                 scheduleEntity.TypeScheduleStatus = model.TypeScheduleStatus;
                 scheduleEntity.Description = model.Description;
                 scheduleEntity.Place = model.Place;
+
                 if (model.TypeScheduleStatus == TypeScheduleStatus.Reagendado)
                     scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
                 await _scheduleRepository.UpdateAsync(scheduleEntity).ConfigureAwait(false);
 
-                model.Id = null;
+                var scheduleHistoryList = await _scheduleHistoryRepository.FindByAsync(x => x.TypeSubject == scheduleEntity.TypeSubject && x.FamilyId == model.FamilyId).ConfigureAwait(false) as List<ScheduleHistory>;
                 var scheduleHistoryEntity = _mapper.Map<ScheduleHistory>(model);
                 scheduleHistoryEntity.HolderCpf = family.Holder.Cpf;
                 scheduleHistoryEntity.HolderName = family.Holder.Name;
                 scheduleHistoryEntity.HolderNumber = family.Holder.Number;
+                scheduleHistoryEntity.TypeSubject = scheduleEntity.TypeSubject;
                 scheduleHistoryEntity.TypeScheduleStatus = model.TypeScheduleStatus;
                 scheduleHistoryEntity.ScheduleId = scheduleEntity._id.ToString();
+                scheduleHistoryEntity.ParentId = scheduleHistoryList?.LastOrDefault()?._id.ToString();
+                scheduleHistoryEntity._id = new ObjectId();
                 await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
+
+
+
 
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
@@ -445,57 +727,90 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
-        ///// <summary>
-        ///// MUDAR O ASSUNTO DA
-        ///// </summary>
-        ///// <remarks>
-        /////OBJ DE ENVIO
-        ///// </remarks>
-        ///// <response code="200">Returns success</response>
-        ///// <response code="400">Custom Error</response>
-        ///// <response code="401">Unauthorize Error</response>
-        ///// <response code="500">Exception Error</response>
-        ///// <returns></returns>
-        //[HttpPost("ChangeSubject")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(401)]
-        //[ProducesResponseType(500)]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> ChangeSubject([FromBody] ScheduleChangeSubjectViewModel model)
-        //{
 
-        //    try
-        //    {
-        //        var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.Date), nameof(model.Description), nameof(model.FamilyId), nameof(model.Place));
-        //        if (isInvalidState != null)
-        //            return BadRequest(isInvalidState);
+        /// <summary>
+        /// MUDA A SITUAÇÃO DA ETAPA DOS PROCESSOS DE REASSENTAMENTO  - ReuniaoPGM = 2 - EscolhaDoImovel = 4 - Mudanca = 7 - AcompanhamentoPosMudança = 8
+        /// </summary>
+        /// <remarks>
+        ///OBJ DE ENVIO
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ChangeSubject")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> ChangeSubject([FromBody] ScheduleChangeSubjectViewModel model)
+        {
 
-
-        //        var dateToSchedule = Utilities.TimeStampToDateTime(model.Date);
-        //        if (dateToSchedule < DateTime.Now)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalidToSchedule));
-
-        //        var family = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
-        //        if (family == null)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+            try
+            {
+                //Reunião PGM -  ReuniaoPGM = 2,
+                //Escolha do imóvel -  EscolhaDoImovel = 7,
+                //Mudança -    Mudanca = 4,
+                //Acompanhamento pós-mudança -  AcompanhamentoPosMudança = 8
+                List<int> enumsValid = new List<int> { (int)TypeSubject.ReuniaoPGM, (int)TypeSubject.EscolhaDoImovel, (int)TypeSubject.Mudanca, (int)TypeSubject.AcompanhamentoPosMudança };
+                if (!enumsValid.Contains((int)model.TypeSubject))
+                    return BadRequest(Utilities.ReturnErro("Tipo de Assunto inválido! Deve-se utilizar(Reunião Pgm - Escolha do Imóvel - Mudança - Acompanhamento pós mudança)"));
 
 
-        //        var scheduleEntity = _mapper.Map<Schedule>(model);
-        //        scheduleEntity.HolderCpf = family.Holder.Cpf;
-        //        scheduleEntity.HolderName = family.Holder.Name;
-        //        scheduleEntity.HolderNumber = family.Holder.Number;
-        //        scheduleEntity.TypeScheduleStatus = model.TypeSubject;
-        //        return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _utilService.RegisterLogAction(LocalAction.Question, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar/atualizar novo questionário", "", "", "", "", ex);
-        //        return BadRequest(ex.ReturnErro());
-        //    }
-        //}
+                var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.Date), nameof(model.Description), nameof(model.FamilyId), nameof(model.Place));
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
 
+
+                var dateToSchedule = Utilities.TimeStampToDateTime(model.Date);
+                if (dateToSchedule < DateTime.Now)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalidToSchedule));
+
+                var family = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
+                if (family == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+
+                var scheduleEntity = await _scheduleRepository.FindByIdAsync(model.Id).ConfigureAwait(false); ;
+                if (scheduleEntity.TypeScheduleStatus != TypeScheduleStatus.Finalizado)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ChangeSubject));
+
+                scheduleEntity.Date = model.Date;
+                scheduleEntity.Description = model.Description;
+                scheduleEntity.Place = model.Place;
+                scheduleEntity.TypeSubject = model.TypeSubject;
+                scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
+                await _scheduleRepository.UpdateAsync(scheduleEntity).ConfigureAwait(false);
+
+
+                var scheduleHistoryList = await _scheduleHistoryRepository.FindByAsync(x => x.TypeSubject == scheduleEntity.TypeSubject && x.FamilyId == model.FamilyId).ConfigureAwait(false) as List<ScheduleHistory>;
+                if (scheduleHistoryList.Exists(x => x.TypeSubject == TypeSubject.EscolhaDoImovel || x.TypeSubject == TypeSubject.Mudanca || x.TypeSubject == TypeSubject.AcompanhamentoPosMudança))
+                {
+                    //var c = scheduleHistoryList.Where(x => x.TypeSubject == scheduleEntity.TypeSubject);
+                    await _scheduleHistoryRepository.UpdateOneAsync(scheduleHistoryList.FirstOrDefault()).ConfigureAwait(false);
+                }
+                else
+                {
+                    model.Id = null;
+                    var scheduleHistoryEntity = _mapper.Map<ScheduleHistory>(model);
+                    scheduleHistoryEntity.HolderCpf = family.Holder.Cpf;
+                    scheduleHistoryEntity.HolderName = family.Holder.Name;
+                    scheduleHistoryEntity.HolderNumber = family.Holder.Number;
+                    scheduleHistoryEntity.TypeScheduleStatus = scheduleEntity.TypeScheduleStatus;
+                    scheduleHistoryEntity.ScheduleId = scheduleEntity._id.ToString();
+                    await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
+                }
+                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+            }
+            catch (Exception ex)
+            {
+                await _utilService.RegisterLogAction(LocalAction.Question, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar/atualizar novo questionário", "", "", "", "", ex);
+                return BadRequest(ex.ReturnErro());
+            }
+        }
 
     }
 

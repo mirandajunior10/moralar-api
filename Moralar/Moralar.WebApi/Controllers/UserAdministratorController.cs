@@ -98,7 +98,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
+        //[OnlyAdministrator]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -352,7 +352,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
+        //[OnlyAdministrator]
         public async Task<IActionResult> Delete([FromBody] UserAdministratorViewModel model)
         {
             try
@@ -399,7 +399,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
+        //[OnlyAdministrator]
         public async Task<IActionResult> BlockUnblock([FromBody] BlockViewModel model)
         {
             try
@@ -443,7 +443,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
+        //[OnlyAdministrator]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model)
         {
             var response = new DtResult<UserAdministratorViewModel>();

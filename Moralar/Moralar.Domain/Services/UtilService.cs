@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Moralar.Data.Entities;
 using Moralar.Data.Enum;
 using Moralar.Domain.Services.Interface;
+using Moralar.Domain.ViewModels;
 using Moralar.Repository.Interface;
+using RestSharp;
 using System;
 using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
@@ -12,15 +16,17 @@ using UtilityFramework.Application.Core;
 namespace Moralar.Domain.Services
 {
 
-    public class UtilService : IUtilService
+    public class UtilService :ControllerBase, IUtilService
     {
         private readonly IMapper _mapper;
         private readonly ILogActionRepository _logActionRepository;
+        private readonly ICityRepository _cityRepository;
 
-        public UtilService(IMapper mapper, ILogActionRepository logActionRepository)
+        public UtilService(IMapper mapper, ILogActionRepository logActionRepository, ICityRepository cityRepository)
         {
             _mapper = mapper;
             _logActionRepository = logActionRepository;
+            _cityRepository = cityRepository;
         }
 
         public string GetFlag(string flag)
@@ -114,6 +120,43 @@ namespace Moralar.Domain.Services
             catch (Exception)
             {
                 /*unused*/
+            }
+        }
+        public async Task<InfoAddressViewModel> GetInfoFromZipCode(string zipCode)
+        {
+            try
+            {
+                if (string.IsNullOrEmpty(zipCode))
+                     Utilities.ReturnErro("Informe o CEP");
+
+                var client = new RestSharp.RestClient($"http://viacep.com.br/ws/{zipCode.OnlyNumbers()}/json/");
+
+                var request = new RestSharp.RestRequest(Method.GET);
+
+                var infoZipCode = await client.Execute<AddressInfoViewModel>(request).ConfigureAwait(false);
+
+                if (infoZipCode.Data.Erro)
+                   Utilities.ReturnErro(DefaultMessages.ZipCodeNotFound);
+
+                var response = _mapper.Map<InfoAddressViewModel>(infoZipCode.Data);
+
+                //var city = await _cityRepository.FindOneByAsync(x => x.Name == infoZipCode.Data.Localidade && x.StateUf == infoZipCode.Data.Uf).ConfigureAwait(false);
+
+                //if (city == null)
+                //   Utilities.ReturnSuccess(data: response);
+
+                //response.CityId = city._id.ToString();
+                //response.CityName = city.Name;
+                //response.StateId = city.StateId;
+                //response.StateUf = infoZipCode.Data.Uf;
+                //response.StateName = city.StateName;
+
+
+                return  response;
+            }
+            catch (Exception ex)
+            {
+                return null;
             }
         }
     }

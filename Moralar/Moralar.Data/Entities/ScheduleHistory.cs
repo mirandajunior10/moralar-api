@@ -19,10 +19,10 @@ namespace Moralar.Data.Entities
         public string HolderNumber { get; set; }
         public string HolderName { get; set; }
         public string HolderCpf { get; set; }
-
+        public string ParentId { get; set; }
         public string ScheduleId { get; set; }
         public TypeSubject TypeSubject { get; set; }
-
+        
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
         public override string CollectionName => nameof(ScheduleHistory);
     }

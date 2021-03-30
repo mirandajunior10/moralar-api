@@ -16,5 +16,6 @@ namespace Moralar.Data.Entities.Auxiliar
         public string Neighborhood { get; set; }
         public string Complement { get; set; }
         public string Location { get; set; }
+        public string CEP { get; set; }
     }
 }

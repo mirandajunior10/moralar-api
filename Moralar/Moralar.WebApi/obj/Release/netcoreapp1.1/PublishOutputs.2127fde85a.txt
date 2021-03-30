@@ -8,6 +8,7 @@ D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.1\PubTmp\Out\Content\images\logo.png
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.1\PubTmp\Out\Content\politica-de-privacidade.html
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.1\PubTmp\Out\Content\termos-de-uso.html
+D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.1\PubTmp\Out\Content\upload\Modelo Importação Familias.xlsx
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.1\PubTmp\Out\Template\custom.html
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.1\PubTmp\Out\appsettings.Development.json
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.WebApi\obj\Release\netcoreapp1.1\PubTmp\Out\appsettings.json

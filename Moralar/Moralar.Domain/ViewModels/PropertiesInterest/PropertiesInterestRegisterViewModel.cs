@@ -14,7 +14,7 @@ namespace Moralar.Domain.ViewModels.PropertiesInterest
         public string FamilyId { get; set; }
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Necessário passar a residência")]
-        public string ResidelcialPropertyId { get; set; }
+        public string ResidencialPropertyId { get; set; }
 
       
     }

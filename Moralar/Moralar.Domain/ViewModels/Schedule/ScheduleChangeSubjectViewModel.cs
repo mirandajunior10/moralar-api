@@ -12,7 +12,7 @@ namespace Moralar.Domain.ViewModels.Schedule
         public string Description { get; set; }
         public long Date { get; set; }
         public string FamilyId { get; set; }
-        public string ScheduleId { get; set; }
-        public TypeScheduleStatus TypeSubject { get; set; }
+        public TypeSubject TypeSubject { get; set; }
+        //public TypeScheduleStatus TypeScheduleStatus { get; set; }
     }
 }

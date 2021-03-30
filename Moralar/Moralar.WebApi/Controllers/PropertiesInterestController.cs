@@ -15,6 +15,7 @@ using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.PropertiesInterest;
+using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
@@ -55,125 +56,89 @@ namespace Moralar.WebApi.Controllers
             _utilService = utilService;
         }
 
+        /// <summary>
+        /// DETALHES DOS MATCHS DA FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DetailFamilyMatch/{familyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DetailFamilyMatch([FromRoute] string familyId)
+        {
+            try
+            {
 
+                var Entity = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                if (Entity == null)
+                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
 
+                var residencialProperties = await _residencialPropertyRepository.FindIn("_id", Entity.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                if (residencialProperties.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
 
+                var vieoViewModel = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialProperties);
 
+                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
+            }
+        }
         ///// <summary>
-        ///// LISTAGEM DOS QUESTINÁRIOS DATATABLE
+        ///// DETALHES DAS FAMÍLIAS INTERESSADAS NO IMÓVEL
         ///// </summary>
         ///// <response code="200">Returns success</response>
         ///// <response code="400">Custom Error</response>
         ///// <response code="401">Unauthorize Error</response>
         ///// <response code="500">Exception Error</response>
         ///// <returns></returns>
-        //[HttpPost("LoadData")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(401)]
-        //[ProducesResponseType(500)]
-        ////[ApiExplorerSettings(IgnoreApi = true)]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, [FromForm] TypeQuiz typeQuiz)
-        //{
-        //    var response = new DtResult<PropertiesInterestViewModel>();
-        //    try
-        //    {
-        //        var builder = Builders<Data.Entities.PropertiesInterest>.Filter;
-        //        var conditions = new List<FilterDefinition<Data.Entities.PropertiesInterest>>();
+        [HttpGet("DetailFamiliesMatch/{ResidencialPropertyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DetailFamiliesMatch([FromRoute] string ResidencialPropertyId)
+        {
+            try
+            {
 
-        //        conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
+                var Entity = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == ResidencialPropertyId).ConfigureAwait(false);
+                if (Entity == null)
+                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
 
-        //        var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
+                var families = await _familyRepository.FindIn("_id", Entity.Select(x => ObjectId.Parse(x.FamilyId.ToString())).ToList()) as List<Family>;
 
-        //        var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
-        //        var totalRecords = (int)await _quizRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+                var vieoViewModel = _mapper.Map<List<FamilyCompleteListViewModel>>(families);
 
-        //        var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
-        //            ? Builders<Data.Entities.Quiz>.Sort.Descending(sortColumn)
-        //            : Builders<Data.Entities.Quiz>.Sort.Ascending(sortColumn);
 
-        //        var retorno = await _quizRepository
-        //            .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns);
+                for (int i = 0; i < families.Count(); i++)
+                {
+                    foreach (var p in families.ToList()[i].Priorization.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
+                    {
+                        var priorityRate = (PriorityRate)p.GetValue(families.ToList()[i].Priorization, null);
+                        vieoViewModel.Find(x => x.Id == families.ToList()[i]._id.ToString()).Priorization.Add(_mapper.Map<PriorityRateViewModel>(priorityRate));
+                    }
+                }
 
-        //        var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
-        //            ? (int)await _quizRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
-        //            : totalRecords;
+                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
+            }
+        }
 
-        //        response.Data = _mapper.Map<List<QuizViewModel>>(retorno);
-        //        response.Draw = model.Draw;
-        //        response.RecordsFiltered = totalrecordsFiltered;
-        //        response.RecordsTotal = totalRecords;
 
-        //        return Ok(response);
 
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        response.Erro = true;
-        //        response.MessageEx = $"{ex.InnerException} {ex.Message}".Trim();
-
-        //        return Ok(response);
-        //    }
-        //}
-
-        ///// <summary>
-        ///// DETALHES DO QUIZ
-        ///// </summary>
-        ///// <response code="200">Returns success</response>
-        ///// <response code="400">Custom Error</response>
-        ///// <response code="401">Unauthorize Error</response>
-        ///// <response code="500">Exception Error</response>
-        ///// <returns></returns>
-        //[HttpGet("Detail/{id}")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(401)]
-        //[ProducesResponseType(500)]
-        //[AllowAnonymous]
-        //public async Task<IActionResult> Detail([FromRoute] string id)
-        //{
-        //    try
-        //    {
-        //        var entity = await _quizRepository.FindByIdAsync(id).ConfigureAwait(false);
-        //        if (entity == null)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
-
-        //        var question = await _questionRepository.FindByAsync(x => x.QuizId == entity._id.ToString()).ConfigureAwait(false) as List<Question>;
-        //        if (question.Count() == 0)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
-
-        //        var _quizViewModel = new QuizDetailViewModel()
-        //        {
-        //            Id = entity._id.ToString(),
-        //            Title = entity.Title,
-        //            TypeQuiz = entity.TypeQuiz
-        //        };
-
-        //        var questionDescription = await _questionDescriptionRepository.FindIn("QuestionId", question.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<QuestionDescription>;
-        //        for (int i = 0; i < question.Count(); i++)
-        //        {
-        //            _quizViewModel.QuestionViewModel.Add(_mapper.Map<QuestionViewModel>(question[i]));
-        //            foreach (var item in questionDescription.Where(x => x.QuestionId == question[i]._id.ToString()))
-        //            {
-        //                if (item != null)
-        //                    _quizViewModel.QuestionViewModel[i].Description.Add(new QuestionDescriptionViewModel()
-        //                    {
-        //                        Id = item._id.ToString(),
-        //                        Description = item.Description,
-        //                        QuestionId = item.QuestionId
-        //                    });
-        //            }
-        //        }
-        //        var pc = questionDescription;
-        //        return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        return BadRequest(ex.ReturnErro());
-        //    }
-        //}
 
         /// <summary>
         /// REGISTRAR UM INTERESSE AO IMÓVEL
@@ -183,21 +148,9 @@ namespace Moralar.WebApi.Controllers
         ///
         ///        POST
         ///        {
-        ///          "title": "string",
-        ///           "typeQuiz": 0 = Questionário, 1 = Enquete,
-        ///          "questionRegister": {
-        ///            "question": [
-        ///              {
-        ///                "nameQuestion": "string",
-        ///                "typeResponse": "Texto", Enum Texto = 0,MultiplaEscolha = 1,EscolhaUnica = 2,ListaSuspensa = 3
-        ///                "description": [
-        ///                  {
-        ///                    "description": "string"
-        ///                  }
-        ///                ]
-        ///              }
-        ///            ]
-        ///          }
+        ///        "familyId": "string",
+        ///        "residencialPropertyId": "string",
+        ///        "id": "string"
         ///        }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -223,14 +176,14 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(isInvalidState);
 
 
-                if (await _propertiesInterestRepository.CheckByAsync(X => X.FamilyId == model.FamilyId && X.ResidelcialPropertyId == model.ResidelcialPropertyId).ConfigureAwait(false))
+                if (await _propertiesInterestRepository.CheckByAsync(X => X.FamilyId == model.FamilyId && X.ResidencialCode == model.ResidencialPropertyId).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyInUse));
 
                 var familyEntity = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
                 if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                var residencialEntity = await _residencialPropertyRepository.FindByIdAsync(model.ResidelcialPropertyId).ConfigureAwait(false);
+                var residencialEntity = await _residencialPropertyRepository.FindByIdAsync(model.ResidencialPropertyId).ConfigureAwait(false);
                 if (residencialEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
@@ -240,6 +193,7 @@ namespace Moralar.WebApi.Controllers
                 entityProperty.HolderEmail = familyEntity.Holder.Email;
                 entityProperty.HolderCpf = familyEntity.Holder.Cpf;
                 entityProperty.HolderNumber = familyEntity.Holder.Number;
+                entityProperty.ResidencialCode = residencialEntity.Code;
                 entityProperty.Priorization = familyEntity.Priorization;
 
                 await _propertiesInterestRepository.CreateAsync(entityProperty).ConfigureAwait(false);
@@ -268,7 +222,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model)
         {
             //, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf
@@ -298,26 +251,25 @@ namespace Moralar.WebApi.Controllers
                 ? Builders<Data.Entities.PropertiesInterest>.Sort.Descending(sortColumn)
                 : Builders<Data.Entities.PropertiesInterest>.Sort.Ascending(sortColumn);
 
-                var pfasdfa =await _propertiesInterestRepository.FindAllAsync().ConfigureAwait(false) as List<PropertiesInterest>;
                 var retorno = await _propertiesInterestRepository
                     .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns);
 
 
-                var t = retorno.ToList();
+                //var t = retorno.ToList();
                 var propertiesEntity = _mapper.Map<List<PropertiesInterestViewModel>>(retorno);
-                for (int i = 0; i < t.Count(); i++)
+                for (int i = 0; i < retorno.Count(); i++)
                 {
-                    var s = t[i].Priorization;
+                    var s = retorno.ToList()[i].Priorization;
 
                     foreach (var p in s.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
                     {
                         var g = (PriorityRate)p.GetValue(s, null);
                         if (g.Value == true)
-                            propertiesEntity.Find(x => x.Id == t[i]._id.ToString()).PriorityRates.Add(g);
+                            propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).PriorityRates.Add(g);
                     }
-                }
-                
+                    propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).Interest = retorno.Count(x => x.ResidencialPropertyId == retorno.ToList()[i].ResidencialPropertyId.ToString());
 
+                }
 
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
                     ? (int)await _propertiesInterestRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
@@ -325,10 +277,10 @@ namespace Moralar.WebApi.Controllers
 
                 var teste = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
 
-                var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidelcialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
                 for (int i = 0; i < propertiesEntity.Count(); i++)
                 {
-                    var objResidencial = residencialEntity.FirstOrDefault(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidelcialPropertyId));
+                    var objResidencial = residencialEntity.FirstOrDefault(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidencialPropertyId));
                     if (objResidencial != null)
                         propertiesEntity[i].ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(objResidencial.ResidencialPropertyAdress);
                 }
