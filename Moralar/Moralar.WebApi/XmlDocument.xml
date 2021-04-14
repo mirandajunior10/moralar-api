@@ -1169,7 +1169,7 @@
             
                     POST
                         {
-                         "email":"string"
+                         "cpf":"string"
                         }
             </remarks>
             <response code="200">Returns success</response>
@@ -2021,6 +2021,25 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.VideoController.Edit(Moralar.Domain.ViewModels.Video.VideoViewModel)">
+            <summary>
+            EDITAR UM VÍDEO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+                    POST
+                        {
+                          "Thumbnail": "fasdfasqwerqwe",/// IMAGEM DO VÍDEO
+                          "Title": "", // TÍTULO
+                          "Duration": "1:32",//DURAÇÃO DO VÍDEO
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.VideoController.Save(Moralar.Domain.ViewModels.Video.VideoViewModel)">
             <summary>
             CADASTRAR UM VÍDEO
@@ -2032,6 +2051,24 @@
                           "Thumbnail": "fasdfasqwerqwe",/// IMAGEM DO VÍDEO
                           "Title": "", // TÍTULO
                           "Duration": "1:32",//DURAÇÃO DO VÍDEO
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.VideoController.RegisterVideoViewed(Moralar.Domain.ViewModels.VideoViewed.VideoViewedViewModel)">
+            <summary>
+            CADASTRAR UM VÍDEO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+                    POST
+                        {
+                          "VideoId" :"",
+                          "FamilyId" : ""
                         }
             </remarks>
             <response code="200">Returns success</response>

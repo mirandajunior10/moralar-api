@@ -11,7 +11,7 @@ namespace Moralar.Data.Entities
     [BsonIgnoreExtraElements]
     public class Informative : ModelBase
     {
-        public long DatePublish { get; set; }
+        public long? DatePublish { get; set; }
         public string Image { get; set; }
         public string Description { get; set; }
         public TypeStatusActiveInactive Status { get; set; }

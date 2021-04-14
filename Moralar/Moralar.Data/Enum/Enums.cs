@@ -52,7 +52,10 @@ namespace Moralar.Data.Enum
         Gestor = 0,
         [EnumMember(Value = "TTS")]
         [Description("TTS")]
-        TTS = 1
+        TTS = 1,
+        [EnumMember(Value = "Admin")]
+        [Description("Admin")]
+        Admin = 2
     }
     public enum Language
     {
@@ -117,7 +120,10 @@ namespace Moralar.Data.Enum
         Gestor = 1,
         [EnumMember(Value = "Família")]
         [Description("Família")]
-        Familia = 2
+        Familia = 2, 
+        [EnumMember(Value = "Admin")]
+        [Description("Admin")]
+        Admin = 3
 
     }
     public enum TypeScholarity

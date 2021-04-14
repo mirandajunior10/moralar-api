@@ -224,7 +224,7 @@ namespace Moralar.WebApi.Controllers
                     await _informativeSendedRepository.CreateAsync(informationSended);
                 }
                 await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
-                return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
+                return Ok(Utilities.ReturnSuccess(DefaultMessages.Registred));
 
             }
             catch (Exception ex)
@@ -309,7 +309,7 @@ namespace Moralar.WebApi.Controllers
                    ? (int)await _informativeRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                    : totalRecords;
 
-                response.Data = _mapper.Map<List<InformativeListViewModel>>(retorno.OrderBy(x => x.Created));
+                response.Data = _mapper.Map<List<InformativeListViewModel>>(retorno.OrderBy(x => x.Created)).ToList();
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;
@@ -450,7 +450,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityId = await _informativeRepository.UpdateOneAsync(entityInformative).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Informativo, model.Block==true? TypeAction.Block: TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Cadastrou novo curso {model.Title}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                await _utilService.RegisterLogAction(LocalAction.Informativo, model.Block==true? TypeAction.Block: TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Cadastrou bloqueou o informativo {entityInformative.Description}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
                 return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
             }
             catch (Exception ex)

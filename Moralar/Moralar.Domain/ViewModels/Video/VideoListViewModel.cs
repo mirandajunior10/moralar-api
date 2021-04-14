@@ -5,7 +5,7 @@ using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Video
 {
-    public class VideoViewModel : BaseViewModel
+    public class VideoListViewModel:BaseViewModel
     {
         public long Created { get; set; }
         public string Thumbnail { get; set; }
@@ -13,5 +13,7 @@ namespace Moralar.Domain.ViewModels.Video
         public string URL { get; set; }
         public bool Blocked { get; set; }
         public string Name { get; set; }
+        public int AmountViewed { get; set; }
+        
     }
 }

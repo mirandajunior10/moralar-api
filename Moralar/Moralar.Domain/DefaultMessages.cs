@@ -64,6 +64,7 @@ namespace Moralar.Domain
         public const string QuizFamilyNotFound = "Não foi encontrado essa disponibilização de questionário para a família";
         public const string DescriptionNotFound = "Descrição não encontrado";
         public const string QuestionNotFound = "Quiz não encontrado";
+        public const string QuestionIdNotFound = "Necessário passar o Id da Questão";
         public const string FamilyNotFound = "Família não encontrado";
         public const string ScheduleNotFound = "Agendamento não encontrado";
         public const string AnyFamilyNotFound = "Alguma família não encontrado";

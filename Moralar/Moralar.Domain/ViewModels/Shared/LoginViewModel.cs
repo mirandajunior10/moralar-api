@@ -19,5 +19,7 @@ namespace Moralar.Domain.ViewModels
         public string RefreshToken { get; set; }
         public string ProviderId { get; set; }
         public TypeProvider TypeProvider { get; set; }
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        public TypeUserProfile TypeUserProfile { get; set; }
     }
 }

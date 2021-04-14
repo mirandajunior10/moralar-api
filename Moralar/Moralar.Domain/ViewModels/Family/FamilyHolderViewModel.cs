@@ -21,13 +21,13 @@ namespace Moralar.Domain.ViewModels.Family
         [Display(Name = "CPF do titular")]
         public string Cpf { get; set; }
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Data de nascimento")]
-        public long Birthday { get; set; }
+        public long? Birthday { get; set; }
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Gênero")]
-        public TypeGenre Genre { get; set; }
+        public TypeGenre? Genre { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "E-mail")]
@@ -37,8 +37,8 @@ namespace Moralar.Domain.ViewModels.Family
         [Display(Name = "Telefone")]
         public string Phone { get; set; }
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Escolaridade")]
-        public TypeScholarity Scholarity { get; set; }
+        public TypeScholarity? Scholarity { get; set; }
     }
 }

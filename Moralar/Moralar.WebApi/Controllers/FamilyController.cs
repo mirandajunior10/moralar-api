@@ -397,6 +397,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
+        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -627,9 +628,12 @@ namespace Moralar.WebApi.Controllers
                         };
 
                         var family = _mapper.Map<Data.Entities.Family>(vw);
-                        var dateBir = Utilities.TimeStampToDateTime(vw.Holder.Birthday);
-                        var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
-                        family.Holder.Birthday = dateUnix;
+                        if (vw.Holder.Birthday.HasValue)
+                        {
+                            var dateBir = Utilities.TimeStampToDateTime(vw.Holder.Birthday.Value);
+                            var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
+                            family.Holder.Birthday = dateUnix;
+                        }
                         family.Holder.Cpf = vw.Holder.Cpf.OnlyNumbers();
 
                         var entityId = await _familyRepository.CreateAsync(family).ConfigureAwait(false);
@@ -808,7 +812,7 @@ namespace Moralar.WebApi.Controllers
                     }
 
                 }
-                
+
                 return Ok(Utilities.ReturnSuccess(data: listDisplacement));
             }
             catch (Exception ex)
@@ -1080,9 +1084,12 @@ namespace Moralar.WebApi.Controllers
 
                 family = _mapper.Map<Data.Entities.Family>(model);
                 family._id = familiId;
-                var dateBir = Utilities.TimeStampToDateTime(model.Holder.Birthday);
-                var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
-                family.Holder.Birthday = dateUnix;
+                if (model.Holder.Birthday.HasValue)
+                {
+                    var dateBir = Utilities.TimeStampToDateTime(model.Holder.Birthday.Value);
+                    var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
+                    family.Holder.Birthday = dateUnix;
+                }
                 family.Holder.Cpf = model.Holder.Cpf.OnlyNumbers();
 
 
@@ -1187,9 +1194,12 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
 
                 var family = _mapper.Map<Data.Entities.Family>(model);
-                var dateBir = Utilities.TimeStampToDateTime(model.Holder.Birthday);
-                var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
-                family.Holder.Birthday = dateUnix;
+                if (model.Holder.Birthday.HasValue)
+                {
+                    var dateBir = Utilities.TimeStampToDateTime(model.Holder.Birthday.Value);
+                    var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
+                    family.Holder.Birthday = dateUnix;
+                }
                 family.Holder.Cpf = model.Holder.Cpf.OnlyNumbers();
 
                 var newPassword = Utilities.RandomString(8);

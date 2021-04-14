@@ -15,6 +15,7 @@ using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Video;
+using Moralar.Domain.ViewModels.VideoViewed;
 using System.Collections.Generic;
 using UtilityFramework.Application.Core;
 using AutoMapperProfile = AutoMapper.Profile;
@@ -81,7 +82,8 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<QuestionViewModel, Question>()
               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<QuestionRegisterViewModel, Question>();
-            CreateMap<QuestionDescriptionViewModel, QuestionDescription>();
+            CreateMap<QuestionDescriptionViewModel, QuestionDescription>()
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
 
             CreateMap<QuestionDescriptionViewModel, QuestionDescription>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
@@ -148,7 +150,11 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<VideoViewModel, Video>()
        .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
-
+            #region VideoViewed
+            CreateMap<VideoViewedViewModel, VideoViewed>()
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+            
+            #endregion
 
 
         }

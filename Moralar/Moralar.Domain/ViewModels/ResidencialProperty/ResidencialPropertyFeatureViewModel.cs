@@ -20,15 +20,17 @@ namespace Moralar.Domain.ViewModels.Property
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Metragem quadrada")]
+        [Range(typeof(decimal), "0", "79228162514264337593543950335",ErrorMessage ="Insira um número maior que 0")]
+
         public decimal SquareFootage { get; set; }
 
 
         [Display(Name = "Valor do condomínio")]
-        public decimal CondominiumValue { get; set; }
+        public decimal? CondominiumValue { get; set; }
 
 
         [Display(Name = "Valor do IPTU")]
-        public decimal IptuValue { get; set; }
+        public decimal? IptuValue { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
@@ -54,11 +56,13 @@ namespace Moralar.Domain.ViewModels.Property
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Número de quartos")]
+        [Range(0, 2000, ErrorMessage = "Insira um valor maior que 0 ")]
         public int NumberOfBedrooms { get; set; }
 
         
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Número de banheiros")]
+        [Range(0, 2000, ErrorMessage = "Insira um valor maior que 0 ")]
         public int NumberOfBathrooms { get; set; }
 
 

@@ -28,7 +28,10 @@ namespace Moralar.Domain.Services
             _logActionRepository = logActionRepository;
             _cityRepository = cityRepository;
         }
+        public string GetEscolasMunicipaisEnsinoFundamental() {
 
+            return "";
+        }
         public string GetFlag(string flag)
         {
             switch (flag)

@@ -277,6 +277,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
+        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -285,7 +286,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
-                var question = await _questionRepository.FindByAsync(x => x.QuizId == entity._id.ToString()).ConfigureAwait(false) as List<Question>;
+                var question = await _questionRepository.FindByAsync(x => x.QuizId == entity._id.ToString() && x.Disabled==null).ConfigureAwait(false) as List<Question>;
                 if (question.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
 
@@ -300,7 +301,7 @@ namespace Moralar.WebApi.Controllers
                 for (int i = 0; i < question.Count(); i++)
                 {
                     _quizViewModel.QuestionViewModel.Add(_mapper.Map<QuestionViewModel>(question[i]));
-                    foreach (var item in questionDescription.Where(x => x.QuestionId == question[i]._id.ToString()))
+                    foreach (var item in questionDescription.Where(x => x.QuestionId == question[i]._id.ToString() && x.Disabled==null))
                     {
                         if (item != null)
                             _quizViewModel.QuestionViewModel[i].Description.Add(new QuestionDescriptionViewModel()

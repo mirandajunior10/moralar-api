@@ -58,14 +58,6 @@ namespace Moralar.WebApi.Controllers
             _utilService = utilService;
             _senderMailService = senderMailService;
         }
-
-
-
-
-
-
-
-
         /// <summary>
         /// BLOQUEAR / DESBLOQUEAR CURSO 
         /// </summary>

@@ -8,7 +8,7 @@ namespace Moralar.Domain.ViewModels.Family
     public class FamilyFinancialViewModel
     {
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Renda familiar")]
+        [Display(Name = "Renda familiar", Description = DefaultMessages.FieldRequired)]
         public decimal FamilyIncome { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
@@ -20,6 +20,6 @@ namespace Moralar.Domain.ViewModels.Family
         public decimal MaximumPurchase { get; set; }
 
         [Display(Name = "Valor de incremento")]
-        public decimal IncrementValue { get; set; }
+        public decimal? IncrementValue { get; set; }
     }
 }

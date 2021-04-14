@@ -12,12 +12,12 @@ namespace Moralar.Domain.ViewModels.Family
         public string Name { get; set; }
         
         [Display(Name = "Data de nascimento")]
-        public long Birthday { get; set; }
+        public long? Birthday { get; set; }
 
         [Display(Name = "Gênero")]
-        public TypeGenre Genre { get; set; }
+        public TypeGenre? Genre { get; set; }
 
         [Display(Name = "Escolaridade")]
-        public TypeScholarity Scholarity { get; set; }
+        public TypeScholarity? Scholarity { get; set; }
     }
 }

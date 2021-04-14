@@ -575,7 +575,7 @@ namespace Moralar.WebApi.Controllers
         public async Task<IActionResult> Token([FromBody] LoginViewModel model)
         {
             var claims = new List<Claim>();
-            var claim = Util.SetRole(TypeProfile.Gestor);
+            var claim = model.TypeUserProfile== TypeUserProfile.Gestor? Util.SetRole(TypeProfile.Gestor): Util.SetRole(TypeProfile.TTS);
             var claimUserName = Request.GetUserName();
             claims.Add(claim);
 
@@ -607,8 +607,10 @@ namespace Moralar.WebApi.Controllers
                     if (isInvalidState != null)
                         return BadRequest(isInvalidState);
 
-                    entity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
-                            : await _profileRepository.FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password).ConfigureAwait(false);
+                    //entity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
+                    //        : await _profileRepository.FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password && x.TypeProfile== model.TypeUserProfile).ConfigureAwait(false);
+
+                    entity = await _profileRepository.FindOneByAsync(x => x.Password == model.Password && x.TypeProfile == model.TypeUserProfile).ConfigureAwait(false);
                     if (entity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 
@@ -941,7 +943,7 @@ namespace Moralar.WebApi.Controllers
         /// 
         ///         POST
         ///             {
-        ///              "email":"string"
+        ///              "cpf":"string"
         ///             }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -961,12 +963,12 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 model?.TrimStringProperties();
-                var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.Email));
+                var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.Cpf));
 
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                var profile = await _profileRepository.FindOneByAsync(x => x.Email == model.Email).ConfigureAwait(false);
+                var profile = await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf).ConfigureAwait(false);
 
                 if (profile == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileUnRegistred));

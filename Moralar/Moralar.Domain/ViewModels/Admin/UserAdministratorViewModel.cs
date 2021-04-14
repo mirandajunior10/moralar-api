@@ -1,4 +1,5 @@
-﻿using Newtonsoft.Json;
+﻿using Moralar.Data.Enum;
+using Newtonsoft.Json;
 using System.ComponentModel.DataAnnotations;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
@@ -8,8 +9,6 @@ namespace Moralar.Domain.ViewModels.Admin
     public class UserAdministratorViewModel : BaseViewModel
     {
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        public string Login { get; set; }
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         public string Password { get; set; }
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         public string Name { get; set; }
@@ -18,5 +17,7 @@ namespace Moralar.Domain.ViewModels.Admin
         public string Email { get; set; }
         public int Level { get; set; }
         public bool Blocked { get; set; }
+        [JsonIgnore]
+        public TypeUserProfile TypeProfile { get; set; }
     }
 }

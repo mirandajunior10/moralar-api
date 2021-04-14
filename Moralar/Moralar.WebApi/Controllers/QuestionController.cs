@@ -179,7 +179,7 @@ namespace Moralar.WebApi.Controllers
                     }
                     itensAdded.Add(itemAdded);
                 }
-              
+
                 //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
@@ -215,7 +215,7 @@ namespace Moralar.WebApi.Controllers
                 //    if (string.IsNullOrEmpty(userId))
                 //        return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
-                var entityQuestion = await _questionRepository.FindOneByAsync(x => x._id == ObjectId.Parse(id) && x.Disabled == null).ConfigureAwait(false) ;
+                var entityQuestion = await _questionRepository.FindOneByAsync(x => x._id == ObjectId.Parse(id) && x.Disabled == null).ConfigureAwait(false);
                 if (entityQuestion == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
 
@@ -225,7 +225,7 @@ namespace Moralar.WebApi.Controllers
 
                 var listQuestion = _mapper.Map<QuestionViewModel>(entityQuestion);
                 listQuestion.Description = _mapper.Map<List<QuestionDescriptionViewModel>>(entityDescription);
-             
+
                 return Ok(Utilities.ReturnSuccess(data: listQuestion));
             }
             catch (Exception ex)
@@ -320,6 +320,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
+        [AllowAnonymous]
         public async Task<IActionResult> Update([FromBody] QuizUpdateViewModel model)
         {
 
@@ -340,48 +341,119 @@ namespace Moralar.WebApi.Controllers
                 await _quizRepository.UpdateOneAsync(quizToModify).ConfigureAwait(false);
 
 
-                var questionEntity = await _questionRepository.FindByAsync(x => x.QuizId == model.Id).ConfigureAwait(false) as List<Question>;
+                var questionEntity = await _questionRepository.FindByAsync(x => x.QuizId == model.Id && x.Disabled == null).ConfigureAwait(false) as List<Question>;
                 if (questionEntity.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
+
+                // remove as questões selecionadas
+                var excludeQuestion = questionEntity.Where(c => !model.QuestionRegister.Question.Where(x => x.Id != null).Any(g => c._id != null && c._id == ObjectId.Parse(g.Id)) && c.Disabled == null).ToList();
+                if (excludeQuestion.Count() > 0)
+                {
+                    foreach (var item in excludeQuestion)
+                        await _questionRepository.DisableOneAsync(item._id.ToString()).ConfigureAwait(false);
+                }
 
 
                 foreach (var item in model.QuestionRegister.Question)
                 {
-                    var entity = _mapper.Map<Question>(item);
-                    var findToUpdateOrIncludeQuestion = questionEntity.Find(x => x._id == ObjectId.Parse(item.Id));
-                    if (findToUpdateOrIncludeQuestion != null)
+                    //remove os itens da pergunta
+                    var questionDescription = await _questionDescriptionRepository.FindByAsync(x => x.QuestionId == item.Id && x.Disabled == null).ConfigureAwait(false) as List<QuestionDescription>;
+                    var itensToExclude = questionDescription.Where(gg => !item.Description.Any(p2 => p2.Id == gg._id.ToString() && gg.Disabled == null)).ToList();
+                    if (itensToExclude.Count() > 0 && item.Id != null)
                     {
-                        entity.QuizId = model.Id;
-                        await _questionRepository.UpdateAsync(entity).ConfigureAwait(false);
+                        foreach (var itemExclude in itensToExclude)
+                            await _questionDescriptionRepository.DisableOneAsync(itemExclude._id.ToString()).ConfigureAwait(false);
+                    }
 
-                        var questionDescription = await _questionDescriptionRepository.FindByAsync(x => x.QuestionId == entity._id.ToString()) as List<QuestionDescription>;
-                        foreach (var itemDescription in item.Description)
+
+
+                    if (item.Description.Count() > 0)
+                    {
+                        for (int i = 0; i < item.Description.Count; i++)
                         {
-                            if (!string.IsNullOrEmpty(itemDescription.Id))
+                            // Atualiza o item da questão
+                            var itemDescription = _mapper.Map<QuestionDescription>(item.Description[i]);
+                            itemDescription.QuestionId = item.Id;
+                            if (item.Description[i].Id != null)
                             {
-                                var findToUpdateOrIncludeQuestionDescription = questionDescription.Find(x => x._id == ObjectId.Parse(itemDescription.Id));
-                                if (findToUpdateOrIncludeQuestionDescription != null)
-                                {
-                                    var update = _mapper.Map<QuestionDescription>(itemDescription);
-                                    update.QuestionId = findToUpdateOrIncludeQuestionDescription.QuestionId;
-                                    await _questionDescriptionRepository.UpdateOneAsync(update).ConfigureAwait(false);
-                                }
+                                var entityDescription = await _questionDescriptionRepository.FindOneByAsync(x => x._id == ObjectId.Parse(item.Description[i].Id)).ConfigureAwait(false);
+                                if (entityDescription != null)
+                                    await _questionDescriptionRepository.UpdateOneAsync(itemDescription).ConfigureAwait(false);
                             }
                             else
                             {
-                                var create = _mapper.Map<QuestionDescription>(itemDescription);
-                                create.QuestionId = entity._id.ToString();
-                                await _questionDescriptionRepository.CreateAsync(create).ConfigureAwait(false);
+                                //Inclui novas alteranativas para questão existente
+                                if (item.Id != null)
+                                {
+                                    foreach (var alternativa in item.Description.Where(x => x.Id == null))
+                                    {
+                                        var alternativasParaIncluir = _mapper.Map<QuestionDescription>(alternativa);
+                                        alternativasParaIncluir.QuestionId = item.Id;
+                                        await _questionDescriptionRepository.CreateAsync(alternativasParaIncluir).ConfigureAwait(false);
+                                    }
+                                    break;
+                                }
+                                else
+                                {
+                                    // Inclui uma nova questão e suas alternativas
+                                    var questao = _mapper.Map<Question>(item);
+                                    questao.QuizId = model.Id;
+                                    var includeQuestion = _questionRepository.Create(questao);
+                                    foreach (var alternativas in item.Description)
+                                    {
+                                        var alternativasParaIncluir = _mapper.Map<QuestionDescription>(alternativas);
+                                        alternativasParaIncluir.QuestionId = includeQuestion;
+                                        await _questionDescriptionRepository.CreateAsync(alternativasParaIncluir).ConfigureAwait(false);
+                                    }
+                                    break;
+                                    //}
+
+                                }
                             }
+
                         }
+
+
                     }
                     else
                     {
-                        await _questionRepository.CreateAsync(entity).ConfigureAwait(false);
+                        var entity = _mapper.Map<Question>(item);
+                        entity.QuizId = model.Id;
+                        var findToUpdateOrIncludeQuestion = questionEntity.Find(x => x._id == entity._id);
+                        if (findToUpdateOrIncludeQuestion != null)
+                        {
+                            await _questionRepository.UpdateAsync(entity).ConfigureAwait(false);
+                            #region MyRegion
+                            //var question = await _questionRepository.FindByAsync(x => x. == entity.QuizId.ToString()) as List<Question>;
+                            //foreach (var itemDescription in item.Description)
+                            //{
+                            //    if (!string.IsNullOrEmpty(itemDescription.Id))
+                            //    {
+                            //        var findToUpdateOrIncludeQuestionDescription = questionDescription.Find(x => x._id == ObjectId.Parse(itemDescription.Id));
+                            //        if (findToUpdateOrIncludeQuestionDescription != null)
+                            //        {
+                            //            var update = _mapper.Map<QuestionDescription>(itemDescription);
+                            //            update.QuestionId = findToUpdateOrIncludeQuestionDescription.QuestionId;
+                            //            await _questionDescriptionRepository.UpdateOneAsync(update).ConfigureAwait(false);
+                            //        }
+                            //    }
+                            //    else
+                            //    {
+                            //        var create = _mapper.Map<QuestionDescription>(itemDescription);
+                            //        create.QuestionId = entity._id.ToString();
+                            //        await _questionDescriptionRepository.CreateAsync(create).ConfigureAwait(false);
+                            //    }
+                            //}
+                            #endregion
+                        }
+                        else
+                        {
+                            await _questionRepository.CreateAsync(entity).ConfigureAwait(false);
+                        }
                     }
-                }
-                //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
+                    //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
 
+                }
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)

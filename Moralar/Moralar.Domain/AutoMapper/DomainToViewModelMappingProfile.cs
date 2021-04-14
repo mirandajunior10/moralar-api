@@ -153,9 +153,9 @@ namespace Moralar.Domain.AutoMapper
             #region Informative
             CreateMap<Informative, InformativeListViewModel>()
               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
-              .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.DataBlocked != null ? "true" : "false"))
-              .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy")))
-              .ForMember(dest => dest.DatePublish, opt => opt.MapFrom(src => src.DatePublish.TimeStampToDateTime().ToString("dd/MM/yyyy")))
+              .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
+              .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created))
+              .ForMember(dest => dest.DatePublish, opt => opt.MapFrom(src => src.DatePublish != null ? src.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"):null))
               ;
             CreateMap<InformativeSended, InformativeSendedDetailViewModel>()
              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
@@ -205,6 +205,9 @@ namespace Moralar.Domain.AutoMapper
              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
              .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null? true:false))
              .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Thumbnail.Split('/')[6]));
+
+            CreateMap<Video, VideoListViewModel>()
+             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
             #endregion
 

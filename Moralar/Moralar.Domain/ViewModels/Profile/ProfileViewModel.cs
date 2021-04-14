@@ -28,7 +28,6 @@ namespace Moralar.Domain.ViewModels
         [JsonConverter(typeof(ToLowerCase))]
         public string Email { get; set; }
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Telefone")]
         public string Phone { get; set; }
 

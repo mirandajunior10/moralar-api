@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
+using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Driver;
@@ -15,6 +16,7 @@ using Moralar.WebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Security.Claims;
 using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
@@ -32,20 +34,23 @@ namespace Moralar.WebApi.Controllers
 
     public class UserAdministratorController : Controller
     {
+        private readonly IHostingEnvironment _env;
         private readonly IMapper _mapper;
         private readonly IUserAdministratorRepository _userAdministratorRepository;
         private readonly ISenderMailService _senderMailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
 
-
-        public UserAdministratorController(IMapper mapper, IUserAdministratorRepository userAdministratorRepository, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
+        public UserAdministratorController(IHostingEnvironment env, IMapper mapper, IUserAdministratorRepository userAdministratorRepository, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
         {
+            _env = env;
             _mapper = mapper;
             _userAdministratorRepository = userAdministratorRepository;
             _senderMailService = senderMailService;
             _httpContextAccessor = httpContextAccessor;
-
         }
+
+
+
 
         /// <summary>
         /// GET INFO 
@@ -150,6 +155,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Register([FromBody] UserAdministratorViewModel model)
         {
+            var claim = Util.SetRole(TypeProfile.Admin);
             try
             {
                 var validOnly = _httpContextAccessor.GetFieldsFromBody();
@@ -165,7 +171,7 @@ namespace Moralar.WebApi.Controllers
                     if (await _userAdministratorRepository.CheckByAsync(x => x.Email == model.Email))
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailInUse));
 
-
+                    model.TypeProfile = TypeUserProfile.Admin;
                     var entity = _mapper.Map<UserAdministrator>(model);
 
                     if (string.IsNullOrEmpty(model.Password))
@@ -232,10 +238,16 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Token([FromBody] LoginAdminViewModel model)
         {
-            var claim = Util.SetRole(TypeProfile.Gestor);
+            var claims = new List<Claim>();
+            var claim = Util.SetRole(TypeProfile.Admin);
+            var claimUserName = Request.GetUserName();
+            claims.Add(claim);
 
             try
             {
+                if (claimUserName != null)
+                    claims.Add(claimUserName);
+
                 model.TrimStringProperties();
 
                 //if (string.IsNullOrEmpty(model.RefreshToken) == false)
@@ -255,7 +267,9 @@ namespace Moralar.WebApi.Controllers
                 if (userAdministrator.DataBlocked != null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.UserAdministratorBlocked));
 
-                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(userAdministrator._id.ToString(), false, claim)));
+
+                claims.Add(new Claim("UserName", userAdministrator.Name));
+                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(userAdministrator._id.ToString(), false, claims.ToArray())));
             }
             catch (Exception ex)
             {
