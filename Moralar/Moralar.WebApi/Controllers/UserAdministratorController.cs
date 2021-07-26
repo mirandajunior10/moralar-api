@@ -66,6 +66,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
+    
 
         public async Task<IActionResult> GetInfo()
         {
@@ -81,7 +82,9 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.UserAdministratorNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<UserAdministratorViewModel>(entity)));
+                var vw = _mapper.Map<UserAdministratorViewModel>(entity);
+                vw.Password = entity.Password;
+                return Ok(Utilities.ReturnSuccess(data: vw));
             }
             catch (Exception ex)
             {
@@ -197,8 +200,8 @@ namespace Moralar.WebApi.Controllers
 
                     userAdministratorEntity.SetIfDifferent(model, validOnly);
 
-                    if (string.IsNullOrEmpty(model.Password) == false)
-                        userAdministratorEntity.Password = Utilities.GerarHashMd5(model.Password);
+                    //if (string.IsNullOrEmpty(model.Password) == false)
+                    //    userAdministratorEntity.Password = Utilities.GerarHashMd5(model.Password);
 
                     await _userAdministratorRepository.UpdateAsync(userAdministratorEntity).ConfigureAwait(false);
 

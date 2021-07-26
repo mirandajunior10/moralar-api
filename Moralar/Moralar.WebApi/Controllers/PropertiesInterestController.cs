@@ -92,32 +92,40 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
             }
         }
-        ///// <summary>
-        ///// DETALHES DAS FAMÍLIAS INTERESSADAS NO IMÓVEL
-        ///// </summary>
-        ///// <response code="200">Returns success</response>
-        ///// <response code="400">Custom Error</response>
-        ///// <response code="401">Unauthorize Error</response>
-        ///// <response code="500">Exception Error</response>
-        ///// <returns></returns>
-        [HttpGet("DetailFamiliesMatch/{ResidencialPropertyId}")]
+        /// <summary>
+        /// DETALHES DAS FAMÍLIAS INTERESSADAS NO IMÓVEL
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DetailFamiliesMatch/{residencialPropertyId}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> DetailFamiliesMatch([FromRoute] string ResidencialPropertyId)
+        [AllowAnonymous]
+        public async Task<IActionResult> DetailFamiliesMatch([FromRoute] string residencialPropertyId)
         {
             try
             {
 
-                var Entity = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == ResidencialPropertyId).ConfigureAwait(false);
-                if (Entity == null)
+                var property = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == residencialPropertyId).ConfigureAwait(false);
+                if (property == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
 
-                var families = await _familyRepository.FindIn("_id", Entity.Select(x => ObjectId.Parse(x.FamilyId.ToString())).ToList()) as List<Family>;
+                var families = await _familyRepository.FindIn("_id", property.Select(x => ObjectId.Parse(x.FamilyId.ToString())).ToList()) as List<Family>;
 
-                var vieoViewModel = _mapper.Map<List<FamilyCompleteListViewModel>>(families);
+                var vwFamilies = _mapper.Map<List<FamilyCompleteListViewModel>>(families);
+
+                var residencialProperty = await _residencialPropertyRepository.FindOneByAsync(x => x._id == ObjectId.Parse(residencialPropertyId)).ConfigureAwait(false);
+                if (residencialProperty != null && residencialProperty.FamiliIdResidencialChosen != null)
+                {
+                    vwFamilies.Find(x => x.Id == residencialProperty.FamiliIdResidencialChosen).FamiliIdResidencialChosen = residencialProperty.FamiliIdResidencialChosen;
+                    vwFamilies.Find(x => x.Id == residencialProperty.FamiliIdResidencialChosen).TypeStatusResidencial = residencialProperty.TypeStatusResidencialProperty;
+                }
 
 
                 for (int i = 0; i < families.Count(); i++)
@@ -125,15 +133,14 @@ namespace Moralar.WebApi.Controllers
                     foreach (var p in families.ToList()[i].Priorization.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
                     {
                         var priorityRate = (PriorityRate)p.GetValue(families.ToList()[i].Priorization, null);
-                        vieoViewModel.Find(x => x.Id == families.ToList()[i]._id.ToString()).Priorization.Add(_mapper.Map<PriorityRateViewModel>(priorityRate));
+                        vwFamilies.Find(x => x.Id == families.ToList()[i]._id.ToString()).Priorization.Add(_mapper.Map<PriorityRateViewModel>(priorityRate));
                     }
                 }
-
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: vwFamilies));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
+                return BadRequest(ex.ReturnErro(DefaultMessages.MessageException));
             }
         }
 

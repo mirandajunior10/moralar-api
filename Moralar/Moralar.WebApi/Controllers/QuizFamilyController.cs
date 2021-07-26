@@ -44,19 +44,22 @@ namespace Moralar.WebApi.Controllers
         private readonly IQuizRepository _quizRepository;
         private readonly IQuestionDescriptionRepository _questionDescriptionRepository;
         private readonly IQuizFamilyRepository _quizFamilyRepository;
+        private readonly IQuestionAnswerRepository _questionAnswerRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly IUtilService _utilService;
 
-        public QuizFamilyController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, IUtilService utilService)
+        public QuizFamilyController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IQuestionAnswerRepository questionAnswerRepository, IFamilyRepository familyRepository, IUtilService utilService)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
             _quizRepository = quizRepository;
             _questionDescriptionRepository = questionDescriptionRepository;
             _quizFamilyRepository = quizFamilyRepository;
+            _questionAnswerRepository = questionAnswerRepository;
             _familyRepository = familyRepository;
             _utilService = utilService;
         }
+
 
         /// <summary>
         /// LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
@@ -73,6 +76,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> LoadDataQuizAvailable([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] TypeStatus status)
         {
+
             //
             var response = new DtResult<QuizFamilyListViewModel>();
             try
@@ -109,8 +113,8 @@ namespace Moralar.WebApi.Controllers
                 var listQuizFamily = _mapper.Map<List<QuizFamilyListViewModel>>(retorno);
                 for (int i = 0; i < listQuizFamily.Count(); i++)
                 {
-                    listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == listOnlyQuiz[i]._id)?.Title;
-                    listQuizFamily[i].TypeQuiz = listOnlyQuiz.Find(x => x._id == listOnlyQuiz[i]._id).TypeQuiz;
+                    listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId))?.Title;
+                    listQuizFamily[i].TypeQuiz = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId)).TypeQuiz;
                 }
                 response.Data = listQuizFamily.Where(x => x.TypeQuiz == TypeQuiz.Quiz).ToList();
                 response.Draw = model.Draw;
@@ -148,6 +152,7 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+
                 var quizFamily = await _quizFamilyRepository.FindByIdAsync(id).ConfigureAwait(false);
                 if (quizFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizFamilyNotFound));
@@ -156,20 +161,20 @@ namespace Moralar.WebApi.Controllers
                 if (family == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                var entity = await _quizRepository.FindByIdAsync(quizFamily.QuizId).ConfigureAwait(false);
-                if (entity == null)
+                var questionAnswer = await _questionAnswerRepository.FindByAsync(x => x.FamilyId == family._id.ToString()).ConfigureAwait(false);
+                if (questionAnswer.Count()==0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.AnswerNotFound));
+
+                var entityQuiz = await _quizRepository.FindByIdAsync(quizFamily.QuizId).ConfigureAwait(false);
+                if (entityQuiz == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
-                var question = await _questionRepository.FindByAsync(x => x.QuizId == entity._id.ToString()).ConfigureAwait(false) as List<Question>;
+                var question = await _questionRepository.FindByAsync(x => x.QuizId == entityQuiz._id.ToString()).ConfigureAwait(false) as List<Question>;
                 if (question.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
 
-                var _quizViewModel = new QuizDetailViewModel()
-                {
-                    Id = entity._id.ToString(),
-                    Title = entity.Title,
-                    TypeQuiz = entity.TypeQuiz
-                };
+
+                var _quizViewModel = _mapper.Map<QuizDetailViewModel>(entityQuiz);
 
                 var questionDescription = await _questionDescriptionRepository.FindIn("QuestionId", question.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<QuestionDescription>;
                 for (int i = 0; i < question.Count(); i++)
@@ -186,55 +191,46 @@ namespace Moralar.WebApi.Controllers
                             });
                     }
                 }
-
                 List<QuestionAnswerListViewModel> listAnswers = new List<QuestionAnswerListViewModel>();
-
-                //var quiz = await _quizRepository.FindAllAsync().ConfigureAwait(false) as List<Quiz>;
-                //var answers = await _questionAnswerRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionAnswer>;
-                //var question = await _questionRepository.FindIn("_id", answers.Select(x => ObjectId.Parse(x.QuestionId)).ToList()) as List<Question>;
-                //var questionDescription = await _questionDescriptionRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionDescription>;
-                //for (int i = 0; i < answers.Count(); i++)
-                //{
-                //    var questionAnswerListViewModel = new QuestionAnswerListViewModel()
-                //    {
-                //        FamilyNumber = answers[i].FamilyNumber,
-                //        FamilyHolderName = answers[i].FamilyHolderName,
-                //        FamilyHolderCpf = answers[i].FamilyHolderCpf,
-                //        Title = quiz.Find(x => question.Any(c => ObjectId.Parse(c.QuizId) == x._id)).Title,
-                //        Date = answers[i].Created.Value,
-                //        Question = question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).NameQuestion
-                //    };
-                //    switch (question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).TypeResponse)
-                //    {
-                //        case TypeResponse.MultiplaEscolha:
-                //            {
-                //                foreach (var item in answers[i].QuestionDescriptionId)
-                //                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
-                //                break;
-                //            }
-                //        case TypeResponse.ListaSuspensa:
-                //            {
-                //                foreach (var item in answers[i].QuestionDescriptionId)
-                //                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
-                //                break;
-                //            }
-                //        case TypeResponse.EscolhaUnica:
-                //            {
-                //                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(answers[i].QuestionDescriptionId.FirstOrDefault())).Description);
-                //                break;
-                //            }
-                //        case TypeResponse.Texto:
-                //            {
-                //                questionAnswerListViewModel.Answers.Add(answers[i].AnswerDescription);
-                //                break;
-                //            }
-                //    }
-                //    listAnswers.Add(questionAnswerListViewModel);
-                //    var objReturn = new
-                //    {
-                //        quiz = _quizViewModel,
-                //        family = family
-                //    };
+                var answers = await _questionAnswerRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionAnswer>;
+                for (int i = 0; i < answers.Count(); i++)
+                {
+                    var questionAnswerListViewModel = new QuestionAnswerListViewModel()
+                    {
+                        FamilyNumber = answers[i].FamilyNumber,
+                        FamilyHolderName = answers[i].FamilyHolderName,
+                        FamilyHolderCpf = answers[i].FamilyHolderCpf,
+                        Title = entityQuiz.Title,//Find(x => question.Any(c => ObjectId.Parse(c.QuizId) == x._id)).
+                        Date = answers[i].Created.Value,
+                        Question = question.Find(x => x.QuizId == answers[i].QuestionId)?.NameQuestion
+                    };
+                    switch (question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).TypeResponse)
+                    {
+                        case TypeResponse.MultiplaEscolha:
+                            {
+                                foreach (var item in answers[i].QuestionDescriptionId)
+                                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
+                                break;
+                            }
+                        case TypeResponse.ListaSuspensa:
+                            {
+                                foreach (var item in answers[i].QuestionDescriptionId)
+                                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
+                                break;
+                            }
+                        case TypeResponse.EscolhaUnica:
+                            {
+                                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(answers[i].QuestionDescriptionId.FirstOrDefault())).Description);
+                                break;
+                            }
+                        case TypeResponse.Texto:
+                            {
+                                questionAnswerListViewModel.Answers.Add(answers[i].AnswerDescription);
+                                break;
+                            }
+                    }
+                    listAnswers.Add(questionAnswerListViewModel);
+                }
                 return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
             }
             catch (Exception ex)

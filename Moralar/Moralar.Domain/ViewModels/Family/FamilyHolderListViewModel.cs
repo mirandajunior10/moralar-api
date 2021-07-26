@@ -9,6 +9,7 @@ namespace Moralar.Domain.ViewModels.Family
 {
     public class FamilyHolderListViewModel : BaseViewModel
     {
+        public string Id { get; set; }
         public long Created { get; set; }
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Número do cadastro")]
@@ -42,6 +43,9 @@ namespace Moralar.Domain.ViewModels.Family
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Escolaridade")]
         public TypeScholarity Scholarity { get; set; }
+
+        public TypeSubject TypeSubject { get; set; }
+        public TypeScheduleStatus TypeScheduleStatus { get; set; }
 
         public bool Blocked { get; set; }
     }

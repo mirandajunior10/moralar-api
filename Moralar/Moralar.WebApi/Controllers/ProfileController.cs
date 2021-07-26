@@ -296,8 +296,9 @@ namespace Moralar.WebApi.Controllers
                         Erro = true,
                         Message = $"Usuário bloqueado,motivo {entity.Reason ?? "não informado"}"
                     });
-
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<ProfileViewModel>(entity)));
+                var vw = _mapper.Map<ProfileViewModel>(entity);
+                vw.Password = entity.Password;
+                return Ok(Utilities.ReturnSuccess(data: vw));
             }
             catch (Exception ex)
             {
@@ -450,7 +451,7 @@ namespace Moralar.WebApi.Controllers
 
                 _profileRepository.Update(entity);
 
-                return Ok(Utilities.ReturnSuccess("Senha alterada com sucesso."));
+                return Ok(Utilities.ReturnSuccess("Alterada com sucesso."));
             }
             catch (Exception ex)
             {
@@ -922,6 +923,7 @@ namespace Moralar.WebApi.Controllers
                 profileEntity.Email = model.Email;
                 profileEntity.Name = model.Name;
                 profileEntity.Phone = model.Phone?.OnlyNumbers();
+                profileEntity.JobPost = model.JobPost;
                 //profileEntity.Login = model.Login;
                 //profileEntity.Photo = model.Photo.RemovePathImage().SetPhotoProfile(profileEntity.ProviderId);
 

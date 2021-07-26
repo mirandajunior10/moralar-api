@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <parameters>
-  <parameter name="IIS Web Application Name" description="" value="Apis\ApiMoralarDev" tags="IisApp">
+  <parameter name="IIS Web Application Name" description="" value="Apis/ApiMoralarHml" tags="IisApp">
     <parameterEntry kind="ProviderPath" scope="IisApp" match="^D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar\.WebApi\\obj\\Release\\netcoreapp1\.1\\PubTmp\\Out\\$" />
   </parameter>
 </parameters>

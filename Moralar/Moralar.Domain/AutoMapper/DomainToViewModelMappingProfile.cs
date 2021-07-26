@@ -112,6 +112,8 @@ namespace Moralar.Domain.AutoMapper
             #region Quiz
             CreateMap<Quiz, QuizViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Quiz, QuizDetailViewModel>()
+         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<Question, QuestionViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<QuestionDescription, QuestionDescriptionViewModel>()

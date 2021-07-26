@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Moralar.Data.Enum;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -6,7 +7,7 @@ using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Family
 {
-    public class FamilyCompleteListViewModel:BaseViewModel
+    public class FamilyCompleteListViewModel : BaseViewModel
     {
         public FamilyCompleteListViewModel()
         {
@@ -41,5 +42,8 @@ namespace Moralar.Domain.ViewModels.Family
         public List<PriorityRateViewModel> Priorization { get; set; }
         public string MotherName { get; set; }
         public string MotherCityBorned { get; set; }
+
+        public TypeStatusResidencial TypeStatusResidencial { get; set; }
+        public string FamiliIdResidencialChosen { get; set; }
     }
 }

@@ -35,5 +35,6 @@ namespace Moralar.Domain.ViewModels
         [Display(Name = "Tipo do Perfil do Usuário")]
         public TypeUserProfile TypeProfile { get; set; }
         public bool Blocked { get; set; }
+        public string Password { get; set; }
     }
 }

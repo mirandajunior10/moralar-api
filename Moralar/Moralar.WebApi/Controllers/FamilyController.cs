@@ -246,7 +246,19 @@ namespace Moralar.WebApi.Controllers
                     ? (int)await _familyRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                response.Data = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
+                var _vwFamiliHolder = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
+                var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
+
+                for (int i = 0; i < _vwFamiliHolder.Count(); i++)
+                {
+                    if (_schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id) != null)
+                    {
+                        _vwFamiliHolder[i].TypeScheduleStatus = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeScheduleStatus;
+                        _vwFamiliHolder[i].TypeSubject = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeSubject;
+                    }
+                }
+
+                response.Data = _vwFamiliHolder;
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;
