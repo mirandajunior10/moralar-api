@@ -19,6 +19,7 @@ using Moralar.Domain.ViewModels.InformativeSended;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
+using Moralar.WebApi.Services;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -460,7 +461,43 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// EXPORTAR PARA EXCEL
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("Export")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [OnlyAdministrator]
+        public async Task<IActionResult> Export()
+        {
+            try
+            {
+                var allData = await _informativeRepository.FindAllAsync().ConfigureAwait(false);
+                var fileName = $"informative.xlsx";
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<InformativeExportViewModel>>(allData);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
 
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
     }
-
 }

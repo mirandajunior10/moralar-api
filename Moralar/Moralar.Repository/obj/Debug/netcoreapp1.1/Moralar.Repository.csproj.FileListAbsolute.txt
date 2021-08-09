@@ -12,3 +12,17 @@ D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Repository\obj\Debug\netcoreapp
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.csproj.CopyComplete
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.dll
 D:\Megaleios\Moralar\api-moralar\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.pdb
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\bin\Debug\netcoreapp1.1\Moralar.Repository.xml
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\bin\Debug\netcoreapp1.1\Moralar.Repository.deps.json
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\bin\Debug\netcoreapp1.1\Moralar.Repository.dll
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\bin\Debug\netcoreapp1.1\Moralar.Repository.pdb
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\bin\Debug\netcoreapp1.1\Moralar.Data.dll
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\bin\Debug\netcoreapp1.1\Moralar.Data.pdb
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\bin\Debug\netcoreapp1.1\Moralar.Data.xml
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.csproj.AssemblyReference.cache
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.AssemblyInfoInputs.cache
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.AssemblyInfo.cs
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.csproj.CoreCompileInputs.cache
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.csproj.CopyComplete
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.dll
+D:\Devs\repos\Megaleios\GIT\moralar-api\Moralar\Moralar.Repository\obj\Debug\netcoreapp1.1\Moralar.Repository.pdb

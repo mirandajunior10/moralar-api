@@ -64,7 +64,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.CourseController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.Int64,System.Int64)">
+        <member name="M:Moralar.WebApi.Controllers.CourseController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64})">
             <summary>
             LISTAGEM DOS CLIENTES
             </summary>
@@ -171,6 +171,16 @@
              <response code="401">Unauthorize Error</response>
              <response code="500">Exception Error</response>
              <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.CourseController.Export(System.String,System.Nullable{System.Int64},System.Nullable{System.Int64})">
+            <summary>
+            EXPORTAR PARA EXCEL
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.DashBoardController.RegisteredFamilies">
             <summary>
@@ -766,6 +776,16 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String)">
+            <summary>
+            EXPORTAR PARA EXCEL
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.FileController.Upload(Microsoft.AspNetCore.Http.IFormFile,System.String)">
             <summary>
             Upload one file
@@ -839,6 +859,16 @@
         <member name="M:Moralar.WebApi.Controllers.InformativeController.BlockUnblock(Moralar.Domain.ViewModels.BlockViewModel)">
             <summary>
             BLOQUEIA OU DESBLOQUEIA O INFORMATIVO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.InformativeController.Export">
+            <summary>
+            EXPORTAR PARA EXCEL
             </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>
@@ -1597,6 +1627,16 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,Moralar.Data.Enum.TypeStatus)">
+            <summary>
+            EXPORTAR PARA EXCEL
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.BlockUnBlock(Moralar.Domain.ViewModels.BlockViewModel)">
             <summary>
             BLOQUEAR / DESBLOQUEAR PROPRIEDADE
@@ -1773,6 +1813,16 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.Export(System.String,System.String,System.Int32)">
+            <summary>
+            EXPORTAR PARA EXCEL
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.ScheduleController.GetHistoryByFamily(System.String)">
             <summary>
             RETORNA O HISTÓRICO DOS AGENDAMENTOS POR FAMÍLIA
@@ -1904,6 +1954,16 @@
              <response code="401">Unauthorize Error</response>
              <response code="500">Exception Error</response>
              <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64},System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeScheduleStatus},Moralar.Data.Enum.TypeSubject)">
+            <summary>
+            EXPORTAR PARA EXCEL
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.GetInfo">
             <summary>

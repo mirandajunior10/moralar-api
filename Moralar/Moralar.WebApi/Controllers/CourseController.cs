@@ -16,8 +16,10 @@ using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Course;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Repository.Interface;
+using Moralar.WebApi.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -124,7 +126,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
         [AllowAnonymous]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, long startDate, long endDate)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, [FromForm] long? startDate, [FromForm] long? endDate)
         {
             var response = new DtResult<CourseListViewModel>();
             try
@@ -135,10 +137,12 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.Created != null));
                 if (!string.IsNullOrEmpty(title))
                     conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(title.ToUpper())));
-                //if (!string.IsNullOrEmpty(nameHolder))
-                //    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(nameHolder.ToUpper())));
-                //if (!string.IsNullOrEmpty(cpf))
-                //    conditions.Add(builder.Where(x => x.Holder.Cpf == cpf));
+
+                if (startDate != null)
+                    conditions.Add(builder.Where(x => x.Created >= startDate));
+
+                if (endDate != null)
+                    conditions.Add(builder.Where(x => x.Created <= endDate));
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
@@ -456,6 +460,65 @@ namespace Moralar.WebApi.Controllers
             {
                 await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// EXPORTAR PARA EXCEL
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("Export")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        
+
+        public async Task<IActionResult> Export([FromForm] string title, [FromForm] long? startDate, [FromForm] long? endDate)
+        {
+            var response = new DtResult<CourseExportViewModel>();
+            try
+            {
+                var conditions = new List<FilterDefinition<Data.Entities.Course>>();
+                var builder = Builders<Data.Entities.Course>.Filter;
+
+                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+
+                if (!string.IsNullOrEmpty(title))
+                    conditions.Add(builder.Where(x => x.Title.ToUpper() == title.ToUpper()));
+
+                if (startDate != null)
+                    conditions.Add(builder.Where(x => x.Created >= startDate));
+
+                if (endDate != null)
+                    conditions.Add(builder.Where(x => x.Created <= endDate));
+
+
+                var condition = builder.And(conditions);
+                var fileName = "Cursos_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
+                var allData = await _courseRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Course>() { }).ToListAsync();
+
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<CourseExportViewModel>>(allData);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Utilities.ReturnErro(ex.Message));
             }
         }
     }

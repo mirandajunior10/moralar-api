@@ -12,6 +12,8 @@ using Moralar.Domain.ViewModels.PropertiesInterest;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.Quiz;
+using Moralar.Domain.ViewModels.QuizFamily;
+using Moralar.Domain.ViewModels.ResidencialProperty;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.ScheduleHistory;
 using Moralar.Domain.ViewModels.Video;
@@ -75,8 +77,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<Family, FamilyHolderDistanceViewModel>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Holder.Name))
                 .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Holder.Cpf))
-                .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Holder.Number))
-            ; 
+                .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Holder.Number)); 
 
             CreateMap<Family, FamilyHolderListViewModel>()
                 .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created))
@@ -100,6 +101,13 @@ namespace Moralar.Domain.AutoMapper
                .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));
 
             CreateMap<Family, ScheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel>();
+
+            CreateMap<Family, FamilyExportViewModel>()
+               .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.DataBlocked != null ? "Inativo" : "Ativo"))
+               .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Holder.Number))
+               .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Holder.Name))
+               .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Holder.Cpf));
+
             #endregion
             #region ResidencialProperty
             CreateMap<ResidencialProperty, ResidencialPropertyViewModel>()
@@ -108,6 +116,10 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<ResidencialPropertyAdress, ResidencialPropertyAdressViewModel>();
             CreateMap<ResidencialPropertyFeatures, ResidencialPropertyFeatureViewModel>();
             CreateMap<ResidencialProperty, ResidencialPropertyAdress>();
+            CreateMap<ResidencialProperty, ResidencialPropertyExportViewModel>()
+                .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? "Inativo" : "Ativo"))
+                .ForMember(dest => dest.TypeStatusResidencialProperty, opt => opt.MapFrom(src => src.TypeStatusResidencialProperty.GetEnumMemberValue()))
+                .ForMember(dest => dest.TypeProperty, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.TypeProperty.GetEnumMemberValue()));
             #endregion
             #region Quiz
             CreateMap<Quiz, QuizViewModel>()
@@ -130,11 +142,20 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<Quiz, QuizListViewModel>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
+            CreateMap<QuizFamily, QuizFamilyExportViewModel>()
+                .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created.MapUnixTime("dd/MM/yyyy", "-")))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.TypeStatus == 0 ? "Não respondido" : "Respondido"));
+
+            CreateMap<Quiz, QuizFamilyExportViewModel>()
+            .ForMember(dest => dest.QuizId, opt => opt.Ignore()); 
 
 
             #endregion
             #region Course
-
+            CreateMap<Course, CourseExportViewModel>()
+                .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? "Inativo" : "Ativo"))
+                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.TimeStampToDateTime().ToString("dd/MM/yyyy")))
+                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.TimeStampToDateTime().ToString("dd/MM/yyyy")));
             #endregion
             #region Schedule
             CreateMap<Schedule, ScheduleRegisterViewModel>()
@@ -143,7 +164,10 @@ namespace Moralar.Domain.AutoMapper
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<Schedule, ScheduleDetailTimeLinePGMViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
-
+            CreateMap<Schedule, ScheduleExportViewModel>()
+                .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date.TimeStampToDateTime().ToString("dd/MM/yyyy HH:mm")))
+                .ForMember(dest => dest.TypeSubject, opt => opt.MapFrom(src => src.TypeSubject.GetEnumMemberValue()))
+                .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.TypeScheduleStatus.GetEnumMemberValue()));
 
             #endregion
             #region ScheduleHistory
@@ -161,6 +185,11 @@ namespace Moralar.Domain.AutoMapper
               ;
             CreateMap<InformativeSended, InformativeSendedDetailViewModel>()
              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
+            CreateMap<Informative, InformativeExportViewModel>()
+             .ForMember(dest => dest.Date, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value).ToString("dd/MM/yyyy")))
+             .ForMember(dest => dest.DatePublishDate, opt => opt.MapFrom(src => src.DatePublish != null ? src.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy") : null));
+
 
             #endregion
             #region Notification

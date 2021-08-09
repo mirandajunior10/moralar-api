@@ -1727,5 +1727,61 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// EXPORTAR PARA EXCEL
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("Export")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+
+
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf)
+        {
+            var response = new DtResult<FamilyExportViewModel>();
+            try
+            {
+                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+                var builder = Builders<Data.Entities.Family>.Filter;
+
+                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+
+                if (!string.IsNullOrEmpty(number))
+                    conditions.Add(builder.Where(x => x.Holder.Number == number));
+                if (!string.IsNullOrEmpty(holderName))
+                    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(holderName.ToUpper())));
+                if (!string.IsNullOrEmpty(holderCpf))
+                    conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
+
+
+                var condition = builder.And(conditions);
+                var fileName = "Familias_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
+                var allData = await _familyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Family>() { }).ToListAsync();
+
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<FamilyExportViewModel>>(allData);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Utilities.ReturnErro(ex.Message));
+            }
+        }
     }
 }

@@ -17,6 +17,7 @@ using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
+using Moralar.Domain.ViewModels.QuizFamily;
 using Moralar.Repository.Interface;
 using System;
 using System.Collections.Generic;
@@ -239,6 +240,70 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// EXPORTAR PARA EXCEL
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("Export")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] TypeStatus status)
+        {
+            var response = new DtResult<QuizFamilyExportViewModel>();
+            try
+            {
+                var conditions = new List<FilterDefinition<Data.Entities.QuizFamily>>();
+                var builder = Builders<Data.Entities.QuizFamily>.Filter;
+
+                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+
+                if (!string.IsNullOrEmpty(number))
+                    conditions.Add(builder.Where(x => x.HolderNumber.ToUpper() == number.ToUpper()));
+                if (!string.IsNullOrEmpty(name))
+                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(name.ToUpper())));
+                if (!string.IsNullOrEmpty(cpf))
+                    conditions.Add(builder.Where(x => x.HolderCpf == cpf));
+
+                conditions.Add(builder.Where(x => x.TypeStatus == status));
+
+
+                var condition = builder.And(conditions);
+                var fileName = "Questionarios disponibilizados_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
+                var allData = await _quizFamilyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.QuizFamily>() { }).ToListAsync();
+
+                var listOnlyQuiz = await _quizRepository.FindIn("_id", allData.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
+                var listQuizFamily = _mapper.Map<List<QuizFamilyExportViewModel>>(allData);
+                for (int i = 0; i < listQuizFamily.Count(); i++)
+                {
+                    listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId))?.Title;
+                    
+                }
+
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<QuizFamilyExportViewModel>>(listQuizFamily);//(allData);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Utilities.ReturnErro(ex.Message));
+            }
+        }
     }
 
 }

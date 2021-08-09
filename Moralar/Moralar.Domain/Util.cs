@@ -18,7 +18,7 @@ namespace Moralar.Domain
     {
 
         private static IStringLocalizer _localizer { get; set; }
-        public static string GetClientIp() => Utilities.HttpContext.HttpContext?.Connection?.RemoteIpAddress?.ToString();
+        public static string GetClientIp() => Utilities.HttpContextAccessor.HttpContext?.Connection?.RemoteIpAddress?.ToString();
 
         public static Dictionary<string, string> GetTemplateVariables()
         {
@@ -141,7 +141,6 @@ namespace Moralar.Domain
                 /**/
             }
             return Language.En;
-        }
-
+        }        
     }
 }

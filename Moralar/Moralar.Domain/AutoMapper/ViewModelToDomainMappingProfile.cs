@@ -13,6 +13,7 @@ using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
+using Moralar.Domain.ViewModels.QuizFamily;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Video;
 using Moralar.Domain.ViewModels.VideoViewed;
@@ -99,7 +100,9 @@ namespace Moralar.Domain.AutoMapper
             #endregion
             #region QuizFamily
             CreateMap<QuizFamilyViewModel, QuizFamily>()
-                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));          
+
+
             #endregion
             #region QuizAnswer
             CreateMap<QuestionAnswerRegisterViewModel, QuestionAnswer>()

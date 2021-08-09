@@ -1,25 +1,21 @@
 {
   "format": 1,
   "restore": {
-    "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj": {}
+    "D:\\Devs\\repos\\Megaleios\\GIT\\moralar-api\\Moralar\\Moralar.Data\\Moralar.Data.csproj": {}
   },
   "projects": {
-    "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj": {
+    "D:\\Devs\\repos\\Megaleios\\GIT\\moralar-api\\Moralar\\Moralar.Data\\Moralar.Data.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj",
+        "projectUniqueName": "D:\\Devs\\repos\\Megaleios\\GIT\\moralar-api\\Moralar\\Moralar.Data\\Moralar.Data.csproj",
         "projectName": "Moralar.Data",
-        "projectPath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\Moralar.Data.csproj",
-        "packagesPath": "C:\\Users\\Usuario\\.nuget\\packages\\",
-        "outputPath": "D:\\Megaleios\\Moralar\\api-moralar\\Moralar\\Moralar.Data\\obj\\",
+        "projectPath": "D:\\Devs\\repos\\Megaleios\\GIT\\moralar-api\\Moralar\\Moralar.Data\\Moralar.Data.csproj",
+        "packagesPath": "C:\\Users\\le_lo\\.nuget\\packages\\",
+        "outputPath": "D:\\Devs\\repos\\Megaleios\\GIT\\moralar-api\\Moralar\\Moralar.Data\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Microsoft\\Xamarin\\NuGet\\"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Usuario\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Xamarin.Offline.config"
+          "C:\\Users\\le_lo\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
         "originalTargetFrameworks": [
           "netcoreapp1.1"
@@ -27,7 +23,8 @@
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "C:\\Program Files\\dotnet\\sdk\\NuGetFallbackFolder": {},
-          "https://api.nuget.org/v3/index.json": {}
+          "https://api.nuget.org/v3/index.json": {},
+          "https://megaleios.pkgs.visualstudio.com/_packaging/UtilityFramework/nuget/v3/index.json": {}
         },
         "frameworks": {
           "netcoreapp1.1": {
@@ -55,7 +52,7 @@
               "version": "[2.0.5, )"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.103\\RuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\5.0.302\\RuntimeIdentifierGraph.json"
         }
       }
     }

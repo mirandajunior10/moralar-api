@@ -17,8 +17,10 @@ using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.ResidencialProperty;
 using Moralar.Repository.Interface;
+using Moralar.WebApi.Services;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Security.Claims;
 using System.Threading.Tasks;
@@ -643,6 +645,62 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// EXPORTAR PARA EXCEL
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("Export")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [OnlyAdministrator]
 
+        public async Task<IActionResult> Export([FromForm] string code, [FromForm] string status, [FromForm] int availableForSale)
+        {
+            var response = new DtResult<ResidencialPropertyExportViewModel>();
+            try
+            {
+                var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
+                var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
+
+                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+
+                if (!string.IsNullOrEmpty(code))
+                    conditions.Add(builder.Where(x => x.Code.ToUpper() == code.ToUpper()));
+                if (!string.IsNullOrEmpty(status))
+                    if (status == "0")
+                        conditions.Add(builder.Where(x => x.DataBlocked == null));
+                    else if (status == "1")
+                        conditions.Add(builder.Where(x => x.DataBlocked != null));
+
+                              
+                var condition = builder.And(conditions);
+                var fileName = "Imoveis_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
+                var allData = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
+
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<ResidencialPropertyExportViewModel>>(allData);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Utilities.ReturnErro(ex.Message));
+            }
+        }
     }
 }

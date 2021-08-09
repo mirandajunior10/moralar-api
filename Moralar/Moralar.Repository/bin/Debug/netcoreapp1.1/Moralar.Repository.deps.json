@@ -422,7 +422,7 @@
         "runtime": {
           "lib/netstandard1.3/System.Collections.NonGeneric.dll": {
             "assemblyVersion": "4.0.2.0",
-            "fileVersion": "4.6.24705.1"
+            "fileVersion": "4.6.24702.1"
           }
         }
       },
@@ -558,7 +558,7 @@
         "runtime": {
           "lib/netstandard1.3/System.Runtime.Serialization.Primitives.dll": {
             "assemblyVersion": "4.1.2.0",
-            "fileVersion": "4.6.24705.1"
+            "fileVersion": "4.6.24702.1"
           }
         }
       },
@@ -810,7 +810,7 @@
     "runtime.native.System.Net.Security/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-M2nN92ePS8BgQ2oi6Jj3PlTUzadYSIWLdZrHY1n1ZcW9o4wAQQ6W+aQ2lfq1ysZQfVCgDwY58alUdowrzezztg==",
+      "sha512": "sha512-CQiFtoE8hAFheD2e+N91MuNT1zOu/dDLurnkJz8oB8QadakrXg7VWaoNjd+wXrsP8VKcNTWqARyVTZOGrC2ZvA==",
       "path": "runtime.native.system.net.security/4.3.0",
       "hashPath": "runtime.native.system.net.security.4.3.0.nupkg.sha512"
     },
@@ -887,28 +887,28 @@
     "System.Collections.NonGeneric/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-prtjIEMhGUnQq6RnPEYLpFt8AtLbp9yq2zxOSrY7KJJZrw25Fi97IzBqY7iqssbM61Ek5b8f3MG/sG1N2sN5KA==",
+      "sha512": "sha512-BekOnFQsWK1AvLH9+4brNw3CYK+G4IkQX41WkVn06XEcEIKYSWzNlIoMm/EZukYJLKa61YJNydpieJ8nh+v03Q==",
       "path": "system.collections.nongeneric/4.3.0",
       "hashPath": "system.collections.nongeneric.4.3.0.nupkg.sha512"
     },
     "System.Collections.Specialized/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Epx8PoVZR0iuOnJJDzp7pWvdfMMOAvpUo95pC4ScH2mJuXkKA2Y4aR3cG9qt2klHgSons1WFh4kcGW7cSXvrxg==",
+      "sha512": "sha512-gLhPIzDbK+tt+sce82wJjlsu+23TKHI5ubcRyAOxdyT5eA0m1FCZqTZ83g2BUcHzeKP+NE6tejUfApK4+AHtxA==",
       "path": "system.collections.specialized/4.3.0",
       "hashPath": "system.collections.specialized.4.3.0.nupkg.sha512"
     },
     "System.ComponentModel.Primitives/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-j8GUkCpM8V4d4vhLIIoBLGey2Z5bCkMVNjEZseyAlm4n5arcsJOeI3zkUP+zvZgzsbLTYh4lYeP/ZD/gdIAPrw==",
+      "sha512": "sha512-pvNu2IeAFijwiMWdmrBjjEJUOLPSXbI+Pu+2q8NBlWjmEdKmvHu0/sEPQKu0XshVlkN8BLa2iysIY5JXKeaxdg==",
       "path": "system.componentmodel.primitives/4.3.0",
       "hashPath": "system.componentmodel.primitives.4.3.0.nupkg.sha512"
     },
     "System.ComponentModel.TypeConverter/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-16pQ6P+EdhcXzPiEK4kbA953Fu0MNG2ovxTZU81/qsCd1zPRsKc3uif5NgvllCY598k6bI0KUyKW8fanlfaDQg==",
+      "sha512": "sha512-nz6VFPukrB8yuA0u3ehGDq/AaVY4jQimYNRXgnAA45LPJWSuY9ez0XZD20BBemmixIxImNF+BKXUndIiP6Ke5A==",
       "path": "system.componentmodel.typeconverter/4.3.0",
       "hashPath": "system.componentmodel.typeconverter.4.3.0.nupkg.sha512"
     },
@@ -957,14 +957,14 @@
     "System.Runtime.Serialization.Formatters/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-KT591AkTNFOTbhZlaeMVvfax3RqhH1EJlcwF50Wm7sfnBLuHiOeZRRKrr1ns3NESkM20KPZ5Ol/ueMq5vg4QoQ==",
+      "sha512": "sha512-5PzZqdCi1oxnZ4eN8XnzwXZ+3E1zsZSlwPWmwyFIt5hlkdPjQNHU07lJtM8cZZytWFGxZ0W3QQ76JoNOYnlw8Q==",
       "path": "system.runtime.serialization.formatters/4.3.0",
       "hashPath": "system.runtime.serialization.formatters.4.3.0.nupkg.sha512"
     },
     "System.Runtime.Serialization.Primitives/4.3.0": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-Wz+0KOukJGAlXjtKr+5Xpuxf8+c8739RI1C+A2BoQZT+wMCCoMDDdO8/4IRHfaVINqL78GO8dW8G2lW/e45Mcw==",
+      "sha512": "sha512-6NXdzDzA69KmkgMJSOqIHwjYVQR4AtwMyfwTDPDwwmgXizsVZRtJQKUcCiyscHrRxmRSJXJ5l5gmVGjcZi4PjQ==",
       "path": "system.runtime.serialization.primitives/4.3.0",
       "hashPath": "system.runtime.serialization.primitives.4.3.0.nupkg.sha512"
     },
@@ -985,7 +985,7 @@
     "System.Text.Encodings.Web/4.3.1": {
       "type": "package",
       "serviceable": true,
-      "sha512": "sha512-tcfPv+q/nK+5EsAxCLauIOd0kL+lZsXQ4lPKRnh8ex6O1Rm8WAN3LtF2GDFHyD0glSmUpIrgTnLhHCkMAKo3Ug==",
+      "sha512": "sha512-8hT+nKwbqLG+LXXcrOnoeo9F1rzZNoRGfTpSOihRmp/sHre6HP372RTnGZv0jOZVm9zOBoVj4R1ibZbrRkDSWQ==",
       "path": "system.text.encodings.web/4.3.1",
       "hashPath": "system.text.encodings.web.4.3.1.nupkg.sha512"
     },
