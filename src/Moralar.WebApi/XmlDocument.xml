@@ -776,6 +776,26 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.FirstAccess(Moralar.Domain.ViewModels.Family.FamilyFirstAccessViewModel)">
+            <summary>
+            PRIMEIRO ACESSO
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                          "password":"string",
+                          "motherName": "string",
+                          "cityBorned": "string"        
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String)">
             <summary>
             EXPORTAR PARA EXCEL

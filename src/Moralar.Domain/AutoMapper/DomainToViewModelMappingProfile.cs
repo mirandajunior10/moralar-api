@@ -63,6 +63,7 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
             #region Family
+            CreateMap<Family, FamilyFirstAccessViewModel>();
             CreateMap<FamilyHolder, FamilyHolderViewModel>();
             CreateMap<FamilyHolder, FamilyHolderListViewModel>()
                  .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));

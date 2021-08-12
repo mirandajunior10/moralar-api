@@ -587,9 +587,11 @@ namespace Moralar.WebApi.Controllers
 
                 model.TrimStringProperties();
 
+              
+                if (string.IsNullOrEmpty(model.RefreshToken) == false)
+                    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
 
-                //if (string.IsNullOrEmpty(model.RefreshToken) == false)
-                //    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
+                
 
                 Data.Entities.Profile entity;
                 if (model.TypeProvider != TypeProvider.Password)

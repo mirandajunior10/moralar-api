@@ -980,9 +980,9 @@ namespace Moralar.WebApi.Controllers
                     profile.FirstOrDefault().Password = newPassword;
                     await _familyRepository.UpdateAsync(profile.FirstOrDefault());
 
-                });
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
-                return Ok(Utilities.ReturnSuccess("Verifique seu e-mail"));
+                });                
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change,TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
+                return Ok(Utilities.ReturnSuccess("Verifique seu e-mail"));                
             }
             catch (Exception ex)
             {
@@ -1214,25 +1214,25 @@ namespace Moralar.WebApi.Controllers
                 }
                 family.Holder.Cpf = model.Holder.Cpf.OnlyNumbers();
 
-                var newPassword = Utilities.RandomString(8);
-                family.Password = newPassword;
+                //var newPassword = Utilities.RandomString(8);
+                //family.Password = newPassword;
                 var entityId = await _familyRepository.CreateAsync(family).ConfigureAwait(false);
-                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                //////await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
 
-                var dataBody = Util.GetTemplateVariables();
-                dataBody.Add("{{ title }}", "Lembrete de senha");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Holder.Name.GetFirstName()}</p>" +
-                                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
-                                            //$"<p><b>Login</b> : {profile.Login}</p>" +
-                                            $"<p><b>Senha</b> :{newPassword}</p>"
-                                            );
+                //var dataBody = Util.GetTemplateVariables();
+                //dataBody.Add("{{ title }}", "Lembrete de senha");
+                //dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Holder.Name.GetFirstName()}</p>" +
+                //                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
+                //                            //$"<p><b>Login</b> : {profile.Login}</p>" +
+                //                            $"<p><b>Senha</b> :{newPassword}</p>"
+                //                            );
 
-                var body = _senderMailService.GerateBody("custom", dataBody);
+                //var body = _senderMailService.GerateBody("custom", dataBody);
 
-                var unused = Task.Run(async () =>
-                {
-                    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
-                });
+                //var unused = Task.Run(async () =>
+                //{
+                //    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
+                //});
 
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Criadoa família {model.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId);
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
@@ -1407,6 +1407,7 @@ namespace Moralar.WebApi.Controllers
                 entity.Holder.Number = entityFamily.Holder.Number;
                 entity.Holder.Cpf = entityFamily.Holder.Cpf;
                 entity.Holder.Birthday = entityFamily.Holder.Birthday;
+               
 
                 var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
@@ -1571,7 +1572,8 @@ namespace Moralar.WebApi.Controllers
 
                 model.TrimStringProperties();
 
-
+                if (string.IsNullOrEmpty(model.RefreshToken) == false)
+                    return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
 
                 Data.Entities.Family entity;
 
@@ -1723,6 +1725,65 @@ namespace Moralar.WebApi.Controllers
             catch (Exception ex)
             {
                 await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// PRIMEIRO ACESSO
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///               "password":"string",
+        ///               "motherName": "string",
+        ///               "cityBorned": "string"        
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpPost("FirstAccess")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> FirstAccess([FromBody] FamilyFirstAccessViewModel model)
+        {
+            try
+            {                
+
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelState();
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                
+                var family = _mapper.Map<Data.Entities.Family>(model);
+               
+                var entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.Cpf).ConfigureAwait(false);
+
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                entity.Password = model.Password;
+                entity.MotherName = model.MotherName.RemoveAccents();
+                entity.MotherCityBorned = model.MotherCityBorned.RemoveAccents();
+                entity.IsFirstAcess = true;
+
+                _familyRepository.Update(entity);
+                
+                return Ok(Utilities.ReturnSuccess("Primeiro acesso realizado com sucesso."));
+            }
+            catch (Exception ex)
+            {
                 return BadRequest(ex.ReturnErro());
             }
         }

@@ -12,6 +12,7 @@ namespace Moralar.Domain.ViewModels
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         public string Password { get; set; }
-      
+        public string RefreshToken { get; set; }
+
     }
 }

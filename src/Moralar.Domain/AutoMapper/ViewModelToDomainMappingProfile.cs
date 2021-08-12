@@ -71,6 +71,8 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<FamilyEditViewModel, Family>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
                 .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));
+
+            CreateMap<FamilyFirstAccessViewModel, Family>();
             #endregion
             #region ResidencialProperty
             CreateMap<ResidencialPropertyViewModel, ResidencialProperty>()
