@@ -229,7 +229,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf)
         {
             //, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf
             var response = new DtResult<PropertiesInterestViewModel>();
@@ -240,14 +240,16 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.PropertiesInterest>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
-                //if (!string.IsNullOrEmpty(number))
-                //    conditions.Add(builder.Where(x => x.HolderNumber == number));
-                //if (!string.IsNullOrEmpty(holderName))
-                //    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
-                //if (!string.IsNullOrEmpty(holderCpf))
-                //    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
+
+                if (!string.IsNullOrEmpty(number))
+                    conditions.Add(builder.Where(x => x.HolderNumber == number));
+                if (!string.IsNullOrEmpty(holderName))
+                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
+                if (!string.IsNullOrEmpty(holderCpf))
+                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
+                
 
                 //var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;

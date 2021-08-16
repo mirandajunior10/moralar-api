@@ -1342,7 +1342,7 @@
              <response code="500">Exception Error</response>
              <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.PropertiesInterestController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters)">
+        <member name="M:Moralar.WebApi.Controllers.PropertiesInterestController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String)">
             <summary>
             LISTAGEM DAS FAMÍLIAS
             </summary>
