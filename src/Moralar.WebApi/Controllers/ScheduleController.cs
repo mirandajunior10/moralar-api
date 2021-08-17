@@ -120,7 +120,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus? status, [FromForm] TypeSubject typeSubject)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus? status, [FromForm] TypeSubject? type)
         {
             var response = new DtResult<ScheduleListViewModel>();
             try
@@ -129,6 +129,7 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.Schedule>>();
 
                 conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
+
                 if (!string.IsNullOrEmpty(number))
                     conditions.Add(builder.Where(x => x.HolderNumber == number));
                 if (!string.IsNullOrEmpty(name))
@@ -146,6 +147,11 @@ namespace Moralar.WebApi.Controllers
 
                 if (status != null)
                     conditions.Add(builder.Where(x => x.TypeScheduleStatus == status));
+
+                if (type != null)
+                    conditions.Add(builder.Where(x => x.TypeSubject == type));
+
+
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
@@ -308,7 +314,7 @@ namespace Moralar.WebApi.Controllers
                 {
                     dataBody.Add("{{ title }}", $"Olá {family.Holder.Name.GetFirstName()}!");
                     dataBody.Add("{{ message }}", $"<p>Sua agenda { Utilities.ToEnum<TypeSubject>(model.TypeSubject.ToString())} foi marcada</p>" +
-                                                $"<p>Dia { Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("dd/MM/yyyy")}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("HH:mm")} , endereço {{xxx}}</p>" +
+                                                $"<p>Dia { Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("dd/MM/yyyy")}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("HH:mm")} , endereço {model.Place}</p>" +
                                                 $"Aguardamos você!"
                                                 );
                 }

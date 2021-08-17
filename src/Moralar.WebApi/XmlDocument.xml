@@ -785,7 +785,8 @@
             
                     POST
                         {
-                          "password":"string",
+                          "cpf": "string",
+                          "password": "string",
                           "motherName": "string",
                           "cityBorned": "string"        
                         }
@@ -1853,7 +1854,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.ScheduleController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64},System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeScheduleStatus},Moralar.Data.Enum.TypeSubject)">
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64},System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeScheduleStatus},System.Nullable{Moralar.Data.Enum.TypeSubject})">
             <summary>
             LISTAGEM DOS QUESTINÁRIOS DATATABLE
             </summary>

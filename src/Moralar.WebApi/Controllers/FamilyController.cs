@@ -1738,7 +1738,8 @@ namespace Moralar.WebApi.Controllers
         /// 
         ///         POST
         ///             {
-        ///               "password":"string",
+        ///               "cpf": "string",
+        ///               "password": "string",
         ///               "motherName": "string",
         ///               "cityBorned": "string"        
         ///             }

@@ -29,7 +29,7 @@ namespace Moralar.Domain
                 dataBody.Add("__bg-cardbody__", "#F2F3F3");
                 dataBody.Add("__bg-cardfooter__", "#A5559A");
                 dataBody.Add("__cl-body__", "#000000");
-                dataBody.Add("{{ baseUrl }}", $"{BaseConfig.CustomUrls[0]}/content/images");
+                dataBody.Add("{{ baseUrl }}", $"{BaseConfig.CustomUrls[0]}content/images");
                 dataBody.Add("{{ contact }}", Utilities.GetConfigurationRoot().GetSection("contactEmail").Get<string>());
                 dataBody.Add("{{ appName }}", BaseConfig.ApplicationName);
             }
