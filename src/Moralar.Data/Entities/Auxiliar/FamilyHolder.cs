@@ -16,5 +16,6 @@ namespace Moralar.Data.Entities.Auxiliar
         public string Email { get; set; }
         public string Phone { get; set; }
         public TypeScholarity? Scholarity { get; set; }
+        
     }
 }

@@ -40,5 +40,6 @@ namespace Moralar.Domain.ViewModels.Family
         //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Escolaridade")]
         public TypeScholarity? Scholarity { get; set; }
+        
     }
 }

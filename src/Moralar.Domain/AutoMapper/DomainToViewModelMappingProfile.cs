@@ -73,7 +73,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<FamilyFinancial, FamilyFinancialViewModel>();
             CreateMap<FamilyPriorization, FamilyPriorizationViewModel>();
             CreateMap<FamilyAddress, FamilyAddressViewModel>();
-            CreateMap<Family, FamilyHolderViewModel>();
+            CreateMap<Family, FamilyHolderViewModel>();               
             CreateMap<PriorityRate, PriorityRateViewModel>();
             CreateMap<Family, FamilyHolderDistanceViewModel>()
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Holder.Name))
@@ -91,8 +91,10 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             //.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<Family, FamilyCompleteViewModel>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
-                ;
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+                
+
+
 
             CreateMap<Family, FamilyCompleteListViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))

@@ -46,7 +46,7 @@ namespace Moralar.Data.Entities
         /// </summary>
         public FamilyPriorization Priorization { get; set; }
         public string Password { get; set; }
-        public bool IsFirstAcess { get; set; }
+        public bool IsFirstAcess { get; set; } = true;
         public string ProviderId { get; set; }
         public string Reason { get; set; }
         public string MotherName { get; set; }

@@ -141,6 +141,22 @@ namespace Moralar.Domain
                 /**/
             }
             return Language.En;
-        }        
+        }
+
+        public static T SetIfDifferentCustom<T, TY>(this T target, TY source) where T : class
+                   where TY : class
+        {
+            var allProperties = source.GetType().GetProperties().ToList();
+
+            for (int i = 0; i < allProperties.Count(); i++)
+            {
+                var sourceValue = Utilities.GetValueByProperty(source, allProperties[i].Name);
+
+                // VERIFICA SE EXISTE VALOR OU ACEITA NULL
+                if (Equals(sourceValue, null) == false)
+                    Utilities.SetPropertyValue(target, allProperties[i].Name, sourceValue);
+            }
+            return target;
+        }
     }
 }

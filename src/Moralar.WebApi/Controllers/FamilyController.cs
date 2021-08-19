@@ -55,6 +55,7 @@ namespace Moralar.WebApi.Controllers
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+   
 
         public FamilyController(IHostingEnvironment env, IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, ICourseFamilyRepository courseFamilyRepository, IQuizFamilyRepository quizFamilyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, ICityRepository cityRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
         {
@@ -490,7 +491,7 @@ namespace Moralar.WebApi.Controllers
                         vw.Spouse.Name = package.Workbook.Worksheets[1].Cells[linha, 9].Value.ToString();
                         vw.Spouse.Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 10].Value.ToString()));
                         vw.Spouse.Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 11].Value.ToString());
-                        vw.Spouse.Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 12].Value.ToString());
+                        vw.Spouse.SpouseScholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 12].Value.ToString());
 
                         //membro 1
                         if (package.Workbook.Worksheets[1].Cells[linha, 13].Value != null)
@@ -1301,12 +1302,12 @@ namespace Moralar.WebApi.Controllers
         ///       "email": "string",
         ///       "phone": "string",
         ///       "scholarity": "Não possui"
-        ///       },
+        ///       },       
         ///       "spouse": {
         ///       "name": "string",
         ///       "birthday": 0,
         ///       "genre": "Feminino",
-        ///       "scholarity": "Não possui"
+        ///       "spouseScholarity": "Não possui"
         ///       },
         ///       "members": [
         ///       {
@@ -1381,7 +1382,8 @@ namespace Moralar.WebApi.Controllers
         ///       "value": true
         ///       }
         ///       },
-        ///       "id": "string"
+        ///       "id": "string",
+        ///       "isFirstAcess": false
         ///       }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -1400,18 +1402,43 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+                var validOnly = _httpContextAccessor.GetFieldsFromBody();
+
                 var entityFamily = await _familyRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
+
                 if (entityFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                var entity = _mapper.Map<Data.Entities.Family>(model);
-                entity.Holder.Number = entityFamily.Holder.Number;
-                entity.Holder.Cpf = entityFamily.Holder.Cpf;
-                entity.Holder.Birthday = entityFamily.Holder.Birthday;
-               
+                //var entity = _mapper.Map<Data.Entities.Family>(model);
+                //entity.Holder.Number = entityFamily.Holder.Number;
+                //entity.Holder.Cpf = entityFamily.Holder.Cpf;
+                //entity.Holder.Birthday = entityFamily.Holder.Birthday;
 
-                var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
+                //entity.SetIfDifferent(model, validOnly);
+
+                entityFamily.SetIfDifferent(model, validOnly);
+
+                if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
+                {
+                    entityFamily.Holder.SetIfDifferentCustom(model.Holder);   
+                }
+
+                if (validOnly.Count(x => x == nameof(Family.Members)) > 0)
+                {
+                    entityFamily.Members = _mapper.Map<List<FamilyMember>>(model.Members);
+                }
+
+                if (validOnly.Count(x => x == nameof(Family.Spouse)) > 0)
+                {
+                    entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);                    
+                }
+
+                //var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
+
+                entityFamily = await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
+            
+
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
 
                 return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
@@ -1778,7 +1805,7 @@ namespace Moralar.WebApi.Controllers
                 entity.Password = model.Password;
                 entity.MotherName = model.MotherName.RemoveAccents();
                 entity.MotherCityBorned = model.MotherCityBorned.RemoveAccents();
-                entity.IsFirstAcess = true;
+                
 
                 _familyRepository.Update(entity);
                 

@@ -8,7 +8,7 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
 {
     public class ResidencialPropertyFilterViewModel
     {
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tipo do imóvel")]
         public TypeProperty TypeProperty { get; set; }
 

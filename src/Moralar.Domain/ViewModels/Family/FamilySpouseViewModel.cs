@@ -18,6 +18,6 @@ namespace Moralar.Domain.ViewModels.Family
         public TypeGenre? Genre { get; set; }
 
         [Display(Name = "Escolaridade")]
-        public TypeScholarity? Scholarity { get; set; }
+        public TypeScholarity? SpouseScholarity { get; set; }
     }
 }

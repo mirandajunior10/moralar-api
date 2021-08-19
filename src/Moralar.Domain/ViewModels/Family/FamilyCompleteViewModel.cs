@@ -42,7 +42,7 @@ namespace Moralar.Domain.ViewModels.Family
         public string MotherName { get; set; }
         public string MotherCityBorned { get; set; }
         //public string Password { get; set; }
-        //public bool IsFirstAcess { get; set; }
+        public bool IsFirstAcess { get; set; }
         //public string ProviderId { get; set; }
 
     }

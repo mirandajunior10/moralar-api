@@ -584,12 +584,12 @@
                   "email": "string",
                   "phone": "string",
                   "scholarity": "Não possui"
-                  },
+                  },       
                   "spouse": {
                   "name": "string",
                   "birthday": 0,
                   "genre": "Feminino",
-                  "scholarity": "Não possui"
+                  "spouseScholarity": "Não possui"
                   },
                   "members": [
                   {
@@ -664,7 +664,8 @@
                   "value": true
                   }
                   },
-                  "id": "string"
+                  "id": "string",
+                  "isFirstAcess": false
                   }
             </remarks>
             <response code="200">Returns success</response>

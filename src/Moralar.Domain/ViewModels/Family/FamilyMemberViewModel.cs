@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Family
@@ -10,10 +11,12 @@ namespace Moralar.Domain.ViewModels.Family
     public class FamilyMemberViewModel 
     {
         [Display(Name = "Nome do membro")]
+        [IsReadOnly]
         public string Name { get; set; }
        
 
         [Display(Name = " Data de nascimento")]
+        [IsReadOnly]
         public long Birthday { get; set; }
 
         

@@ -49,11 +49,13 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<FamilyPriorizationViewModel, FamilyPriorization>();
             CreateMap<FamilyAddressViewModel, FamilyAddress>();
 
+            CreateMap<FamilyHolderViewModel, Family>();
+
             CreateMap<FamilyCompleteViewModel, Family>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<FamilyCompleteWebViewModel, Family>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
-                 .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.Priorization))
+                 .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.Priorization))                 
                  ;
             //            Error mapping types.
 

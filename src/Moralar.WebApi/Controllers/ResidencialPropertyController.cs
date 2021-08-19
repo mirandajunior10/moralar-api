@@ -335,17 +335,18 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
+
                 if (model.TypeProperty == TypeProperty.Apartamento || model.TypeProperty == TypeProperty.Casa)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
-
 
                 if (model.StartSquareFootage > 0 && model.EndSquareFootage > 0)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.SquareFootage >= model.StartSquareFootage && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
 
+                if (model.StartCondominiumValue > 0 && model.EndCondominiumValue > 0)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.CondominiumValue >= model.StartCondominiumValue && x.ResidencialPropertyFeatures.CondominiumValue <= model.EndCondominiumValue));
 
                 if (model.StartIptuValue > 0 && model.EndIptuValue > 0)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.IptuValue >= model.StartIptuValue && x.ResidencialPropertyFeatures.IptuValue <= model.EndIptuValue));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
-
 
                 if (!string.IsNullOrEmpty(model.Neighborhood))
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
