@@ -8,7 +8,7 @@ namespace Moralar.Domain.ViewModels.Schedule
 {
     public class ScheduleListViewModel : BaseViewModel
     {
-        public string Date { get; set; }
+        public long Date { get; set; }
         public string Place { get; set; }
         public string Description { get; set; }
         public string FamilyId { get; set; }

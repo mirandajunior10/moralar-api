@@ -983,7 +983,7 @@ namespace Moralar.WebApi.Controllers
                     await _familyRepository.UpdateAsync(profile.FirstOrDefault());
 
                 });                
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change,TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change,TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {model.Cpf}", "", "", "");
                 return Ok(Utilities.ReturnSuccess("Verifique seu e-mail"));                
             }
             catch (Exception ex)
@@ -1423,6 +1423,11 @@ namespace Moralar.WebApi.Controllers
                     entityFamily.Holder.SetIfDifferentCustom(model.Holder);   
                 }
 
+                if (validOnly.Count(x => x == nameof(Family.Address)) > 0)
+                {
+                    entityFamily.Address.SetIfDifferentCustom(model.Address);
+                }
+
                 if (validOnly.Count(x => x == nameof(Family.Members)) > 0)
                 {
                     entityFamily.Members = _mapper.Map<List<FamilyMember>>(model.Members);
@@ -1431,6 +1436,29 @@ namespace Moralar.WebApi.Controllers
                 if (validOnly.Count(x => x == nameof(Family.Spouse)) > 0)
                 {
                     entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);                    
+                }
+
+                if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)
+                {
+                    entityFamily.Financial.SetIfDifferentCustom(model.Financial);                    
+
+                    //if (model.Financial.FamilyIncome > 0)
+                    //    entityFamily.Financial.FamilyIncome = model.Financial.FamilyIncome;                    
+
+                    //if (model.Financial.PropertyValueForDemolished > 0)
+                    //    entityFamily.Financial.PropertyValueForDemolished = model.Financial.PropertyValueForDemolished;
+
+                    //if (model.Financial.MaximumPurchase > 0)
+                    //    entityFamily.Financial.MaximumPurchase = model.Financial.MaximumPurchase;
+
+                    //if (model.Financial.IncrementValue > 0)
+                    //    entityFamily.Financial.IncrementValue = model.Financial.IncrementValue;
+
+                }
+
+                if (validOnly.Count(x => x == nameof(Family.Priorization)) > 0)
+                {
+                    entityFamily.Priorization.SetIfDifferentCustom(model.Priorization);
                 }
 
                 //var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);

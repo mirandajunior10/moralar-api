@@ -194,6 +194,11 @@ namespace Moralar.WebApi.Controllers
                 if (residencialEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
+                /* Regra de escolha de imóvel  */
+                var propertyChoiceFamily = await _propertiesInterestRepository.CountAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false);
+                if (propertyChoiceFamily > 3)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ChoiceLimitExceeded));
+               
 
                 var entityProperty = _mapper.Map<PropertiesInterest>(model);
                 entityProperty.HolderName = familyEntity.Holder.Name;
