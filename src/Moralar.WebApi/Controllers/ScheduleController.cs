@@ -106,6 +106,38 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
+        /// <summary>
+        /// RETORNA OS PRÓXIMOS AGENDAMENTOS POR FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetScheduleByFamily/{familyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetScheduleByFamily([FromRoute] string familyId)
+        {
+            try
+            {
+                var entity = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleListViewModel>>(entity.OrderBy(x => x.Created).ToList())));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
         /// <summary>
         /// LISTAGEM DOS QUESTINÁRIOS DATATABLE
         /// </summary>

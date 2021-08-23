@@ -1855,6 +1855,16 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.GetScheduleByFamily(System.String)">
+            <summary>
+            RETORNA OS PRÓXIMOS AGENDAMENTOS POR FAMÍLIA
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.ScheduleController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64},System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeScheduleStatus},System.Nullable{Moralar.Data.Enum.TypeSubject})">
             <summary>
             LISTAGEM DOS QUESTINÁRIOS DATATABLE

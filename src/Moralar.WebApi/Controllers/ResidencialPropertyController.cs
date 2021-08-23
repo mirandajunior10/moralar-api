@@ -196,6 +196,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
+            
             try
             {
                 if (ObjectId.TryParse(id, out var unused) == false)
@@ -211,7 +212,13 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<ResidencialPropertyViewModel>(entity)));
+                var viewmodelData = _mapper.Map<ResidencialPropertyViewModel>(entity);
+
+                /* Quantidade de famílias interessadas */
+                viewmodelData.InterestedFamilies = await _propertiesInterestRepository.CountAsync(x => x.ResidencialPropertyId == id).ConfigureAwait(false);
+
+
+                return Ok(Utilities.ReturnSuccess(data: viewmodelData));
             }
             catch (Exception ex)
             {
@@ -336,7 +343,8 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
-                if (model.TypeProperty == TypeProperty.Apartamento || model.TypeProperty == TypeProperty.Casa)
+                //if (model.TypeProperty == TypeProperty.Apartamento || model.TypeProperty == TypeProperty.Casa)
+                if(model.TypeProperty != null)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
 
                 if (model.StartSquareFootage > 0 && model.EndSquareFootage > 0)
@@ -351,10 +359,17 @@ namespace Moralar.WebApi.Controllers
                 if (!string.IsNullOrEmpty(model.Neighborhood))
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
 
-                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasGarage == model.HasGarage));
-                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessLadder == model.HasAccessLadder));
-                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessRamp == model.HasAccessRamp));
-                conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd));
+                if (model.HasGarage != null ) 
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasGarage == model.HasGarage.GetValueOrDefault()));
+
+                if(model.HasAccessLadder != null)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessLadder == model.HasAccessLadder.GetValueOrDefault()));
+
+                if (model.HasAccessRamp != null)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessRamp == model.HasAccessRamp.GetValueOrDefault()));
+
+                if (model.HasAdaptedToPcd != null)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd.GetValueOrDefault()));
 
                 var condition = builder.And(conditions);
                 var entity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();

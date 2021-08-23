@@ -28,8 +28,11 @@ namespace Moralar.Domain.ViewModels.Property
         [JsonIgnore]
         public TypeStatusResidencial TypeStatusResidencialProperty { get; set; }
         public ResidencialPropertyAdressViewModel ResidencialPropertyAdress { get; set; }
-
-
         public ResidencialPropertyFeatureViewModel ResidencialPropertyFeatures { get; set; }
+        /// <summary>
+        /// Total de famílias interessadas
+        /// </summary>
+        [Display(Name = "Famílias interessadas")]
+        public long InterestedFamilies { get; set; }
     }
 }

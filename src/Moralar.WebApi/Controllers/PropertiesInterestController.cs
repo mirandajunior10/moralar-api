@@ -45,14 +45,16 @@ namespace Moralar.WebApi.Controllers
         private readonly IFamilyRepository _familyRepository;
         private readonly IResidencialPropertyRepository _residencialPropertyRepository;
         private readonly IPropertiesInterestRepository _propertiesInterestRepository;
+        private readonly ISenderMailService _senderMailService;
         private readonly IUtilService _utilService;
 
-        public PropertiesInterestController(IMapper mapper, IFamilyRepository familyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, IUtilService utilService)
+        public PropertiesInterestController(IMapper mapper, IFamilyRepository familyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, IUtilService utilService, ISenderMailService senderMailService)
         {
             _mapper = mapper;
             _familyRepository = familyRepository;
             _residencialPropertyRepository = residencialPropertyRepository;
             _propertiesInterestRepository = propertiesInterestRepository;
+            _senderMailService = senderMailService;
             _utilService = utilService;
         }
 
@@ -209,6 +211,29 @@ namespace Moralar.WebApi.Controllers
                 entityProperty.Priorization = familyEntity.Priorization;
 
                 await _propertiesInterestRepository.CreateAsync(entityProperty).ConfigureAwait(false);
+
+                var entityResidencial = await _residencialPropertyRepository.FindByIdAsync(model.ResidencialPropertyId).ConfigureAwait(false);
+                if (entityResidencial == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
+
+
+                var sendInformation = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false);
+                foreach (var item in sendInformation)
+                {
+
+                    var dataBody = Util.GetTemplateVariables();
+                    dataBody.Add("{{ title }}", "Interesse em Imóvel");
+                    dataBody.Add("{{ message }}", $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
+                                                $"<p> Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.Location} "
+                                                );
+
+                    var body = _senderMailService.GerateBody("custom", dataBody);
+
+                    var unused = Task.Run(async () =>
+                    {
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.HolderEmail, body, "Registro de interesse em imóvel").ConfigureAwait(false);
+                    });
+                }
 
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));

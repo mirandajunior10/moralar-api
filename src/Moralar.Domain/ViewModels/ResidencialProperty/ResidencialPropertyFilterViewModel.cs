@@ -10,7 +10,7 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
     {
         //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tipo do imóvel")]
-        public TypeProperty TypeProperty { get; set; }
+        public TypeProperty? TypeProperty { get; set; }
 
         public double StartSquareFootage { get; set; }
         public double EndSquareFootage { get; set; }
@@ -24,22 +24,22 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
         public string Neighborhood { get; set; }
         public int StartNumberOfBedrooms { get; set; }
         public int EndNumberOfBedrooms { get; set; }
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tem garagem de serviço?")]
-        public bool HasGarage { get; set; }
+        public bool? HasGarage { get; set; }
 
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tem escada de acesso?")]
-        public bool HasAccessLadder { get; set; }
+        public bool? HasAccessLadder { get; set; }
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tem rampa de acesso?")]
-        public bool HasAccessRamp { get; set; }
+        public bool? HasAccessRamp { get; set; }
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "É Adaptada ou permite adaptação para PCD?")]
-        public bool HasAdaptedToPcd { get; set; }
+        public bool? HasAdaptedToPcd { get; set; }
 
     }
 }
