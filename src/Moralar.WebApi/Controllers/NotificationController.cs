@@ -177,7 +177,7 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var familyId = "60364a23531d390deaca2a4f"; //Request.GetUserId();
+                var familyId = Request.GetUserId();
                 var entity = await _notificationSendedRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
                 if (entity.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));

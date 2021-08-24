@@ -450,7 +450,7 @@ namespace Moralar.WebApi.Controllers
                     Title = "Cancelamento de inscrição em curso",
                     Description = $"Olá {  entityFamily.Holder.Name }!" +
                                  $" Seu curso {  entityCourse.Title }" +
-                                 " foi realizada com sucesso!Fique atento, seu curso começará em breve.",
+                                 " foi cancelado com sucesso!",
                     FamilyId = entityFamily._id.ToString(),
                 });
                 await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cancelou o curso {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), Request.GetUserName().Value, model.CourseId, "");

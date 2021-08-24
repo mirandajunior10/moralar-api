@@ -356,6 +356,9 @@ namespace Moralar.WebApi.Controllers
                 if (model.StartIptuValue > 0 && model.EndIptuValue > 0)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.IptuValue >= model.StartIptuValue && x.ResidencialPropertyFeatures.IptuValue <= model.EndIptuValue));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
 
+                if (model.StartNumberOfBedrooms > 0 && model.EndNumberOfBedrooms > 0)
+                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.NumberOfBedrooms >= model.StartNumberOfBedrooms && x.ResidencialPropertyFeatures.NumberOfBedrooms <= model.EndNumberOfBedrooms));
+
                 if (!string.IsNullOrEmpty(model.Neighborhood))
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
 
