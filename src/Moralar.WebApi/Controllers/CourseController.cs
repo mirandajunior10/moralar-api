@@ -204,13 +204,23 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+                var userId = Request.GetUserId();
 
                 var entity = await _courseRepository.FindByIdAsync(id).ConfigureAwait(false);
 
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<CourseViewModel>(entity)));
+                var viewmodelData = _mapper.Map<CourseViewModel>(entity);
+
+                /* Verifica se a família já é inscrita no curso */
+                var entityCourseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == userId && x.CourseId == id).ConfigureAwait(false);
+                if (entityCourseFamily.Count() > 0)
+                {
+                   viewmodelData.IsSubscribed = true;
+                }
+
+                return Ok(Utilities.ReturnSuccess(data: viewmodelData));
             }
             catch (Exception ex)
             {
@@ -240,7 +250,7 @@ namespace Moralar.WebApi.Controllers
                 var entity = await _courseRepository.FindAllAsync().ConfigureAwait(false);
 
                 if (entity == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
 
                 return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<CourseViewModel>>(entity)));
             }

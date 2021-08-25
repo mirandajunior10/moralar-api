@@ -71,7 +71,7 @@ namespace Moralar.WebApi.Controllers
         /// <remarks>
         /// OBJ DE ENVIO
         /// 
-        ///POST
+        ///       POST
         ///       {
         ///         "questionDescriptionId": [
         ///           "string"
@@ -176,7 +176,9 @@ namespace Moralar.WebApi.Controllers
                         FamilyHolderCpf = answers[i].FamilyHolderCpf,
                         Title = quiz.Find(x => question.Any(c => ObjectId.Parse(c.QuizId) == x._id)).Title,
                         Date = answers[i].Created.Value,
-                        Question = question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).NameQuestion
+                        Question = question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).NameQuestion,
+                        QuestionAneswerId = answers[i]._id.ToString()
+                        
                     };
                     switch (question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).TypeResponse)
                     {

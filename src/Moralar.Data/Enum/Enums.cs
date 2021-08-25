@@ -314,10 +314,11 @@ namespace Moralar.Data.Enum
     {
         [EnumMember(Value = "Respondido")]
         [Description("Respondido")]
-        NaoRespondido = 0,
+        Respondido = 1,
         [EnumMember(Value = "Não Respondido")]
         [Description("Não Respondido")]
-        Respondido = 1
+        NaoRespondido = 0
+        
     }
     public enum TypeSubject
     {

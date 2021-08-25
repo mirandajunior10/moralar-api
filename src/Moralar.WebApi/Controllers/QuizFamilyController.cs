@@ -75,7 +75,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> LoadDataQuizAvailable([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] TypeStatus status)
+        public async Task<IActionResult> LoadDataQuizAvailable([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status)
         {
 
             //
@@ -89,12 +89,15 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
                 if (!string.IsNullOrEmpty(number))
                     conditions.Add(builder.Where(x => x.HolderNumber.ToUpper() == number.ToUpper()));
-                if (!string.IsNullOrEmpty(name))
-                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(name.ToUpper())));
-                if (!string.IsNullOrEmpty(cpf))
-                    conditions.Add(builder.Where(x => x.HolderCpf == cpf));
+                if (!string.IsNullOrEmpty(holderName))
+                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
+                if (!string.IsNullOrEmpty(holderCpf))
+                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
 
+                if (status != null)
                 conditions.Add(builder.Where(x => x.TypeStatus == status));
+
+
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
@@ -254,7 +257,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] TypeStatus status)
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status)
         {
             var response = new DtResult<QuizFamilyExportViewModel>();
             try
@@ -266,12 +269,13 @@ namespace Moralar.WebApi.Controllers
 
                 if (!string.IsNullOrEmpty(number))
                     conditions.Add(builder.Where(x => x.HolderNumber.ToUpper() == number.ToUpper()));
-                if (!string.IsNullOrEmpty(name))
-                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(name.ToUpper())));
-                if (!string.IsNullOrEmpty(cpf))
-                    conditions.Add(builder.Where(x => x.HolderCpf == cpf));
+                if (!string.IsNullOrEmpty(holderName))
+                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
+                if (!string.IsNullOrEmpty(holderCpf))
+                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
 
-                conditions.Add(builder.Where(x => x.TypeStatus == status));
+                if (status != null)
+                    conditions.Add(builder.Where(x => x.TypeStatus == status));
 
 
                 var condition = builder.And(conditions);

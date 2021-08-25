@@ -245,7 +245,7 @@ namespace Moralar.WebApi.Controllers
                 {                   
 
 
-                    var entityProfile = await _profileRepository.FindByAsync(x => x.TypeProfile == TypeUserProfile.Gestor || x.TypeProfile == TypeUserProfile.TTS).ConfigureAwait(false);
+                    var entityProfile = await _profileRepository.FindByAsync(x => x.TypeProfile == TypeUserProfile.Gestor || x.TypeProfile == TypeUserProfile.TTS && x.DataBlocked != null).ConfigureAwait(false);
                     foreach (var item in entityProfile)
                     {
                         var dataBody = Util.GetTemplateVariables();

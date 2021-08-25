@@ -1373,29 +1373,29 @@
              <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.QuestionAnswerController.Register(Moralar.Domain.ViewModels.QuestionAnswer.QuestionAnswerRegisterViewModel)">
-             <summary>
-             REGISTRAR UMA RESPOSTA
-             </summary>
-             <remarks>
-             OBJ DE ENVIO
-             
-            POST
-                   {
-                     "questionDescriptionId": [
-                       "string"
-                     ],
-                     "questionId": "string",
-                     "answerDescription": "string",
-                     "familyId": "string",
-                     "responsibleForResponsesId": "string",
-                     "id": "string"
-                   }
-             </remarks>
-             <response code="200">Returns success</response>
-             <response code="400">Custom Error</response>
-             <response code="401">Unauthorize Error</response>
-             <response code="500">Exception Error</response>
-             <returns></returns>
+            <summary>
+            REGISTRAR UMA RESPOSTA
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                  POST
+                  {
+                    "questionDescriptionId": [
+                      "string"
+                    ],
+                    "questionId": "string",
+                    "answerDescription": "string",
+                    "familyId": "string",
+                    "responsibleForResponsesId": "string",
+                    "id": "string"
+                  }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.QuestionAnswerController.GetResponses">
             <summary>
@@ -1647,7 +1647,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.LoadDataQuizAvailable(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,Moralar.Data.Enum.TypeStatus)">
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.LoadDataQuizAvailable(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus})">
             <summary>
             LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
             </summary>
@@ -1667,7 +1667,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,Moralar.Data.Enum.TypeStatus)">
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus})">
             <summary>
             EXPORTAR PARA EXCEL
             </summary>

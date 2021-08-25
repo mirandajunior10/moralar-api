@@ -74,5 +74,8 @@ namespace Moralar.Domain.ViewModels.Course
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Quantidade de vagas")]
         public int NumberOfVacancies { get; set; }
+
+        [Display(Name = "Família inscrita no curso?")]
+        public bool IsSubscribed { get; set; }
     }
 }

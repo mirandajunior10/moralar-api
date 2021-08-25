@@ -396,7 +396,7 @@ namespace Moralar.WebApi.Controllers
                         _quizFamilyRepository.Create(new QuizFamily()
                         {
                             FamilyId = item._id.ToString(),
-                            QuizId =quizEntityId,
+                            QuizId = quizEntityId,
                             HolderName = item.Holder.Name,
                             HolderCpf = item.Holder.Cpf,
                             HolderNumber = item.Holder.Number,
