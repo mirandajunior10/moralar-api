@@ -357,7 +357,7 @@ namespace Moralar.WebApi.Controllers
                 if (entityFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                if (await _courseFamilyRepository.CheckByAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false))
+                if (await _courseFamilyRepository.CheckByAsync(x => x.FamilyId == model.FamilyId && x.CourseId == model.CourseId).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro("Família já realizou o curso"));
                 var entityCourse = await _courseRepository.FindByIdAsync(model.CourseId).ConfigureAwait(false);
                 if (entityCourse == null)
@@ -383,7 +383,7 @@ namespace Moralar.WebApi.Controllers
                                   "foi realizada com sucesso!Fique atento, seu curso começará em breve.",
                     FamilyId=entity._id.ToString(),
                 });
-                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou família  {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou família  {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), "", entityId, "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -463,7 +463,7 @@ namespace Moralar.WebApi.Controllers
                                  " foi cancelado com sucesso!",
                     FamilyId = entityFamily._id.ToString(),
                 });
-                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cancelou o curso {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), Request.GetUserName().Value, model.CourseId, "");
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cancelou o curso {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), "", model.CourseId, "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)

@@ -1752,6 +1752,7 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 var userId = Request.GetUserId();
+                
 
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro());
@@ -1767,20 +1768,18 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                //if (entity.Password != model.CurrentPassword)
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.PasswordNoMatch));
-
-                //entity.LastPassword = entity.Password;
+               if (entity.Password != model.CurrentPassword)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.PasswordNoMatch));
 
                 entity.Password = model.NewPassword;
 
                 _familyRepository.Update(entity);
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, userId);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Alteração de senha {entity.Holder.Name}", userId, "", userId);
                 return Ok(Utilities.ReturnSuccess("Senha alterada com sucesso."));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova Família", "", "", "", "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Não foi possível alterar a senha", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
