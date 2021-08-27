@@ -520,13 +520,16 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
+              
                 var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId).ConfigureAwait(false);
 
 
                 var entityFamily = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
                 if (entityFamily.Count(x => x.TypeQuiz == typeQuiz) == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));                
 
+
+                    
                 return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizViewModel>>(entityFamily)));
             }
             catch (Exception ex)

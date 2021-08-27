@@ -132,7 +132,13 @@ namespace Moralar.WebApi.Controllers
 
                 var entityNewAnswer = _mapper.Map<QuestionAnswer>(model);
                 entityNewAnswer.ResponsibleForResponses = model.ResponsibleForResponsesId == null ? Request.GetUserId() : model.ResponsibleForResponsesId;
-                await _questionAnswerRepository.CreateAsync(entityNewAnswer);
+                await _questionAnswerRepository.CreateAsync(entityNewAnswer);                                             
+
+               
+                /* Atualiza o status do quiz para respondido */
+                _quizFamilyRepository.UpdateMultiple(Query<QuizFamily>.Where(x => x.FamilyId == model.FamilyId && x.QuizId == entityQuestion.QuizId), 
+                    new UpdateBuilder<QuizFamily>().Set(x => x.TypeStatus, TypeStatus.Respondido), UpdateFlags.Multi);
+
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }

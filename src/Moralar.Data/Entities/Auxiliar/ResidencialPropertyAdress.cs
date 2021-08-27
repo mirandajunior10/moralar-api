@@ -17,5 +17,7 @@ namespace Moralar.Data.Entities.Auxiliar
         public string Complement { get; set; }
         public string Location { get; set; }
         public string CEP { get; set; }
+        public double Latitude { get; set; }
+        public double Longitude { get; set; }
     }
 }

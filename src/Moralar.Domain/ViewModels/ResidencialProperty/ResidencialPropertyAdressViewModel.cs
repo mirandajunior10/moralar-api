@@ -57,5 +57,18 @@ namespace Moralar.Domain.ViewModels.Property
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Localização")]
         public string Location { get; set; }
+
+        /// <summary>
+        /// Longitude
+        /// </summary>
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "Latitude")]
+        public double Latitude { get; set; }
+        /// <summary>
+        /// Longitude
+        /// </summary>
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "Longitude")]
+        public double Longitude { get; set; }
     }
 }

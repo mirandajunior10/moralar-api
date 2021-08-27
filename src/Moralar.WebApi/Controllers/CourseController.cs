@@ -112,7 +112,7 @@ namespace Moralar.WebApi.Controllers
             }
         }
         /// <summary>
-        /// LISTAGEM DOS CLIENTES
+        /// LISTAGEM DOS CURSOS
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>

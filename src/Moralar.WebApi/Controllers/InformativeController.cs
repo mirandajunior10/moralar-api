@@ -475,7 +475,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
+        
         public async Task<IActionResult> Export()
         {
             try

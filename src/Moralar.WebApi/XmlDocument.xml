@@ -66,7 +66,7 @@
         </member>
         <member name="M:Moralar.WebApi.Controllers.CourseController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.Nullable{System.Int64},System.Nullable{System.Int64})">
             <summary>
-            LISTAGEM DOS CLIENTES
+            LISTAGEM DOS CURSOS
             </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>
