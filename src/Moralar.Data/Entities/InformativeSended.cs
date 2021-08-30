@@ -13,7 +13,7 @@ namespace Moralar.Data.Entities
     {
         public string InformativeId { get; set; }
         public string FamilyId { get; set; }
-        public long DateViewed { get; set; }
+        public long? DateViewed { get; set; }
         public override string CollectionName => nameof(InformativeSended);
     }
 }

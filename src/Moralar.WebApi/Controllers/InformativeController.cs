@@ -176,13 +176,28 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 var familyId = Request.GetUserId();
-                var entity = await _informativeSendedRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+
+                var entity = await _informativeSendedRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<InformativeSended>;
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-                var vieoViewModel = _mapper.Map<List<InformativeViewModel>>(entity);
+               
+                var entityInformative = await _informativeRepository.FindIn("_id", entity.Select(x => ObjectId.Parse(x.InformativeId)).ToList()) as List<Informative>;
+                                
+                
+                var vieoViewModel = _mapper.Map<List<InformativeSendedViewModel>>(entity); 
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                for (int i = 0; i < vieoViewModel.Count(); i++)
+                {
+                    var informativeSended = entityInformative.Find(x => x._id.ToString() == vieoViewModel[i].InformativeId);
+
+                    if (informativeSended != null)
+                        vieoViewModel[i].Description = informativeSended.Description;
+                        vieoViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
+                        vieoViewModel[i].Image = informativeSended.Image;
+                }
+
+                    return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
             }
             catch (Exception ex)
             {

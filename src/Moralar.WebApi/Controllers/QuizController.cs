@@ -44,9 +44,10 @@ namespace Moralar.WebApi.Controllers
         private readonly IQuestionDescriptionRepository _questionDescriptionRepository;
         private readonly IQuizFamilyRepository _quizFamilyRepository;
         private readonly IFamilyRepository _familyRepository;
+        private readonly INotificationSendedRepository _notificationSendedRepository;
         private readonly IUtilService _utilService;
 
-        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, IUtilService utilService)
+        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, INotificationSendedRepository notificationSendedRepository, IUtilService utilService)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
@@ -54,6 +55,7 @@ namespace Moralar.WebApi.Controllers
             _questionDescriptionRepository = questionDescriptionRepository;
             _quizFamilyRepository = quizFamilyRepository;
             _familyRepository = familyRepository;
+            _notificationSendedRepository = notificationSendedRepository;
             _utilService = utilService;
         }
 
@@ -480,10 +482,17 @@ namespace Moralar.WebApi.Controllers
                     };
                     if (await _quizFamilyRepository.CheckByAsync(x => x.QuizId == model.QuizId && x.FamilyId == item._id.ToString()) == false)
                         await _quizFamilyRepository.CreateAsync(entityQuizFamily).ConfigureAwait(false);
-                }
-                ///TODO
-                /// ENVIAR MSG PARA O APP DO CLIENTE
 
+                    /// ENVIAR MSG PARA O APP DO CLIENTE
+                    await _notificationSendedRepository.CreateAsync(new NotificationSended
+                    {
+                        Title = "Novo questionário disponibilizado",
+                        Description = $"Olá { item.Holder.Name  }," +
+                                 $"Precisamos saber sua opinião sobre sua casa nova!"
+                    });
+
+
+                }   
 
                 //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
 
@@ -520,25 +529,30 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
-              
-                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId).ConfigureAwait(false);
+
+                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId).ConfigureAwait(false) as List<QuizFamily>;
 
 
                 var entityFamily = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
                 if (entityFamily.Count(x => x.TypeQuiz == typeQuiz) == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));                
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
+        
+                var _quizViewModel = _mapper.Map<List<QuizViewModel>>(entityFamily);
 
-                    
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizViewModel>>(entityFamily)));
+                for (int i = 0; i < _quizViewModel.Count(); i++)
+                {                    
+                    var quizfamilyEntity = quizFamilies.Find(x => x.QuizId == _quizViewModel[i].Id.ToString());
+                    if (quizfamilyEntity != null)
+                        _quizViewModel[i].TypeStatus = quizfamilyEntity.TypeStatus;
+                }
+
+                return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
             }
             catch (Exception ex)
             {
                 return BadRequest(ex.ReturnErro());
             }
         }
-
-
     }
-
 }

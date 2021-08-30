@@ -193,6 +193,13 @@ namespace Moralar.Domain.AutoMapper
              .ForMember(dest => dest.Date, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value).ToString("dd/MM/yyyy")))
              .ForMember(dest => dest.DatePublishDate, opt => opt.MapFrom(src => src.DatePublish != null ? src.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy") : null));
 
+            CreateMap<Informative, InformativeViewModel>()
+             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
+             .ForMember(dest => dest.Description, opt => opt.MapFrom(src => src.Description))
+             .ForMember(dest => dest.DatePublish, opt => opt.MapFrom(src => src.DatePublish != null ? src.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy") : null));
+           
+            CreateMap<InformativeSended, InformativeSendedViewModel>()
+             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
             #endregion
             #region Notification
