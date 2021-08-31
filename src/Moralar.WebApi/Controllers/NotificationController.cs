@@ -193,9 +193,25 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// CADASTRAR UM NOTIFICAÇÃO
+        /// CADASTRAR UMA NOTIFICAÇÃO POR FAMÍLIA OU TODAS
         /// </summary>
         /// <remarks>
+        ///OBJ DE ENVIO
+        ///
+        /// 
+        ///         POST
+        ///         {
+        ///
+        ///              "familyId": [
+        ///                 "string"
+        ///              ]
+        ///              },
+        ///              "allFamily": "false",  // INFORME TRUE PARA TODAS AS FAMILIAS
+        ///              "image": "210831110311.jpg",
+        ///              "title": "string",
+        ///              "description": "string"
+        ///          }    
+        /// </remarks>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>
         /// <response code="401">Unauthorize Error</response>
@@ -213,16 +229,45 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 model.TrimStringProperties();
-                var ignoreValidation = new List<string>();
+                //var ignoreValidation = new List<string>();
 
-                var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
+                //var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
 
-                if (isInvalidState != null)
-                    return BadRequest(isInvalidState);
+                //if (isInvalidState != null)
+                //    return BadRequest(isInvalidState);  
 
-                var entity = _mapper.Map<Data.Entities.Notification>(model);
-                var informativeId = await _notificationRepository.CreateAsync(entity).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
+
+                var entityFamily = new List<Family>();
+                if (model.AllFamily == true)
+                    entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+                else
+                {
+                    entityFamily = await _familyRepository.FindIn("_id", model.FamilyId.Select(x => ObjectId.Parse(x)).ToList()) as List<Family>;
+                    if (model.FamilyId.Count() != entityFamily.Count())
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+                }
+
+                foreach (var item in entityFamily)
+                {
+                    var entityNotification = new Notification()
+                    {
+                        Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                        FamilyId = item._id.ToString(),
+                        Title = model.Title,
+                        Description = model.Description,
+                        Image = model.Image.SetPathImage()
+                    };
+                    
+                    
+                    var informativeId = await _notificationRepository.CreateAsync(entityNotification).ConfigureAwait(false);
+
+                    await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
+
+                }
+
+                //var entity = _mapper.Map<Data.Entities.Notification>(model);
+                //var informativeId = await _notificationRepository.CreateAsync(entity).ConfigureAwait(false);
+                //  await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
 
             }

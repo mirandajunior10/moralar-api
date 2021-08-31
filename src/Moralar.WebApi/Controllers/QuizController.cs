@@ -488,7 +488,8 @@ namespace Moralar.WebApi.Controllers
                     {
                         Title = "Novo questionário disponibilizado",
                         Description = $"Olá { item.Holder.Name  }," +
-                                 $"Precisamos saber sua opinião sobre sua casa nova!"
+                                 $"Precisamos saber sua opinião sobre sua casa nova!",
+                        FamilyId = item._id.ToString(),
                     });
 
 

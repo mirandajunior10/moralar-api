@@ -948,7 +948,33 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.Register(Moralar.Domain.ViewModels.Notification.NotificationViewModel)" -->
+        <member name="M:Moralar.WebApi.Controllers.NotificationController.Register(Moralar.Domain.ViewModels.Notification.NotificationViewModel)">
+             <summary>
+             CADASTRAR UMA NOTIFICAÇÃO POR FAMÍLIA OU TODAS
+             </summary>
+             <remarks>
+            OBJ DE ENVIO
+            
+             
+                     POST
+                     {
+            
+                          "familyId": [
+                             "string"
+                          ]
+                          },
+                          "allFamily": "false",  // INFORME TRUE PARA TODAS AS FAMILIAS
+                          "image": "210831110311.jpg",
+                          "title": "string",
+                          "description": "string"
+                      }    
+             </remarks>
+             <response code="200">Returns success</response>
+             <response code="400">Custom Error</response>
+             <response code="401">Unauthorize Error</response>
+             <response code="500">Exception Error</response>
+             <returns></returns>
+        </member>
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.Send(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToRead(System.String)" -->
         <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadDataNotification(UtilityFramework.Application.Core.ViewModels.DtParameters)">

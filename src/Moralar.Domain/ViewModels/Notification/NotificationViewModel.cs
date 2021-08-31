@@ -14,5 +14,16 @@ namespace Moralar.Domain.ViewModels.Notification
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Descrição da notificação")]
         public string Description { get; set; }
+        [Display(Name = "Imagem")]
+        public string Image { get; set; }       
+
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "Enviar para todas as famílias?")]
+        public bool AllFamily { get; set; }
+
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "Id da Família")]
+        public List<string> FamilyId { get; set; }
+        public long? DateViewed { get; set; }
     }
 }
