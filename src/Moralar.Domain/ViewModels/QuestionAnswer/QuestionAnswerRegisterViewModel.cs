@@ -8,7 +8,8 @@ using System.Text;
 
 namespace Moralar.Domain.ViewModels.QuestionAnswer
 {
-    public class QuestionAnswerRegisterViewModel : QuestionAnswerViewModel
+    //QuestionAnswerViewModel
+    public class QuestionAnswerRegisterViewModel : QuestionAnswerResponseViewModel
     {
         [JsonIgnore]
         

@@ -272,9 +272,21 @@ namespace Moralar.WebApi.Controllers
                 var informativeSended = await _informativeSendedRepository.FindByIdAsync(informativeId).ConfigureAwait(false);
                 if (informativeSended == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InformativeNotFound));
-                informativeSended.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
+
+                if (informativeSended.DateViewed == 0)
+                {
+                    /* Informativo lido */
+                    informativeSended.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
+                }
+                else
+                {
+                    informativeSended.DateViewed = 0;
+                }
+
                 await _informativeSendedRepository.UpdateOneAsync(informativeSended).ConfigureAwait(false);
+
                 await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Mudou a situação para visualizada {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
+                
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated));
 
             }

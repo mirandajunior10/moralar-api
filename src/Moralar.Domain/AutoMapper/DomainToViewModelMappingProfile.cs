@@ -11,6 +11,7 @@ using Moralar.Domain.ViewModels.NotificationSended;
 using Moralar.Domain.ViewModels.PropertiesInterest;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
+using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.QuizFamily;
 using Moralar.Domain.ViewModels.ResidencialProperty;
@@ -150,8 +151,11 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.TypeStatus == 0 ? "Não respondido" : "Respondido"));
 
             CreateMap<Quiz, QuizFamilyExportViewModel>()
-            .ForMember(dest => dest.QuizId, opt => opt.Ignore()); 
+            .ForMember(dest => dest.QuizId, opt => opt.Ignore());
 
+            CreateMap<QuestionAnswerAux, QuestionAnswerAuxViewModel>();
+
+            CreateMap<QuestionAnswer, QuestionAnswerRegisterViewModel>();
 
             #endregion
             #region Course

@@ -1398,6 +1398,16 @@
              <response code="500">Exception Error</response>
              <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.QuestionAnswerController.GetResponses(System.String)">
+            <summary>
+            BUSCA AS RESPOSTAS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.QuestionAnswerController.Register(Moralar.Domain.ViewModels.QuestionAnswer.QuestionAnswerRegisterViewModel)">
             <summary>
             REGISTRAR UMA RESPOSTA
@@ -1407,26 +1417,18 @@
             
                   POST
                   {
-                    "questionDescriptionId": [
-                      "string"
-                    ],
-                    "questionId": "string",
-                    "answerDescription": "string",
                     "familyId": "string",
-                    "responsibleForResponsesId": "string",
-                    "id": "string"
-                  }
+                    "quizId": "string",
+                    "questions": {
+                       "questionDescriptionId": [
+                          "string"
+                     ],
+                     "questionId": "string",
+                     "answerDescription": "string"
+                     },
+                     "responsibleForResponsesId": "string"
+                     }
             </remarks>
-            <response code="200">Returns success</response>
-            <response code="400">Custom Error</response>
-            <response code="401">Unauthorize Error</response>
-            <response code="500">Exception Error</response>
-            <returns></returns>
-        </member>
-        <member name="M:Moralar.WebApi.Controllers.QuestionAnswerController.GetResponses">
-            <summary>
-            BUSCA AS RESPOSTAS
-            </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>
             <response code="401">Unauthorize Error</response>

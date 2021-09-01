@@ -8,9 +8,9 @@ namespace Moralar.Domain.ViewModels.QuestionAnswer
     {
         public QuestionAnswerListViewModel()
         {
-            //CreditCards = new List<string>();
             Answers = new List<string>();
         }
+        public string QuizId { get; set; }
         public string QuestionAneswerId { get; set; }
         public string FamilyNumber { get; set; }
         public string FamilyHolderName { get; set; }
@@ -20,6 +20,7 @@ namespace Moralar.Domain.ViewModels.QuestionAnswer
         public long Date { get; set; }
         public string Question { get; set; }
         public List<string> Answers { get; set; }
+        public List<QuestionAnswerAuxViewModel> Questions { get; set; }
 
     }
 }

@@ -206,34 +206,34 @@ namespace Moralar.WebApi.Controllers
                         FamilyHolderCpf = answers[i].FamilyHolderCpf,
                         Title = entityQuiz.Title,//Find(x => question.Any(c => ObjectId.Parse(c.QuizId) == x._id)).
                         Date = answers[i].Created.Value,
-                        Question = question.Find(x => x.QuizId == answers[i].QuestionId)?.NameQuestion
+                        //Question = question.Find(x => x.QuizId == answers[i].Questions.QuestionId)?.NameQuestion
                     };
-                    switch (question.Find(x => x._id == ObjectId.Parse(answers[i].QuestionId)).TypeResponse)
-                    {
-                        case TypeResponse.MultiplaEscolha:
-                            {
-                                foreach (var item in answers[i].QuestionDescriptionId)
-                                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
-                                break;
-                            }
-                        case TypeResponse.ListaSuspensa:
-                            {
-                                foreach (var item in answers[i].QuestionDescriptionId)
-                                    questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
-                                break;
-                            }
-                        case TypeResponse.EscolhaUnica:
-                            {
-                                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(answers[i].QuestionDescriptionId.FirstOrDefault())).Description);
-                                break;
-                            }
-                        case TypeResponse.Texto:
-                            {
-                                questionAnswerListViewModel.Answers.Add(answers[i].AnswerDescription);
-                                break;
-                            }
-                    }
-                    listAnswers.Add(questionAnswerListViewModel);
+                    //switch (question.Find(x => x._id == ObjectId.Parse(answers[i].Questions.QuestionId)).TypeResponse)
+                    //{
+                    //    case TypeResponse.MultiplaEscolha:
+                    //        {
+                    //            foreach (var item in answers[i].Questions.QuestionDescriptionId)
+                    //                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
+                    //            break;
+                    //        }
+                    //    case TypeResponse.ListaSuspensa:
+                    //        {
+                    //            foreach (var item in answers[i].Questions.QuestionDescriptionId)
+                    //                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
+                    //            break;
+                    //        }
+                    //    case TypeResponse.EscolhaUnica:
+                    //        {
+                    //            questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(answers[i].Questions.QuestionDescriptionId.FirstOrDefault())).Description);
+                    //            break;
+                    //        }
+                    //    case TypeResponse.Texto:
+                    //        {
+                    //            questionAnswerListViewModel.Answers.Add(answers[i].Questions.AnswerDescription);
+                    //            break;
+                    //        }
+                    //}
+                    //listAnswers.Add(questionAnswerListViewModel);
                 }
                 return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
             }
