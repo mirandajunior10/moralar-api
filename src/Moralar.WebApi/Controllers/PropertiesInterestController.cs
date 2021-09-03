@@ -80,7 +80,7 @@ namespace Moralar.WebApi.Controllers
             {
 
                 var Entity = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
-                if (Entity == null)
+                if (Entity.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
 
                 var residencialProperties = await _residencialPropertyRepository.FindIn("_id", Entity.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;

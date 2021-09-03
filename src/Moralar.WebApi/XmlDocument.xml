@@ -808,6 +808,25 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.RegisterUnRegisterDeviceId(Moralar.Domain.ViewModels.PushViewModel)">
+            <summary>
+            REGISTRAR E REMOVER DEVICE ID ONESIGNAL OU FCM | CHAMAR APOS LOGIN E LOGOUT
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "deviceId":"string",
+                         "isRegister":true  // true => registrar  | false => remover 
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.FileController.Upload(Microsoft.AspNetCore.Http.IFormFile,System.String)">
             <summary>
             Upload one file
@@ -977,6 +996,7 @@
         </member>
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.Send(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToRead(System.String)" -->
+        <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToReadInfo(System.String)" -->
         <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadDataNotification(UtilityFramework.Application.Core.ViewModels.DtParameters)">
             <summary>
             METODO DE LISTAGEM COM DATATABLE

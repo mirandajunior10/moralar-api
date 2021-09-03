@@ -8,6 +8,7 @@ namespace Moralar.Domain.ViewModels.Notification
     public class NotificationListViewModel : BaseViewModel
     {
         public bool Status { get; set; }
+        public long? DateViewed { get; set; }
         public long Created { get; set; }
         public string Title { get; set; }
         public string Description { get; set; }        

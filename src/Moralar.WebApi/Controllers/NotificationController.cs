@@ -323,7 +323,7 @@ namespace Moralar.WebApi.Controllers
             }
         }
         /// <summary>
-        /// MODIFICA UMA NOTIFICAÇÃO PARA LIDO
+        /// MODIFICA UMA NOTIFICAÇÃO DE APP PARA LIDO
         /// </summary>
         /// <remarks>
         /// <response code="200">Returns success</response>
@@ -349,6 +349,42 @@ namespace Moralar.WebApi.Controllers
                 entityNotificationSended.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
                 var entityFamily = await _notificationSendedRepository.UpdateOneAsync(entityNotificationSended).ConfigureAwait(false);
                 await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Leu a notificação{Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, entityFamily);
+                return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated));
+            }
+            catch (Exception ex)
+            {
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi ler a notificação", "", "", "", "", ex);
+                return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
+            }
+        }
+
+        /// <summary>
+        /// MODIFICA UMA NOTIFICAÇÃO DE INFORMATIVOS PARA LIDO
+        /// </summary>
+        /// <remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ChangeToReadInfo/{notificationId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> ChangeToReadInfo(string notificationId)
+        {
+            try
+            {
+
+                var entityNotification = await _notificationRepository.FindByIdAsync(notificationId).ConfigureAwait(false);
+                if (entityNotification == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.NotificationNotFound));
+
+                entityNotification.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
+                var entityFamily = await _notificationRepository.UpdateOneAsync(entityNotification).ConfigureAwait(false);
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Leu a notificação{Request.GetUserName()}", "", "", entityFamily);
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated));
             }
             catch (Exception ex)

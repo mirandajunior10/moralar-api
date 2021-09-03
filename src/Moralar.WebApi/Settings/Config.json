@@ -46,10 +46,10 @@
   "SERVICES": {
     "ONESIGNAL": [
       {
-        "KEY": null,
+        "KEY": "MDQ3YmE2MDItZDkxZS00YWZmLWFkNjQtOTgzNDIxODg2ZWEx",
         "SOUND": "default",
         "ICON": "default",
-        "APPID": null
+        "APPID": "f3a41312-fd24-4e06-87f5-2244edd4851c"
       }
     ],
     "SMTP": {

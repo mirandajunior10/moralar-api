@@ -166,7 +166,7 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
                 var questionAnswer = await _questionAnswerRepository.FindByAsync(x => x.FamilyId == family._id.ToString()).ConfigureAwait(false);
-                if (questionAnswer.Count()==0)
+                if (questionAnswer.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.AnswerNotFound));
 
                 var entityQuiz = await _quizRepository.FindByIdAsync(quizFamily.QuizId).ConfigureAwait(false);
@@ -197,49 +197,31 @@ namespace Moralar.WebApi.Controllers
                 }
                 List<QuestionAnswerListViewModel> listAnswers = new List<QuestionAnswerListViewModel>();
                 var answers = await _questionAnswerRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionAnswer>;
-                for (int i = 0; i < answers.Count(); i++)
-                {
-                    var questionAnswerListViewModel = new QuestionAnswerListViewModel()
+
+                var response = new List<QuestionAnswerListViewModel>();
+                
+                for (int i = 0; i < question.Count; i++)
+                {                    
+                    var item = question[i];
+
+                    var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0);
+
+                    response.Add(new QuestionAnswerListViewModel()
                     {
+
                         FamilyNumber = answers[i].FamilyNumber,
                         FamilyHolderName = answers[i].FamilyHolderName,
                         FamilyHolderCpf = answers[i].FamilyHolderCpf,
-                        Title = entityQuiz.Title,//Find(x => question.Any(c => ObjectId.Parse(c.QuizId) == x._id)).
+                        Title = entityQuiz.Title,
                         Date = answers[i].Created.Value,
-                        //Question = question.Find(x => x.QuizId == answers[i].Questions.QuestionId)?.NameQuestion
-                    };
-                    //switch (question.Find(x => x._id == ObjectId.Parse(answers[i].Questions.QuestionId)).TypeResponse)
-                    //{
-                    //    case TypeResponse.MultiplaEscolha:
-                    //        {
-                    //            foreach (var item in answers[i].Questions.QuestionDescriptionId)
-                    //                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
-                    //            break;
-                    //        }
-                    //    case TypeResponse.ListaSuspensa:
-                    //        {
-                    //            foreach (var item in answers[i].Questions.QuestionDescriptionId)
-                    //                questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(item)).Description);
-                    //            break;
-                    //        }
-                    //    case TypeResponse.EscolhaUnica:
-                    //        {
-                    //            questionAnswerListViewModel.Answers.Add(questionDescription.Find(x => x._id == ObjectId.Parse(answers[i].Questions.QuestionDescriptionId.FirstOrDefault())).Description);
-                    //            break;
-                    //        }
-                    //    case TypeResponse.Texto:
-                    //        {
-                    //            questionAnswerListViewModel.Answers.Add(answers[i].Questions.AnswerDescription);
-                    //            break;
-                    //        }
-                    //}
-                    //listAnswers.Add(questionAnswerListViewModel);
+                        Question = item.NameQuestion                        
+                    });                    
                 }
                 return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ReturnErro());
+                return BadRequest(ex.ReturnErro(responseList: true));
             }
         }
 
@@ -309,5 +291,4 @@ namespace Moralar.WebApi.Controllers
             }
         }
     }
-
 }

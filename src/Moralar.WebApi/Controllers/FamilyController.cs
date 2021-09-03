@@ -1900,5 +1900,65 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(Utilities.ReturnErro(ex.Message));
             }
         }
+
+        /// <summary>
+        /// REGISTRAR E REMOVER DEVICE ID ONESIGNAL OU FCM | CHAMAR APOS LOGIN E LOGOUT
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "deviceId":"string",
+        ///              "isRegister":true  // true => registrar  | false => remover 
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("RegisterUnRegisterDeviceId")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public IActionResult RegisterUnRegisterDeviceId([FromBody] PushViewModel model)
+        {
+            try
+            {
+                var userId = Request.GetUserId();
+
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelState();
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                Task.Run(() =>
+                {
+                    if (model.IsRegister)
+                    {
+                        _familyRepository.UpdateMultiple(Query<Data.Entities.Family>.Where(x => x._id == ObjectId.Parse(userId)),
+                            new UpdateBuilder<Data.Entities.Family>().AddToSet(x => x.DeviceId, model.DeviceId), UpdateFlags.None);
+                    }
+                    else
+                    {
+                        _familyRepository.UpdateMultiple(Query<Data.Entities.Profile>.Where(x => x._id == ObjectId.Parse(userId)),
+                            new UpdateBuilder<Data.Entities.Family>().Pull(x => x.DeviceId, model.DeviceId), UpdateFlags.None);
+                    }
+                });
+
+                return Ok(Utilities.ReturnSuccess());
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Utilities.ReturnErro(ex.Message));
+            }
+        }
     }
 }

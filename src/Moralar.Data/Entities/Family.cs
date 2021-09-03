@@ -15,6 +15,7 @@ namespace Moralar.Data.Entities
         public Family()
         {
             Members = new List<FamilyMember>();
+            DeviceId = new List<string>();
         }
 
         /// <summary>
@@ -48,6 +49,7 @@ namespace Moralar.Data.Entities
         public string Password { get; set; }
         public bool IsFirstAcess { get; set; } = true;
         public string ProviderId { get; set; }
+        public List<string> DeviceId { get; set; }
         public string Reason { get; set; }
         public string MotherName { get; set; }
         public string MotherCityBorned { get; set; }
