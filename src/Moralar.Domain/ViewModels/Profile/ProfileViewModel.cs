@@ -29,12 +29,13 @@ namespace Moralar.Domain.ViewModels
         public string Email { get; set; }
 
         [Display(Name = "Telefone")]
+        [JsonConverter(typeof(OnlyNumber))]
         public string Phone { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tipo do Perfil do Usuário")]
         public TypeUserProfile TypeProfile { get; set; }
         public bool Blocked { get; set; }
-        public string Password { get; set; }
+        //public string Password { get; set; }
     }
 }

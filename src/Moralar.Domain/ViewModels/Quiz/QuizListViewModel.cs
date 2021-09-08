@@ -14,6 +14,6 @@ namespace Moralar.Domain.ViewModels.Quiz
         [Display(Name = "Título")]
         public string Title { get; set; }
         public TypeQuiz TypeQuiz { get; set; }
-        public string Created { get; set; }
+        public long Created { get; set; }
     }
 }

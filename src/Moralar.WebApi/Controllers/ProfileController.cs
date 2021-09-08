@@ -297,7 +297,7 @@ namespace Moralar.WebApi.Controllers
                         Message = $"Usuário bloqueado,motivo {entity.Reason ?? "não informado"}"
                     });
                 var vw = _mapper.Map<ProfileViewModel>(entity);
-                vw.Password = entity.Password;
+                //vw.Password = entity.Password;
                 return Ok(Utilities.ReturnSuccess(data: vw));
             }
             catch (Exception ex)
@@ -399,20 +399,18 @@ namespace Moralar.WebApi.Controllers
             }
         }
         /// <summary>
-        /// ALTERAR PASSWORD
+        /// EDITAR PERFIL
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO
         /// 
         ///         POST
         ///             {
-        ///              "Name" : "",
-        ///              "JobPost" : "",
-        ///              "Cpf" : "",
-        ///              "Email" : "",
-        ///              "Phone" : "",
-        ///              "Password" : "",
-        ///              "id": ""
+        ///              "name" : "string",
+        ///              "jobPost" : "string",       
+        ///              "email" : "string",
+        ///              "phone" : "string",             
+        ///              "id": "string"
         ///             }
         /// </remarks>
         /// <response code="200">Returns success</response>

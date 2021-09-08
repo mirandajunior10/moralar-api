@@ -262,6 +262,27 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.SearchTimeLine(Moralar.Domain.ViewModels.SearchViewModel)">
+            <summary>
+            BUSCAR LINHA DO TEMPO DAS FAMILIAS
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                           "searchTerm": "Nome",
+                           "typeSubject": " Visita do TTS",
+                           "page": 0,
+                           "limit": 0
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.TimeLineProcessMandatory(System.String)">
             <summary>
             TIME LINE DO PROCESSO OBRIGATÓRIO
@@ -1115,20 +1136,18 @@
         </member>
         <member name="M:Moralar.WebApi.Controllers.ProfileController.UpdateProfile(Moralar.Domain.ViewModels.Profile.ProfileUpdateViewModel)">
             <summary>
-            ALTERAR PASSWORD
+            EDITAR PERFIL
             </summary>
             <remarks>
             OBJ DE ENVIO
             
                     POST
                         {
-                         "Name" : "",
-                         "JobPost" : "",
-                         "Cpf" : "",
-                         "Email" : "",
-                         "Phone" : "",
-                         "Password" : "",
-                         "id": ""
+                         "name" : "string",
+                         "jobPost" : "string",       
+                         "email" : "string",
+                         "phone" : "string",             
+                         "id": "string"
                         }
             </remarks>
             <response code="200">Returns success</response>

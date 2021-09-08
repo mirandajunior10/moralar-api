@@ -89,6 +89,7 @@ namespace Moralar.Domain
         public const string LocationNotFound = "Localização não encontrada.";
         public const string PropertySaledNotFound = "Propriedade vendida não encontrada.";
         public const string ChoiceLimitExceeded = "Limite de escolha excedido.";
+        public const string FieldSearchTerm = "Termo de busca";
 
     }
 }

@@ -277,6 +277,98 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+        /// <summary>
+        /// BUSCAR LINHA DO TEMPO DAS FAMILIAS
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///                "searchTerm": "Nome",
+        ///                "typeSubject": " Visita do TTS",
+        ///                "page": 0,
+        ///                "limit": 0
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("SearchTimeLine")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(IEnumerable<FamilyHolderListViewModel>), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+
+        public async Task<IActionResult> SearchTimeLine([FromBody] SearchViewModel model)
+        {
+            try
+            {
+                
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelState();
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                model.Page = Math.Max(1, model.Page);
+                model.Limit = Math.Max(1, model.Limit);
+
+                var builder = Builders<Data.Entities.Family>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+
+                conditions.Add(builder.Where(x => x.Created != null));
+
+                conditions.Add(
+                        builder.Or(
+                        builder.Regex(x => x.Holder.Number, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.Holder.Name, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.Holder.Cpf, new BsonRegularExpression(model.SearchTerm, "i"))
+                        
+                )
+                );
+
+
+
+                var retorno = await _familyRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Data.Entities.Family>()
+                {
+                    Sort = Builders<Data.Entities.Family>.Sort.Ascending(nameof(Family.Holder.Name)),
+                    Skip = (model.Page - 1) * model.Limit,
+                    Limit = model.Limit
+                }).ToListAsync();
+
+                
+                    var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == model.TypeSubject.GetValueOrDefault()).ConfigureAwait(false) as List<Schedule>;
+                                
+                    var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
+
+                    var _vwFamiliHolder = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
+                
+                var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
+
+                for (int i = 0; i < _vwFamiliHolder.Count(); i++)
+                {
+                    if (_schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id) != null)
+                    {
+                        _vwFamiliHolder[i].TypeScheduleStatus = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeScheduleStatus;
+                        _vwFamiliHolder[i].TypeSubject = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeSubject;
+                    }
+                }
+
+
+                var response = _vwFamiliHolder;
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
+            }
+        }
 
 
         /// <summary>
