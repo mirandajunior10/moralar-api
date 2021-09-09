@@ -1,15 +1,11 @@
 using Moralar.Data.Enum;
 using System.ComponentModel.DataAnnotations;
 
-namespace Moralar.Domain.ViewModels
+namespace Moralar.Domain.ViewModels.Family
 {
     public class SearchViewModel
     {
-        public SearchViewModel()
-        {
-            Page = 1;
-            Limit = 30;
-        }
+        
         /// <summary>
         /// Termo de busca
         /// </summary>
@@ -18,7 +14,6 @@ namespace Moralar.Domain.ViewModels
         [Display(Name = nameof(DefaultMessages.FieldSearchTerm))]
         public string SearchTerm { get; set; }
         public TypeSubject? TypeSubject { get; set; }
-        public int Page { get; set; }
-        public int Limit { get; set; }
+        
     }
 }

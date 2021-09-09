@@ -199,7 +199,7 @@ namespace Moralar.WebApi.Controllers
                
 
 
-                /* Regra de escolha de imóvel de ser de no máximo 03  */
+                /* Regra de escolha de imóvel tem que ser de no máximo 03  */
                 var propertyChoiceFamily = await _propertiesInterestRepository.CountAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false);
                 if (propertyChoiceFamily > 3)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ChoiceLimitExceeded));
@@ -227,7 +227,7 @@ namespace Moralar.WebApi.Controllers
                     var dataBody = Util.GetTemplateVariables();
                     dataBody.Add("{{ title }}", "Interesse em Imóvel");
                     dataBody.Add("{{ message }}", $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
-                                                $"<p> Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.Location} "
+                                                $"<p> Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} "
                                                 );
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
@@ -366,6 +366,90 @@ namespace Moralar.WebApi.Controllers
                 response.MessageEx = $"{ex.InnerException} {ex.Message}".Trim();
 
                 return Ok(response);
+            }
+        }
+
+        /// <summary>
+        /// BUSCAR MATCHS DAS FAMILIAS
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///                "searchTerm": "Nome",
+        ///                "residencialCode": "string"                
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("SearchMatch")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(IEnumerable<PropertiesInterestViewModel>), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+
+        public async Task<IActionResult> SearchMatch([FromBody] SearchMatchsViewModel model)
+        {
+            try
+            {
+
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelState();
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+
+                var builder = Builders<Data.Entities.PropertiesInterest>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.PropertiesInterest>>();
+
+                conditions.Add(builder.Where(x => x.Created != null));
+
+                conditions.Add(
+                        builder.Or(
+                        builder.Regex(x => x.HolderNumber, new BsonRegularExpression(model.Search, "i")),
+                        builder.Regex(x => x.HolderName, new BsonRegularExpression(model.Search, "i")),
+                        builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.Search.OnlyNumbers(), "i"))
+
+                )
+                );
+
+                var retorno = await _propertiesInterestRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Data.Entities.PropertiesInterest>()
+                {
+                    Sort = Builders<Data.Entities.PropertiesInterest>.Sort.Ascending(nameof(PropertiesInterest.Created))
+                    
+                }).ToListAsync();
+
+               
+                var propertiesEntity = _mapper.Map<List<PropertiesInterestViewModel>>(retorno);
+                for (int i = 0; i < retorno.Count(); i++)
+                {
+                    var s = retorno.ToList()[i].Priorization;
+
+                    foreach (var p in s.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
+                    {
+                        var g = (PriorityRate)p.GetValue(s, null);
+                        if (g.Value == true)
+                            propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).PriorityRates.Add(g);
+                    }
+                    propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).Interest = retorno.Count(x => x.ResidencialPropertyId == retorno.ToList()[i].ResidencialPropertyId.ToString());
+
+                }
+
+
+                var response = propertiesEntity.OrderBy(c => c.PriorityRates.Min(x => x.Rate)).ToList();
+
+                return Ok(response);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
             }
         }
 

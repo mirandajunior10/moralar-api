@@ -262,7 +262,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.FamilyController.SearchTimeLine(Moralar.Domain.ViewModels.SearchViewModel)">
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.SearchTimeLine(Moralar.Domain.ViewModels.Family.SearchViewModel)">
             <summary>
             BUSCAR LINHA DO TEMPO DAS FAMILIAS
             </summary>
@@ -272,9 +272,8 @@
                     POST
                         {
                            "searchTerm": "Nome",
-                           "typeSubject": " Visita do TTS",
-                           "page": 0,
-                           "limit": 0
+                           "typeSubject": " Visita do TTS"
+                           
                         }
             </remarks>
             <response code="200">Returns success</response>
@@ -1418,6 +1417,25 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.PropertiesInterestController.SearchMatch(Moralar.Domain.ViewModels.PropertiesInterest.SearchMatchsViewModel)">
+            <summary>
+            BUSCAR MATCHS DAS FAMILIAS
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                           "searchTerm": "Nome",
+                           "residencialCode": "string"                
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.PropertiesInterestController.InterestCancel(Moralar.Domain.ViewModels.PropertiesInterest.PropertiesInterestCancelViewModel)">
              <summary>
              REMOVER INTERESSE DA FAMÍLIA
@@ -1717,6 +1735,16 @@
         <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.LoadDataQuizAvailable(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus})">
             <summary>
             LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.GetAllQuiz">
+            <summary>
+            LISTA TODOS OS QUESTIONÁRIOS DISPONIBILIZADOS PARA A FAMÍLIA
             </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>

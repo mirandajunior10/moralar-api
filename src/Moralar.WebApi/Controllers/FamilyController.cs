@@ -286,9 +286,8 @@ namespace Moralar.WebApi.Controllers
         ///         POST
         ///             {
         ///                "searchTerm": "Nome",
-        ///                "typeSubject": " Visita do TTS",
-        ///                "page": 0,
-        ///                "limit": 0
+        ///                "typeSubject": " Visita do TTS"
+        ///                
         ///             }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -315,11 +314,11 @@ namespace Moralar.WebApi.Controllers
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                model.Page = Math.Max(1, model.Page);
-                model.Limit = Math.Max(1, model.Limit);
 
                 var builder = Builders<Data.Entities.Family>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+
+                //var cpfSearch = model.SearchTerm.OnlyNumbers();
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
@@ -328,27 +327,22 @@ namespace Moralar.WebApi.Controllers
                         builder.Regex(x => x.Holder.Number, new BsonRegularExpression(model.SearchTerm, "i")),
                         builder.Regex(x => x.Holder.Name, new BsonRegularExpression(model.SearchTerm, "i")),
                         builder.Regex(x => x.Holder.Cpf, new BsonRegularExpression(model.SearchTerm, "i"))
-                        
                 )
                 );
 
+                var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == model.TypeSubject).ConfigureAwait(false) as List<Schedule>;
 
+                var query = _familyRepository.PrintQuery(builder.And(conditions));
 
-                var retorno = await _familyRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Data.Entities.Family>()
-                {
-                    Sort = Builders<Data.Entities.Family>.Sort.Ascending(nameof(Family.Holder.Name)),
-                    Skip = (model.Page - 1) * model.Limit,
-                    Limit = model.Limit
-                }).ToListAsync();
+                var retorno = await _familyRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Family>()).ToListAsync();
 
-                
-                    var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == model.TypeSubject.GetValueOrDefault()).ConfigureAwait(false) as List<Schedule>;
-                                
-                    var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
+                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
+               
+                var _vwFamiliHolder = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
+                //var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
 
-                    var _vwFamiliHolder = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
-                
-                var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
+                var _schedules = await _scheduleRepository.FindIn(x => x.TypeSubject == model.TypeSubject, "FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList(), Builders<Schedule>.Sort.Descending(x => x._id)) as List<Schedule>;
+
 
                 for (int i = 0; i < _vwFamiliHolder.Count(); i++)
                 {
@@ -359,10 +353,9 @@ namespace Moralar.WebApi.Controllers
                     }
                 }
 
+               var response = _vwFamiliHolder;  
 
-                var response = _vwFamiliHolder;
-
-                return Ok(response);
+                return Ok(Utilities.ReturnSuccess(data: response));
             }
             catch (Exception ex)
             {

@@ -138,6 +138,51 @@ namespace Moralar.WebApi.Controllers
 
         }
         /// <summary>
+        /// LISTA TODOS OS QUESTIONÁRIOS DISPONIBILIZADOS PARA A FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetAllQuiz")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> GetAllQuiz()
+        {
+            try
+            {
+
+                var quizFamily = await _quizFamilyRepository.FindAllAsync().ConfigureAwait(false) as List<QuizFamily>;
+
+                if (quizFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizFamilyNotFound));
+
+                var _quizViewModel = _mapper.Map<List<QuizFamilyListViewModel>>(quizFamily);
+
+               
+                for (int i = 0; i < _quizViewModel.Count; i++)
+                {
+                    var item = _quizViewModel[i];
+
+                    var entityQuiz = await _quizRepository.FindByIdAsync(item.QuizId).ConfigureAwait(false);
+
+                    _quizViewModel[i].Title = entityQuiz.Title;
+                }
+
+
+                return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
+            }
+        }
+        /// <summary>
         /// DETALHES DO QUIZ DISPONIBILIZADO PARA O MORADOR
         /// </summary>
         /// <response code="200">Returns success</response>
