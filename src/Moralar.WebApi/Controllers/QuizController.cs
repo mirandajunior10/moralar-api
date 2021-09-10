@@ -555,5 +555,55 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+        /// <summary>
+        /// LISTA OS QUESTIONÁRIOS POR FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetQuizByFamilyId")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetQuizByFamilyId([FromQuery] string familyId, TypeQuiz typeQuiz)
+        {
+            try
+            {
+
+
+                var entity = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
+
+                if (entity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+
+                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<QuizFamily>;
+
+
+                var entityFamily = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
+                if (entityFamily.Count(x => x.TypeQuiz == typeQuiz) == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
+
+
+                var _quizViewModel = _mapper.Map<List<QuizViewModel>>(entityFamily);
+
+                for (int i = 0; i < _quizViewModel.Count(); i++)
+                {
+                    var quizfamilyEntity = quizFamilies.Find(x => x.QuizId == _quizViewModel[i].Id.ToString());
+                    if (quizfamilyEntity != null)
+                        _quizViewModel[i].TypeStatus = quizfamilyEntity.TypeStatus;
+                }
+
+                return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
     }
 }

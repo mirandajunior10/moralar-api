@@ -285,8 +285,8 @@ namespace Moralar.WebApi.Controllers
         /// 
         ///         POST
         ///             {
-        ///                "searchTerm": "Nome",
-        ///                "typeSubject": " Visita do TTS"
+        ///                "searchTerm": "string",  Ex: (nome, cpf ou nº de cadastro)
+        ///                "typeSubject": 2         Ex: ReuniaoPGM = 2 - EscolhaDoImovel = 4 - Mudanca = 7 - AcompanhamentoPosMudança = 8
         ///                
         ///             }
         /// </remarks>
@@ -298,7 +298,7 @@ namespace Moralar.WebApi.Controllers
         [HttpPost("SearchTimeLine")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
-        [ProducesResponseType(typeof(IEnumerable<FamilyHolderListViewModel>), 201)]
+        [ProducesResponseType(typeof(IEnumerable<ScheduleListViewModel>), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
@@ -312,48 +312,35 @@ namespace Moralar.WebApi.Controllers
                 var isInvalidState = ModelState.ValidModelState();
 
                 if (isInvalidState != null)
-                    return BadRequest(isInvalidState);
+                    return BadRequest(isInvalidState);               
 
 
-                var builder = Builders<Data.Entities.Family>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+                var builder = Builders<Data.Entities.Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Schedule>>();
 
                 //var cpfSearch = model.SearchTerm.OnlyNumbers();
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
-                conditions.Add(
-                        builder.Or(
-                        builder.Regex(x => x.Holder.Number, new BsonRegularExpression(model.SearchTerm, "i")),
-                        builder.Regex(x => x.Holder.Name, new BsonRegularExpression(model.SearchTerm, "i")),
-                        builder.Regex(x => x.Holder.Cpf, new BsonRegularExpression(model.SearchTerm, "i"))
+                if (string.IsNullOrEmpty(model.SearchTerm) == false)
+                    conditions.Add(
+                        builder.Or(                       
+                        builder.Regex(x => x.HolderName, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.HolderNumber, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.SearchTerm, "i"))
                 )
                 );
 
-                var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == model.TypeSubject).ConfigureAwait(false) as List<Schedule>;
-
-                var query = _familyRepository.PrintQuery(builder.And(conditions));
-
-                var retorno = await _familyRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Family>()).ToListAsync();
-
-                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
+                if (model.TypeSubject != null)
+                    conditions.Add(builder.Where(x => x.TypeSubject == model.TypeSubject));
                
-                var _vwFamiliHolder = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
-                //var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
+               //var query = _scheduleRepository.PrintQuery(builder.And(conditions));
 
-                var _schedules = await _scheduleRepository.FindIn(x => x.TypeSubject == model.TypeSubject, "FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList(), Builders<Schedule>.Sort.Descending(x => x._id)) as List<Schedule>;
+                var retorno = await _scheduleRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Schedule>()).ToListAsync();              
 
-
-                for (int i = 0; i < _vwFamiliHolder.Count(); i++)
-                {
-                    if (_schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id) != null)
-                    {
-                        _vwFamiliHolder[i].TypeScheduleStatus = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeScheduleStatus;
-                        _vwFamiliHolder[i].TypeSubject = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeSubject;
-                    }
-                }
-
-               var response = _vwFamiliHolder;  
+                var _vwFamiliHolder = _mapper.Map<List<ScheduleListViewModel>>(retorno);
+               
+                var response = _vwFamiliHolder;  
 
                 return Ok(Utilities.ReturnSuccess(data: response));
             }

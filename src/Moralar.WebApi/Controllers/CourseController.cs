@@ -261,6 +261,63 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
+        /// LISTA OS CURSOS POR FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetCourseByFamilyId")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetCourseByFamilyId([FromQuery] string familyId)
+        {
+            try
+            {
+                var entityFamily = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
+
+                if (entityFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+
+                var entityCourseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == entityFamily._id.ToString()).ConfigureAwait(false) as List<CourseFamily>; 
+
+                if (entityCourseFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
+
+
+                var entityCourse = await _courseRepository.FindIn("_id", entityCourseFamily.Select(x => ObjectId.Parse(x.CourseId)).ToList()) as List<Course>;
+       
+                if (entityCourse == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
+
+
+
+                var viewModelData = _mapper.Map<List<CourseFamilyListViewModel>>(entityCourse);
+
+
+                for (int i = 0; i < viewModelData.Count(); i++)
+                {
+                    var familyCourse = entityCourseFamily.Find(x => x.CourseId == viewModelData[i].Id.ToString());
+                    if (familyCourse != null)
+                        viewModelData[i].TypeStatusCourse = familyCourse.TypeStatusCourse;
+                }
+
+
+
+                return Ok(Utilities.ReturnSuccess(data: viewModelData));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
+            }
+        }
+
+        /// <summary>
         /// REGISTRAR UM NOVO CURSO
         /// </summary>
         /// <remarks>

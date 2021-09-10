@@ -102,6 +102,16 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.CourseController.GetCourseByFamilyId(System.String)">
+            <summary>
+            LISTA OS CURSOS POR FAMÍLIA
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.CourseController.Register(Moralar.Domain.ViewModels.Course.CourseViewModel)">
              <summary>
              REGISTRAR UM NOVO CURSO
@@ -271,8 +281,8 @@
             
                     POST
                         {
-                           "searchTerm": "Nome",
-                           "typeSubject": " Visita do TTS"
+                           "searchTerm": "string",  Ex: (nome, cpf ou nº de cadastro)
+                           "typeSubject": 2         Ex: ReuniaoPGM = 2 - EscolhaDoImovel = 4 - Mudanca = 7 - AcompanhamentoPosMudança = 8
                            
                         }
             </remarks>
@@ -1426,7 +1436,7 @@
             
                     POST
                         {
-                           "searchTerm": "Nome",
+                           "searchTerm": "string",
                            "residencialCode": "string"                
                         }
             </remarks>
@@ -1725,6 +1735,16 @@
         <member name="M:Moralar.WebApi.Controllers.QuizController.GetQuizByFamily(Moralar.Data.Enum.TypeQuiz)">
             <summary>
             LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.QuizController.GetQuizByFamilyId(System.String,Moralar.Data.Enum.TypeQuiz)">
+            <summary>
+            LISTA OS QUESTIONÁRIOS POR FAMÍLIA
             </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>

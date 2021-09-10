@@ -10,7 +10,7 @@ namespace Moralar.Domain.ViewModels.Family
         /// Termo de busca
         /// </summary>
         /// <example>Nome</example>
-        [Required(ErrorMessage = nameof(DefaultMessages.FieldRequired))]
+       // [Required(ErrorMessage = nameof(DefaultMessages.FieldRequired))]
         [Display(Name = nameof(DefaultMessages.FieldSearchTerm))]
         public string SearchTerm { get; set; }
         public TypeSubject? TypeSubject { get; set; }

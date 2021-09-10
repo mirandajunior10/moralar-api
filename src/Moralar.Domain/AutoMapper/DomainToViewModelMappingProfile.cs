@@ -157,13 +157,7 @@ namespace Moralar.Domain.AutoMapper
 
             CreateMap<QuestionAnswer, QuestionAnswerRegisterViewModel>();
 
-            #endregion
-            #region Course
-            CreateMap<Course, CourseExportViewModel>()
-                .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? "Inativo" : "Ativo"))
-                .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.TimeStampToDateTime().ToString("dd/MM/yyyy")))
-                .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.TimeStampToDateTime().ToString("dd/MM/yyyy")));
-            #endregion
+            #endregion           
             #region Schedule
             CreateMap<Schedule, ScheduleRegisterViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
@@ -182,7 +176,6 @@ namespace Moralar.Domain.AutoMapper
         .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
             #endregion
-
             #region Informative
             CreateMap<Informative, InformativeListViewModel>()
               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
@@ -242,6 +235,14 @@ namespace Moralar.Domain.AutoMapper
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.StartDate)))
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.EndDate)));
+
+            CreateMap<Course, CourseFamilyListViewModel>()
+           .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));          
+
+            CreateMap<Course, CourseExportViewModel>()
+            .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? "Inativo" : "Ativo"))
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => src.StartDate.TimeStampToDateTime().ToString("dd/MM/yyyy")))
+            .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => src.EndDate.TimeStampToDateTime().ToString("dd/MM/yyyy")));
 
             #endregion
             #region Video

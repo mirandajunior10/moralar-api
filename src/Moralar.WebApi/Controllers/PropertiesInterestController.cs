@@ -377,7 +377,7 @@ namespace Moralar.WebApi.Controllers
         /// 
         ///         POST
         ///             {
-        ///                "searchTerm": "Nome",
+        ///                "searchTerm": "string",
         ///                "residencialCode": "string"                
         ///             }
         /// </remarks>
@@ -398,7 +398,6 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-
                 model.TrimStringProperties();
                 var isInvalidState = ModelState.ValidModelState();
 
@@ -411,14 +410,18 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
-                conditions.Add(
+                if (string.IsNullOrEmpty(model.Search) == false)
+                    conditions.Add(
                         builder.Or(
                         builder.Regex(x => x.HolderNumber, new BsonRegularExpression(model.Search, "i")),
                         builder.Regex(x => x.HolderName, new BsonRegularExpression(model.Search, "i")),
-                        builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.Search.OnlyNumbers(), "i"))
+                        builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.Search, "i"))
 
                 )
                 );
+
+                if (string.IsNullOrEmpty(model.ResidencialCode) == false)
+                    conditions.Add(builder.Where(x => x.ResidencialCode == model.ResidencialCode));
 
                 var retorno = await _propertiesInterestRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Data.Entities.PropertiesInterest>()
                 {
@@ -428,24 +431,20 @@ namespace Moralar.WebApi.Controllers
 
                
                 var propertiesEntity = _mapper.Map<List<PropertiesInterestViewModel>>(retorno);
-                for (int i = 0; i < retorno.Count(); i++)
+
+
+                var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                for (int i = 0; i < propertiesEntity.Count(); i++)
                 {
-                    var s = retorno.ToList()[i].Priorization;
+                    var objResidencial = residencialEntity.FirstOrDefault(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidencialPropertyId));
+                    if (objResidencial != null)
+                        propertiesEntity[i].ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(objResidencial.ResidencialPropertyAdress);
 
-                    foreach (var p in s.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
-                    {
-                        var g = (PriorityRate)p.GetValue(s, null);
-                        if (g.Value == true)
-                            propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).PriorityRates.Add(g);
-                    }
                     propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).Interest = retorno.Count(x => x.ResidencialPropertyId == retorno.ToList()[i].ResidencialPropertyId.ToString());
-
                 }
+                
 
-
-                var response = propertiesEntity.OrderBy(c => c.PriorityRates.Min(x => x.Rate)).ToList();
-
-                return Ok(response);
+                return Ok(Utilities.ReturnSuccess(data: propertiesEntity));
             }
             catch (Exception ex)
             {
