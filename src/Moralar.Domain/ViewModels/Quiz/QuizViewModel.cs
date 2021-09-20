@@ -17,9 +17,9 @@ namespace Moralar.Domain.ViewModels.Quiz
         public TypeQuiz TypeQuiz { get; set; }
         public QuestionRegisterViewModel QuestionRegister { get; set; }
        
-        [Display(Name = "Data")]
-        [IsReadOnly]
-        public long? Created { get; set; }
+        //[Display(Name = "Data")]
+        //[IsReadOnly]
+        //public long? Created { get; set; }
 
         [Display(Name = "Status")]
         [IsReadOnly]

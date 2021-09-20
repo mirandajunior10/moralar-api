@@ -2011,10 +2011,17 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
+                /* VERIFICA SE EXISTE UM DISPOSITIVO LOGADO  */
+                //var entityDevice = await _familyRepository.FindOneByAsync(x => x._id.ToString() == userId && x.DeviceId.ToString() == model.DeviceId).ConfigureAwait(false);
+                
+                //if (entityDevice == null)
+                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.DeviceInUse));
+
                 Task.Run(() =>
                 {
                     if (model.IsRegister)
                     {
+
                         _familyRepository.UpdateMultiple(Query<Data.Entities.Family>.Where(x => x._id == ObjectId.Parse(userId)),
                             new UpdateBuilder<Data.Entities.Family>().AddToSet(x => x.DeviceId, model.DeviceId), UpdateFlags.None);
                     }

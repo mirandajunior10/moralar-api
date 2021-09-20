@@ -142,6 +142,82 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
+        /// BUSCA AS RESPOSTAS POR FAMILIA (TTS)
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetResponsesByFamily")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetResponsesByFamily([FromQuery] string familyId, [FromQuery] string quizId)
+        {
+            try
+            {
+
+                List<QuestionAnswerListViewModel> listAnswers = new List<QuestionAnswerListViewModel>();
+
+                var quiz = await _quizRepository.FindByIdAsync(quizId).ConfigureAwait(false);
+
+                var builderAnswer = Builders<QuestionAnswer>.Filter;
+                var conditionsAnswer = new List<FilterDefinition<QuestionAnswer>>();
+                
+                conditionsAnswer.Add(builderAnswer.Where(x => x.QuizId == quizId && x.FamilyId == familyId));
+
+                var answers = await _questionAnswerRepository.GetCollectionAsync().FindSync(builderAnswer.And(conditionsAnswer)).ToListAsync();
+
+
+                var builderQuestion = Builders<Question>.Filter;
+                var conditionsQuestion = new List<FilterDefinition<Question>>();
+
+                conditionsQuestion.Add(builderQuestion.Eq(x => x.QuizId, quizId));
+
+                var question = await _questionRepository.GetCollectionAsync().FindSync(builderQuestion.And(conditionsQuestion)).ToListAsync();
+
+                var builderQuestionDescrip = Builders<QuestionDescription>.Filter;
+                var conditionsQuestionDescrip = new List<FilterDefinition<QuestionDescription>>();
+
+                conditionsQuestionDescrip.Add(builderQuestionDescrip.In(x => x.QuestionId, answers.SelectMany(x => x.Questions).Select(x => x.QuestionId).ToList()));
+
+                var questionDescription = await _questionDescriptionRepository.GetCollectionAsync().FindSync(builderQuestionDescrip.And(conditionsQuestionDescrip)).ToListAsync();
+
+                var response = new List<QuestionAnswerListViewModel>();
+
+                for (int i = 0; i < question.Count; i++)
+                {
+                    var item = question[i];
+
+                    var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0);
+
+                    response.Add(new QuestionAnswerListViewModel()
+                    {
+                        Title = quiz.Title,
+                        Date = answers[i].Created.Value,
+                        Question = item.NameQuestion,
+                        QuestionId = item._id.ToString(),
+                        QuizId = item.QuizId,
+                        Answers = itemAnswers.SelectMany(x => x.Questions).Select(x => x.AnswerDescription?.Trim()).Distinct().ToList(),
+                        TypeResponse = item.TypeResponse,
+                        FamilyNumber = answers[i].FamilyNumber,
+                        FamilyHolderName = answers[i].FamilyHolderName,
+                        FamilyHolderCpf = answers[i].FamilyHolderCpf
+                    });
+                }
+
+                return Ok(Utilities.ReturnSuccess(data: response));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
+            }
+        }
+
+        /// <summary>
         /// REGISTRAR UMA RESPOSTA
         /// </summary>
         /// <remarks>
@@ -225,91 +301,6 @@ namespace Moralar.WebApi.Controllers
                 await _utilService.RegisterLogAction(LocalAction.Question, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar/atualizar novo questionário", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
-        }
-
-
-        /// <summary>
-        /// REGISTRAR UMA RESPOSTA
-        /// </summary>
-        /// <remarks>
-        /// OBJ DE ENVIO
-        /// 
-        ///       POST
-        ///       {
-        ///         "questionDescriptionId": [
-        ///           "string"
-        ///         ],
-        ///         "questionId": "string",
-        ///         "answerDescription": "string",
-        ///         "familyId": "string",
-        ///         "responsibleForResponsesId": "string",
-        ///         "id": "string"
-        ///       }
-        /// </remarks>
-        /// <response code="200">Returns success</response>
-        /// <response code="400">Custom Error</response>
-        /// <response code="401">Unauthorize Error</response>
-        /// <response code="500">Exception Error</response>
-        /// <returns></returns>
-        //[HttpPost("Register")]
-        //[Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
-        //[ProducesResponseType(400)]
-        //[ProducesResponseType(401)]
-        //[ProducesResponseType(500)]
-        //public async Task<IActionResult> Register([FromBody] QuestionAnswerRegisterViewModel model)
-        //{
-
-        //    try
-        //    {
-        //        var typeRegister = TypeAction.Register;
-        //        var message = $"Registro de nova questão {Request.GetUserName()}";
-
-        //        var ignoreValidation = new List<string>();
-        //        var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
-        //        if (isInvalidState != null)
-        //            return BadRequest(isInvalidState);
-
-        //        //var entityQuestion = await _questionRepository.FindByIdAsync(model.QuestionId).ConfigureAwait(false);
-        //        //if (entityQuestion == null)
-        //        //    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
-
-        //        var entityFamily = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
-        //        if (entityFamily == null)
-        //            return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
-        //        model.FamilyHolderName = entityFamily.Holder.Name;
-        //        model.FamilyHolderCpf = entityFamily.Holder.Cpf;
-        //        model.FamilyNumber = entityFamily.Holder.Number;
-
-
-        //        //var profileResponsibleForResponse = new Data.Entities.Profile();
-        //        //if (string.IsNullOrEmpty(model.ResponsibleForResponsesId) == false)
-        //        //{
-        //        //    profileResponsibleForResponse = await _profileRepository.FindByIdAsync(model.ResponsibleForResponsesId).ConfigureAwait(false);
-        //        //    if (profileResponsibleForResponse != null)
-        //        //    {
-        //        //        model.ResponsibleForResponsesCpf = profileResponsibleForResponse.Cpf;
-        //        //        model.ResponsibleForResponsesName = profileResponsibleForResponse.Name;
-        //        //    }
-        //        //}
-
-        //        //var entityNewAnswer = _mapper.Map<QuestionAnswer>(model);
-        //        //entityNewAnswer.ResponsibleForResponses = model.ResponsibleForResponsesId == null ? Request.GetUserId() : model.ResponsibleForResponsesId;
-        //        //await _questionAnswerRepository.CreateAsync(entityNewAnswer);                                             
-
-
-        //        ///* Atualiza o status do quiz para respondido */
-        //        //_quizFamilyRepository.UpdateMultiple(Query<QuizFamily>.Where(x => x.FamilyId == model.FamilyId && x.QuizId == entityQuestion.QuizId), 
-        //        //    new UpdateBuilder<QuizFamily>().Set(x => x.TypeStatus, TypeStatus.Respondido), UpdateFlags.Multi);
-
-
-        //        return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
-        //    }
-        //    catch (Exception ex)
-        //    {
-        //        await _utilService.RegisterLogAction(LocalAction.Question, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar/atualizar novo questionário", "", "", "", "", ex);
-        //        return BadRequest(ex.ReturnErro());
-        //    }
-        //}
+        }        
     }
 }
