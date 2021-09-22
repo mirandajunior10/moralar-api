@@ -11,7 +11,6 @@ using Moralar.WebApi.Filter;
 using Moralar.WebApi.Services;
 using System.IO;
 using System.Linq;
-using System.Linq;
 using System.Reflection;
 using UtilityFramework.Application.Core;
 
@@ -53,7 +52,8 @@ namespace Moralar.WebApi
             {
                 opt.Filters.Add(typeof(CheckJson));
                 opt.Filters.Add(typeof(PreventSpanFilter));
-                opt.Filters.Add(new FilterAsyncToken());
+                opt.Filters.Add(typeof(CheckCurrentDevice));
+                opt.Filters.Add(new FilterAsyncToken()); 
             });
             
             /*TRANSLATE I18N*/
@@ -129,7 +129,7 @@ namespace Moralar.WebApi
 
             app.UseCors("AllowAllOrigin");
             /*LOG BASICO*/
-            app.UseRequestResponseLoggingLite();
+           // app.UseRequestResponseLoggingLite();
             /*RETORNO COM GZIP*/
             app.UseResponseCompression();
             

@@ -608,10 +608,10 @@ namespace Moralar.WebApi.Controllers
                     if (isInvalidState != null)
                         return BadRequest(isInvalidState);
 
-                    //entity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
-                    //        : await _profileRepository.FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password && x.TypeProfile== model.TypeUserProfile).ConfigureAwait(false);
+                    entity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
+                            : await _profileRepository.FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password && x.TypeProfile == model.TypeUserProfile).ConfigureAwait(false);
 
-                    entity = await _profileRepository.FindOneByAsync(x => x.Password == model.Password && x.TypeProfile == model.TypeUserProfile).ConfigureAwait(false);
+                   
                     if (entity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 

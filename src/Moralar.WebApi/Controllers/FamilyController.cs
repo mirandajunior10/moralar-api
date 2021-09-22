@@ -26,6 +26,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
@@ -55,7 +56,7 @@ namespace Moralar.WebApi.Controllers
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
-   
+
 
         public FamilyController(IHostingEnvironment env, IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, ICourseFamilyRepository courseFamilyRepository, IQuizFamilyRepository quizFamilyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, ICityRepository cityRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
         {
@@ -307,12 +308,12 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                
+
                 model.TrimStringProperties();
                 var isInvalidState = ModelState.ValidModelState();
 
                 if (isInvalidState != null)
-                    return BadRequest(isInvalidState);               
+                    return BadRequest(isInvalidState);
 
 
                 var builder = Builders<Data.Entities.Schedule>.Filter;
@@ -324,7 +325,7 @@ namespace Moralar.WebApi.Controllers
 
                 if (string.IsNullOrEmpty(model.SearchTerm) == false)
                     conditions.Add(
-                        builder.Or(                       
+                        builder.Or(
                         builder.Regex(x => x.HolderName, new BsonRegularExpression(model.SearchTerm, "i")),
                         builder.Regex(x => x.HolderNumber, new BsonRegularExpression(model.SearchTerm, "i")),
                         builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.SearchTerm, "i"))
@@ -333,14 +334,14 @@ namespace Moralar.WebApi.Controllers
 
                 if (model.TypeSubject != null)
                     conditions.Add(builder.Where(x => x.TypeSubject == model.TypeSubject));
-               
-               //var query = _scheduleRepository.PrintQuery(builder.And(conditions));
 
-                var retorno = await _scheduleRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Schedule>()).ToListAsync();              
+                //var query = _scheduleRepository.PrintQuery(builder.And(conditions));
+
+                var retorno = await _scheduleRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Schedule>()).ToListAsync();
 
                 var _vwFamiliHolder = _mapper.Map<List<ScheduleListViewModel>>(retorno);
-               
-                var response = _vwFamiliHolder;  
+
+                var response = _vwFamiliHolder;
 
                 return Ok(Utilities.ReturnSuccess(data: response));
             }
@@ -1054,9 +1055,9 @@ namespace Moralar.WebApi.Controllers
                     profile.FirstOrDefault().Password = newPassword;
                     await _familyRepository.UpdateAsync(profile.FirstOrDefault());
 
-                });                
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change,TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {model.Cpf}", "", "", "");
-                return Ok(Utilities.ReturnSuccess("Verifique seu e-mail"));                
+                });
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {model.Cpf}", "", "", "");
+                return Ok(Utilities.ReturnSuccess("Verifique seu e-mail"));
             }
             catch (Exception ex)
             {
@@ -1492,7 +1493,7 @@ namespace Moralar.WebApi.Controllers
 
                 if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
                 {
-                    entityFamily.Holder.SetIfDifferentCustom(model.Holder);   
+                    entityFamily.Holder.SetIfDifferentCustom(model.Holder);
                 }
 
                 if (validOnly.Count(x => x == nameof(Family.Address)) > 0)
@@ -1507,12 +1508,12 @@ namespace Moralar.WebApi.Controllers
 
                 if (validOnly.Count(x => x == nameof(Family.Spouse)) > 0)
                 {
-                    entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);                    
+                    entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);
                 }
 
                 if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)
                 {
-                    entityFamily.Financial.SetIfDifferentCustom(model.Financial);                    
+                    entityFamily.Financial.SetIfDifferentCustom(model.Financial);
 
                     //if (model.Financial.FamilyIncome > 0)
                     //    entityFamily.Financial.FamilyIncome = model.Financial.FamilyIncome;                    
@@ -1536,7 +1537,7 @@ namespace Moralar.WebApi.Controllers
                 //var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
 
                 entityFamily = await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
-            
+
 
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
 
@@ -1671,7 +1672,8 @@ namespace Moralar.WebApi.Controllers
         ///         POST
         ///             {
         ///              "holderCpf":"string", //obrigatório
-        ///              "password":"string" //obrigatório
+        ///              "password":"string", //obrigatório  
+        ///              "UseNewDevice":false  /// true para forçar o login de outro dispositivo
         ///             }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -1693,10 +1695,14 @@ namespace Moralar.WebApi.Controllers
             var claimUserName = Request.GetUserName();
             claims.Add(claim);
 
+            var response = new ResponseCheckDevice();
+
             try
             {
                 if (claimUserName != null)
                     claims.Add(claimUserName);
+
+                var deviceId = Request.Headers["deviceId"].ToString();
 
                 model.TrimStringProperties();
 
@@ -1709,23 +1715,39 @@ namespace Moralar.WebApi.Controllers
                 var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.HolderCpf), nameof(model.Password));
 
                 if (isInvalidState != null)
+                {
+                    isInvalidState.Data = response;
                     return BadRequest(isInvalidState);
+                }                   
 
                 entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Password == model.Password).ConfigureAwait(false);
 
                 if (entity == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
+                {
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin, data: response));
+                }
 
+                /* VERIFICA SE EXISTE UM DISPOSITIVO LOGADO  */
+                if (entity != null && string.IsNullOrEmpty(deviceId) == false && entity.DeviceId != null && entity.DeviceId.Count() > 0 && entity.DeviceId[0] != deviceId && model.UseNewDevice == false)
+                {
+                    response.HasAnotherSession = true;
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.DeviceInUse, data: response));
+                }
 
                 claims.Add(new Claim("UserName", entity.Holder.Name));
-                await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
 
+                if (string.IsNullOrEmpty(deviceId) == false && (entity.DeviceId.Count() == 0 || model.UseNewDevice))
+                {
+                    entity.DeviceId = new List<string>() { deviceId };
+
+                    await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
+                }
 
                 return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ReturnErro());
+                return BadRequest(ex.ReturnErro(data: response));
             }
         }
         /// <summary>
@@ -1824,7 +1846,7 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 var userId = Request.GetUserId();
-                
+
 
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro());
@@ -1840,7 +1862,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-               if (entity.Password != model.CurrentPassword)
+                if (entity.Password != model.CurrentPassword)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.PasswordNoMatch));
 
                 entity.Password = model.NewPassword;
@@ -1885,7 +1907,7 @@ namespace Moralar.WebApi.Controllers
         public async Task<IActionResult> FirstAccess([FromBody] FamilyFirstAccessViewModel model)
         {
             try
-            {                
+            {
 
                 model.TrimStringProperties();
                 var isInvalidState = ModelState.ValidModelState();
@@ -1893,9 +1915,9 @@ namespace Moralar.WebApi.Controllers
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                
+
                 var family = _mapper.Map<Data.Entities.Family>(model);
-               
+
                 var entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.Cpf).ConfigureAwait(false);
 
                 if (entity == null)
@@ -1904,10 +1926,10 @@ namespace Moralar.WebApi.Controllers
                 entity.Password = model.Password;
                 entity.MotherName = model.MotherName.RemoveAccents();
                 entity.MotherCityBorned = model.MotherCityBorned.RemoveAccents();
-                
+
 
                 _familyRepository.Update(entity);
-                
+
                 return Ok(Utilities.ReturnSuccess("Primeiro acesso realizado com sucesso."));
             }
             catch (Exception ex)
@@ -2011,11 +2033,6 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                /* VERIFICA SE EXISTE UM DISPOSITIVO LOGADO  */
-                //var entityDevice = await _familyRepository.FindOneByAsync(x => x._id.ToString() == userId && x.DeviceId.ToString() == model.DeviceId).ConfigureAwait(false);
-                
-                //if (entityDevice == null)
-                //    return BadRequest(Utilities.ReturnErro(DefaultMessages.DeviceInUse));
 
                 Task.Run(() =>
                 {

@@ -91,6 +91,8 @@ namespace Moralar.Domain
         public const string ChoiceLimitExceeded = "Limite de escolha excedido.";
         public const string FieldSearchTerm = "Termo de busca";
         public const string DeviceInUse = "Já existe um login em outro dispositivo";
-
+        public const string InvalidDeviceID = "Você iniciou uma nova sessão em outro device";
+        public const string OldVersion = "App versão antiga";
+        public static string Success = "Sucesso";
     }
 }

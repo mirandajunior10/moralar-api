@@ -760,7 +760,8 @@
                     POST
                         {
                          "holderCpf":"string", //obrigatório
-                         "password":"string" //obrigatório
+                         "password":"string", //obrigatório  
+                         "UseNewDevice":false  /// true para forçar o login de outro dispositivo
                         }
             </remarks>
             <response code="200">Returns success</response>
