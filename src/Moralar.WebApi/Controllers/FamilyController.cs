@@ -1489,6 +1489,8 @@ namespace Moralar.WebApi.Controllers
 
                 //entity.SetIfDifferent(model, validOnly);
 
+                entityFamily.IsFirstAcess = model.IsFirstAcess;
+
                 entityFamily.SetIfDifferent(model, validOnly);
 
                 if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
