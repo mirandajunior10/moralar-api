@@ -279,6 +279,87 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
+        /// EXPORTAR TIMELINE DAS FAMÍLIAS
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ExportTimeLine")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]        
+        public async Task<IActionResult> ExportTimeLine([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject typeSubject)
+        {
+            var response = new DtResult<FamilyHolderExportViewModel>();
+
+            try
+            {
+                var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
+
+                if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
+
+                var builder = Builders<Data.Entities.Family>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+
+                conditions.Add(builder.Where(x => x.Created != null));
+                if (!string.IsNullOrEmpty(number))
+                    conditions.Add(builder.Where(x => x.Holder.Number == number));
+                if (!string.IsNullOrEmpty(holderName))
+                    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(holderName.ToUpper())));
+                if (!string.IsNullOrEmpty(holderCpf))
+                    conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
+
+                var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == typeSubject).ConfigureAwait(false) as List<Schedule>;
+                var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
+
+                var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
+                var totalRecords = (int)await _familyRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                    ? Builders<Data.Entities.Family>.Sort.Descending(sortColumn)
+                    : Builders<Data.Entities.Family>.Sort.Ascending(sortColumn);
+
+                var retorno = await _familyRepository
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Family>;
+
+                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));                
+
+                var _vwFamiliHolder = _mapper.Map<List<FamilyHolderExportViewModel>>(filterFamilyWithSchedule);
+                var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
+
+                for (int i = 0; i < _vwFamiliHolder.Count(); i++)
+                {
+                    if (_schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id) != null)
+                    {
+                        _vwFamiliHolder[i].TypeSubject = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeSubject;
+                    }
+                }
+
+                var fileName = "Linha do Tempo Familias_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<FamilyHolderExportViewModel>>(retorno);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Utilities.ReturnErro(ex.Message));
+            }
+        }
+
+        /// <summary>
         /// BUSCAR LINHA DO TEMPO DAS FAMILIAS
         /// </summary>
         /// <remarks>
@@ -1941,7 +2022,7 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// EXPORTAR PARA EXCEL
+        /// EXPORTAR FAMÍLIA PARA O EXCEL
         /// </summary>
         /// <response code="200">Returns success</response>
         /// <response code="400">Custom Error</response>

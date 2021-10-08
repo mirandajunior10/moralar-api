@@ -272,6 +272,16 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.ExportTimeLine(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,Moralar.Data.Enum.TypeSubject)">
+            <summary>
+            EXPORTAR TIMELINE DAS FAMÍLIAS
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.SearchTimeLine(Moralar.Domain.ViewModels.Family.SearchViewModel)">
             <summary>
             BUSCAR LINHA DO TEMPO DAS FAMILIAS
@@ -831,7 +841,7 @@
         </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String)">
             <summary>
-            EXPORTAR PARA EXCEL
+            EXPORTAR FAMÍLIA PARA O EXCEL
             </summary>
             <response code="200">Returns success</response>
             <response code="400">Custom Error</response>

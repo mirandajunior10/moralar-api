@@ -57,6 +57,11 @@ namespace Moralar.Domain.AutoMapper
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
                  .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.Priorization))                 
                  ;
+
+            CreateMap<FamilyHolderExportViewModel, Family>()
+                .ForMember(dest => dest._id, opt => opt.Ignore());
+
+
             //            Error mapping types.
 
             //Mapping types:

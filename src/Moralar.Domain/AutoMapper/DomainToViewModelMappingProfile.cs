@@ -91,11 +91,15 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             //.ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
+            CreateMap<Family, FamilyHolderExportViewModel>()
+                .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Holder.Number))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Holder.Name))
+                .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Holder.Cpf))
+                .ForMember(dest => dest.Id, opt => opt.Ignore());
+
             CreateMap<Family, FamilyCompleteViewModel>()
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
-                
-
-
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));   
 
             CreateMap<Family, FamilyCompleteListViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
