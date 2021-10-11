@@ -261,13 +261,13 @@ namespace Moralar.WebApi.Controllers
                     
                     var informativeId = await _notificationRepository.CreateAsync(entityNotification).ConfigureAwait(false);
 
-                    await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
+                    await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
 
                 }
 
                 //var entity = _mapper.Map<Data.Entities.Notification>(model);
                 //var informativeId = await _notificationRepository.CreateAsync(entity).ConfigureAwait(false);
-                //  await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
+                //  await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
 
             }
@@ -313,7 +313,7 @@ namespace Moralar.WebApi.Controllers
                     };
                     await _notificationSendedRepository.CreateAsync(notificationSended);
                 }
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, "");
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
             }
             catch (Exception ex)
@@ -348,7 +348,7 @@ namespace Moralar.WebApi.Controllers
 
                 entityNotificationSended.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
                 var entityFamily = await _notificationSendedRepository.UpdateOneAsync(entityNotificationSended).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Leu a notificação{Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, entityFamily);
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Leu a notificação{Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, entityFamily);
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated));
             }
             catch (Exception ex)
@@ -533,7 +533,7 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InformativeNotFound));
 
                  await _notificationRepository.DeleteOneAsync(id).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Deletou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, id);
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Deletou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, id);
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Deleted)));
             }
             catch (Exception ex)
@@ -574,7 +574,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityId = await _notificationRepository.UpdateOneAsync(entityVideo).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, model.Block==true? TypeAction.Block:TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Bloqueou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, entityVideo._id.ToString());
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, model.Block==true? TypeAction.Block:TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Bloqueou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, entityVideo._id.ToString());
                 return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
             }
             catch (Exception ex)

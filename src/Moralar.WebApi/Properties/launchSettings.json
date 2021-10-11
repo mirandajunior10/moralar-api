@@ -47,13 +47,13 @@
         "ASPNETCORE_ENVIRONMENT": "Development"
       }
     },
-    "IIS - Staging": {
+    "IIS - Homolog": {
       "commandName": "IISExpress",
       "launchBrowser": true,
       "launchUrl": "swagger",
       "applicationUrl": "http://localhost:5000",
       "environmentVariables": {
-        "ASPNETCORE_ENVIRONMENT": "Staging"
+        "ASPNETCORE_ENVIRONMENT": "Homolog"
       }
     }
   }

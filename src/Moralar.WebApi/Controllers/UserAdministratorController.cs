@@ -1,4 +1,9 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -13,11 +18,6 @@ using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
 using Moralar.Repository.Interface;
 using Moralar.WebApi.Services;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -66,7 +66,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-    
+
 
         public async Task<IActionResult> GetInfo()
         {
@@ -261,18 +261,20 @@ namespace Moralar.WebApi.Controllers
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                var userAdministrator = await _userAdministratorRepository.FindOneByAsync(x =>
+                var userAdministratorEntity = await _userAdministratorRepository.FindOneByAsync(x =>
                    x.Email == model.Email && x.Password == model.Password).ConfigureAwait(false);
 
-                if (userAdministrator == null)
+                if (userAdministratorEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.UserAdministratorNotFound));
 
-                if (userAdministrator.DataBlocked != null)
+                if (userAdministratorEntity.DataBlocked != null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.UserAdministratorBlocked));
 
 
-                claims.Add(new Claim("UserName", userAdministrator.Name));
-                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(userAdministrator._id.ToString(), false, claims.ToArray())));
+                if (claims.Count(x => x.Type == "UserName") == 0)
+                    claims.Add(new Claim("UserName", userAdministratorEntity.Name));
+
+                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(userAdministratorEntity._id.ToString(), false, claims.ToArray())));
             }
             catch (Exception ex)
             {

@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -17,12 +23,6 @@ using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -101,12 +101,12 @@ namespace Moralar.WebApi.Controllers
 
                 await _quizRepository.UpdateAsync(entity);
                 var typeAction = model.Block == true ? TypeAction.Block : TypeAction.UnBlock;
-                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, model.TargetId);
+                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId);
                 return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName().Value, model.TargetId, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -288,7 +288,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
-                var question = await _questionRepository.FindByAsync(x => x.QuizId == entity._id.ToString() && x.Disabled==null).ConfigureAwait(false) as List<Question>;
+                var question = await _questionRepository.FindByAsync(x => x.QuizId == entity._id.ToString() && x.Disabled == null).ConfigureAwait(false) as List<Question>;
                 if (question.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
 
@@ -303,7 +303,7 @@ namespace Moralar.WebApi.Controllers
                 for (int i = 0; i < question.Count(); i++)
                 {
                     _quizViewModel.QuestionViewModel.Add(_mapper.Map<QuestionViewModel>(question[i]));
-                    foreach (var item in questionDescription.Where(x => x.QuestionId == question[i]._id.ToString() && x.Disabled==null))
+                    foreach (var item in questionDescription.Where(x => x.QuestionId == question[i]._id.ToString() && x.Disabled == null))
                     {
                         if (item != null)
                             _quizViewModel.QuestionViewModel[i].Description.Add(new QuestionDescriptionViewModel()
@@ -402,11 +402,11 @@ namespace Moralar.WebApi.Controllers
                             HolderName = item.Holder.Name,
                             HolderCpf = item.Holder.Cpf,
                             HolderNumber = item.Holder.Number,
-                            TypeStatus= TypeStatus.NaoRespondido
+                            TypeStatus = TypeStatus.NaoRespondido
                         });
                     }
                 }
-                //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
+                //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName()?.Value, string.Join(";", itensAdded.ToArray()), "");
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
@@ -493,9 +493,9 @@ namespace Moralar.WebApi.Controllers
                     });
 
 
-                }   
+                }
 
-                //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
+                //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName()?.Value, string.Join(";", itensAdded.ToArray()), "");
 
 
 
@@ -536,13 +536,13 @@ namespace Moralar.WebApi.Controllers
 
                 var entityFamily = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
                 if (entityFamily.Count(x => x.TypeQuiz == typeQuiz) == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
+                    return Ok(Utilities.ReturnSuccess(DefaultMessages.AnyQuiz, new List<object>()));
 
-        
+
                 var _quizViewModel = _mapper.Map<List<QuizViewModel>>(entityFamily);
 
                 for (int i = 0; i < _quizViewModel.Count(); i++)
-                {                    
+                {
                     var quizfamilyEntity = quizFamilies.Find(x => x.QuizId == _quizViewModel[i].Id.ToString());
                     if (quizfamilyEntity != null)
                         _quizViewModel[i].TypeStatus = quizfamilyEntity.TypeStatus;

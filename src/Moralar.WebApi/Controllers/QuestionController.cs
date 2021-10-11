@@ -99,12 +99,12 @@ namespace Moralar.WebApi.Controllers
 
                 await _questionRepository.UpdateAsync(entity);
                 var typeAction = model.Block == true ? TypeAction.Block : TypeAction.UnBlock;
-                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, model.TargetId);
+                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId);
                 return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName().Value, model.TargetId, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -180,7 +180,7 @@ namespace Moralar.WebApi.Controllers
                     itensAdded.Add(itemAdded);
                 }
 
-                //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
+                //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName()?.Value, string.Join(";", itensAdded.ToArray()), "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -267,7 +267,7 @@ namespace Moralar.WebApi.Controllers
                 var deleteQuestion = await _questionRepository.DisableOneAsync(id).ConfigureAwait(false);
 
 
-                await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, id, "");
+                await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName()?.Value, id, "");
                 return Ok(Utilities.ReturnSuccess(data: "Deletado com sucesso!"));
             }
             catch (Exception ex)
@@ -451,7 +451,7 @@ namespace Moralar.WebApi.Controllers
                             await _questionRepository.CreateAsync(entity).ConfigureAwait(false);
                         }
                     }
-                    //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName().Value, string.Join(";", itensAdded.ToArray()), "");
+                    //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName()?.Value, string.Join(";", itensAdded.ToArray()), "");
 
                 }
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));

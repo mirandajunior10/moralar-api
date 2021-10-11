@@ -94,5 +94,7 @@ namespace Moralar.Domain
         public const string InvalidDeviceID = "Você iniciou uma nova sessão em outro device";
         public const string OldVersion = "App versão antiga";
         public static string Success = "Sucesso";
+
+        public static string AnyQuiz { get; set; }
     }
 }

@@ -1,5 +1,5 @@
-﻿using Microsoft.AspNetCore.Hosting;
-using System.IO;
+﻿using System.IO;
+using Microsoft.AspNetCore.Hosting;
 
 namespace Moralar.WebApi
 {
@@ -13,6 +13,7 @@ namespace Moralar.WebApi
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()
+                .UseSetting(WebHostDefaults.DetailedErrorsKey, "true")
                 //.UseApplicationInsights()
                 .Build();
 

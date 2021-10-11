@@ -1,4 +1,7 @@
-﻿using AutoMapper;
+﻿using System.IO;
+using System.Linq;
+using System.Reflection;
+using AutoMapper;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
@@ -9,9 +12,6 @@ using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
 using Moralar.WebApi.Filter;
 using Moralar.WebApi.Services;
-using System.IO;
-using System.Linq;
-using System.Reflection;
 using UtilityFramework.Application.Core;
 
 
@@ -23,8 +23,7 @@ namespace Moralar.WebApi
         {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
-                .AddJsonFile("appsettings.json", optional: false, reloadOnChange: true)
-                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", optional: true)
+                .AddJsonFile($"appsettings.{env.EnvironmentName}.json", reloadOnChange: true, optional: false)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
 
@@ -53,9 +52,9 @@ namespace Moralar.WebApi
                 opt.Filters.Add(typeof(CheckJson));
                 opt.Filters.Add(typeof(PreventSpanFilter));
                 opt.Filters.Add(typeof(CheckCurrentDevice));
-                opt.Filters.Add(new FilterAsyncToken()); 
+                opt.Filters.Add(new FilterAsyncToken());
             });
-            
+
             /*TRANSLATE I18N*/
             //services.AddLocalization(options => options.ResourcesPath = "Resources");
             //services.AddMvc()
@@ -113,26 +112,25 @@ namespace Moralar.WebApi
             app.UseImageResizer();
 
             app.UseStaticFiles();
-            if (env.IsDevelopment() == false)
+
+            var path = Path.Combine(Directory.GetCurrentDirectory(), @"Content");
+
+            if (Directory.Exists(path) == false)
+                Directory.CreateDirectory(path);
+
+            app.UseStaticFiles(new StaticFileOptions()
             {
-                var path = Path.Combine(Directory.GetCurrentDirectory(), @"Content");
+                FileProvider = new PhysicalFileProvider(path),
+                RequestPath = new PathString("/content")
+            });
 
-                if (Directory.Exists(path) == false)
-                    Directory.CreateDirectory(path);
-
-                app.UseStaticFiles(new StaticFileOptions()
-                {
-                    FileProvider = new PhysicalFileProvider(path),
-                    RequestPath = new PathString("/content")
-                });
-            }
 
             app.UseCors("AllowAllOrigin");
             /*LOG BASICO*/
-           // app.UseRequestResponseLoggingLite();
+            // app.UseRequestResponseLoggingLite();
             /*RETORNO COM GZIP*/
             app.UseResponseCompression();
-            
+
             /* TRANSLATE API */
             // app.UseRequestLocalization(new RequestLocalizationOptions
             // {
@@ -151,13 +149,13 @@ namespace Moralar.WebApi
             if (EnableSwagger)
             {
                 app.UseSwagger();
-                
+
                 app.UseSwaggerUI(c =>
                {
-                   c.SwaggerEndpoint($"../swagger/v1/swagger.json".Trim(), $"API {ApplicationName}");
+                   c.SwaggerEndpoint($"../swagger/v1/swagger.json".Trim(), $"API {ApplicationName} {env.EnvironmentName}");
                    c.EnableDeepLinking();
                    c.DocExpansion(DocExpansion.None);
-                   
+
                });
             }
 

@@ -876,13 +876,13 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null && x._id != null));
 
-                if (!string.IsNullOrEmpty(number))
+                if (string.IsNullOrEmpty(number) == false)
                     conditions.Add(builder.Where(x => x.HolderNumber == number));
 
-                if (!string.IsNullOrEmpty(name))
-                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(name.ToUpper())));
+                if (string.IsNullOrEmpty(name) == false)
+                    conditions.Add(builder.Regex(x => x.HolderName,new BsonRegularExpression(name,"i")));
 
-                if (!string.IsNullOrEmpty(cpf))
+                if (string.IsNullOrEmpty(cpf) == false)
                     conditions.Add(builder.Where(x => x.HolderCpf == cpf.OnlyNumbers()));
 
                 if (startDate.HasValue)
@@ -891,10 +891,10 @@ namespace Moralar.WebApi.Controllers
                 if (endDate.HasValue)
                     conditions.Add(builder.Where(x => x.Date <= endDate));
 
-                if (!string.IsNullOrEmpty(place))
+                if (string.IsNullOrEmpty(place) == false)
                     conditions.Add(builder.Where(x => x.Place.ToUpper().Contains(place.ToUpper())));
 
-                if (!string.IsNullOrEmpty(description))
+                if (string.IsNullOrEmpty(description) == false)
                     conditions.Add(builder.Where(x => x.Description.ToUpper().Contains(description.ToUpper())));
 
                 if (status != null)

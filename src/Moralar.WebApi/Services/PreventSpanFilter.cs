@@ -1,13 +1,13 @@
-using Microsoft.AspNetCore.Http.Extensions;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Controllers;
-using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.Extensions.Caching.Memory;
 using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
+using Microsoft.AspNetCore.Http.Extensions;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.Mvc.Controllers;
+using Microsoft.AspNetCore.Mvc.Filters;
+using Microsoft.Extensions.Caching.Memory;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.WebApi.Services
@@ -16,7 +16,7 @@ namespace Moralar.WebApi.Services
     {
         public int DelayRequest { get; set; } = 1;
         public string ErrorMessage { get; set; } = null;
-        private List<string> ignoreEndPoints = new List<string>() { "trigger/changestatusgatway" };
+        private List<string> ignoreEndPoints = new List<string>() { "trigger/changestatusgatway", "loaddata" };
 
 
 

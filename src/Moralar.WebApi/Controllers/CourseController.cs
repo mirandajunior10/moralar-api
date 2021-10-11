@@ -102,12 +102,12 @@ namespace Moralar.WebApi.Controllers
 
                 await _courseRepository.UpdateAsync(entity);
                 var typeAction = model.Block == true ? TypeAction.Block : TypeAction.UnBlock;
-                await _utilService.RegisterLogAction(LocalAction.Curso, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueou/Desbloqueu o curso {entity.Title}", Request.GetUserId(), Request.GetUserName().Value, model.TargetId);
+                await _utilService.RegisterLogAction(LocalAction.Curso, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueou/Desbloqueu o curso {entity.Title}", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId);
                 return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName().Value, model.TargetId, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -369,7 +369,7 @@ namespace Moralar.WebApi.Controllers
                 var entityId = await _courseRepository.CreateAsync(entity).ConfigureAwait(false);
 
               
-                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou novo curso {model.Title}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou novo curso {model.Title}", Request.GetUserId(), Request.GetUserName()?.Value, entityId, "");
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }

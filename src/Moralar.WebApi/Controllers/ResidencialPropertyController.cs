@@ -106,12 +106,12 @@ namespace Moralar.WebApi.Controllers
                 entity.Reason = model.Block ? model.Reason : null;
 
                 await _residencialPropertyRepository.UpdateAsync(entity);
-                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio do imóvel {entity._id}", Request.GetUserId(), Request.GetUserName().Value, model.TargetId);
+                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio do imóvel {entity._id}", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId);
                 return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer o imóvel", Request.GetUserId(), Request.GetUserName().Value, model.TargetId, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer o imóvel", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -475,13 +475,13 @@ namespace Moralar.WebApi.Controllers
 
 
 
-                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de novo imóvel {entity.Code}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de novo imóvel {entity.Code}", Request.GetUserId(), Request.GetUserName()?.Value, entityId, "");
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar novo imóvel", Request.GetUserId(), Request.GetUserName().Value, "", "", ex);
+                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar novo imóvel", Request.GetUserId(), Request.GetUserName()?.Value, "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -556,7 +556,7 @@ namespace Moralar.WebApi.Controllers
                     });
                 }
 
-                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
+                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
@@ -602,13 +602,13 @@ namespace Moralar.WebApi.Controllers
 
                 await _residencialPropertyRepository.UpdateOneAsync(entity).ConfigureAwait(false);
 
-                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Remover foto  ", Request.GetUserId(), Request.GetUserName().Value, entity._id.ToString());
+                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Remover foto  ", Request.GetUserId(), Request.GetUserName()?.Value, entity._id.ToString());
 
                 return Ok(Utilities.ReturnSuccess(data: "Foto excluída com sucesso!"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Não foi possível a foto", Request.GetUserId(), Request.GetUserName().Value, model.Id, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Não foi possível a foto", Request.GetUserId(), Request.GetUserName()?.Value, model.Id, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -653,13 +653,13 @@ namespace Moralar.WebApi.Controllers
 
                 await _residencialPropertyRepository.UpdateOneAsync(entity).ConfigureAwait(false);
 
-                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Registrar foto  ", Request.GetUserId(), Request.GetUserName().Value, entity._id.ToString());
+                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Registrar foto  ", Request.GetUserId(), Request.GetUserName()?.Value, entity._id.ToString());
 
                 return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível registrar a foto", Request.GetUserId(), Request.GetUserName().Value, model.Id, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.ResidencialProperty, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível registrar a foto", Request.GetUserId(), Request.GetUserName()?.Value, model.Id, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }

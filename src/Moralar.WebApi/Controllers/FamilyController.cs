@@ -1,4 +1,11 @@
 ﻿
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
@@ -22,13 +29,6 @@ using Moralar.Domain.ViewModels.ScheduleHistory;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
 using OfficeOpenXml;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -117,12 +117,12 @@ namespace Moralar.WebApi.Controllers
 
                 await _familyRepository.UpdateAsync(entity);
                 var typeAction = model.Block == true ? TypeAction.Block : TypeAction.UnBlock;
-                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, model.TargetId);
+                await _utilService.RegisterLogAction(LocalAction.Familia, typeAction, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId);
                 return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName().Value, model.TargetId, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível bloquer Família", Request.GetUserId(), Request.GetUserName()?.Value, model.TargetId, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -215,20 +215,23 @@ namespace Moralar.WebApi.Controllers
 
             try
             {
-                var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
+                // var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
 
-                if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
+                // if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
+                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
 
                 var builder = Builders<Data.Entities.Family>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.Family>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
-                if (!string.IsNullOrEmpty(number))
+
+                if (string.IsNullOrEmpty(number) == false)
                     conditions.Add(builder.Where(x => x.Holder.Number == number));
-                if (!string.IsNullOrEmpty(holderName))
-                    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(holderName.ToUpper())));
-                if (!string.IsNullOrEmpty(holderCpf))
+
+                if (string.IsNullOrEmpty(holderName) == false)
+                    conditions.Add(builder.Regex(x => x.Holder.Name, new BsonRegularExpression(holderName, "i")));
+
+                if (string.IsNullOrEmpty(holderCpf) == false)
                     conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
 
                 var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == typeSubject).ConfigureAwait(false) as List<Schedule>;
@@ -290,7 +293,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
-        [ProducesResponseType(500)]        
+        [ProducesResponseType(500)]
         public async Task<IActionResult> ExportTimeLine([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject typeSubject)
         {
             var response = new DtResult<FamilyHolderExportViewModel>();
@@ -326,7 +329,7 @@ namespace Moralar.WebApi.Controllers
                 var retorno = await _familyRepository
                     .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Family>;
 
-                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));                
+                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
 
                 var _vwFamiliHolder = _mapper.Map<List<FamilyHolderExportViewModel>>(filterFamilyWithSchedule);
                 var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
@@ -425,6 +428,89 @@ namespace Moralar.WebApi.Controllers
                 var response = _vwFamiliHolder;
 
                 return Ok(Utilities.ReturnSuccess(data: response));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
+            }
+        }
+
+        /// <summary>
+        /// BUSCAR LINHA DO TEMPO DAS FAMILIAS
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///                "searchTerm": "string",  Ex: (nome, cpf ou nº de cadastro)
+        ///                "typeSubject": 2         Ex: ReuniaoPGM = 2 - EscolhaDoImovel = 4 - Mudanca = 7 - AcompanhamentoPosMudança = 8
+        ///                
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("SearchTimeLineExport")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(IEnumerable<ScheduleListViewModel>), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+
+        public async Task<IActionResult> SearchTimeLineExport([FromBody] SearchViewModel model)
+        {
+            try
+            {
+
+                model.TrimStringProperties();
+                var isInvalidState = ModelState.ValidModelState();
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+
+                var builder = Builders<Data.Entities.Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Schedule>>();
+
+                //var cpfSearch = model.SearchTerm.OnlyNumbers();
+
+                conditions.Add(builder.Where(x => x.Created != null));
+
+                if (string.IsNullOrEmpty(model.SearchTerm) == false)
+                    conditions.Add(
+                        builder.Or(
+                        builder.Regex(x => x.HolderName, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.HolderNumber, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.SearchTerm, "i"))
+                )
+                );
+
+                if (model.TypeSubject != null)
+                    conditions.Add(builder.Where(x => x.TypeSubject == model.TypeSubject));
+
+                var retorno = await _scheduleRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Schedule>()).ToListAsync();
+
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var fileName = $"linhadotempo_{now}.xlsx";
+
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<ScheduleExportViewModel>>(retorno);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+
             }
             catch (Exception ex)
             {
@@ -808,7 +894,7 @@ namespace Moralar.WebApi.Controllers
                     }
                 }
                 //package.Save();
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.ImportFamily, TypeResposible.UserAdminstratorGestor, $"Importou as famílias {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.ImportFamily, TypeResposible.UserAdminstratorGestor, $"Importou as famílias {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, "");
 
                 return Ok(Utilities.ReturnSuccess());
             }
@@ -1262,7 +1348,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityId = await _familyRepository.UpdateOneAsync(family).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Registrou uma família {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName().Value, "");
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Registrou uma família {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -1373,7 +1459,7 @@ namespace Moralar.WebApi.Controllers
                 //var newPassword = Utilities.RandomString(8);
                 //family.Password = newPassword;
                 var entityId = await _familyRepository.CreateAsync(family).ConfigureAwait(false);
-                //////await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                //////await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastro de nova família {entity.Holder.Name}", Request.GetUserId(), Request.GetUserName()?.Value, entityId, "");
 
                 //var dataBody = Util.GetTemplateVariables();
                 //dataBody.Add("{{ title }}", "Lembrete de senha");
@@ -1390,7 +1476,7 @@ namespace Moralar.WebApi.Controllers
                 //    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, model.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
                 //});
 
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Criadoa família {model.Holder.Name}", Request.GetUserId(), Request.GetUserName().Value, entityId);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Criadoa família {model.Holder.Name}", Request.GetUserId(), Request.GetUserName()?.Value, entityId);
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
@@ -1622,7 +1708,7 @@ namespace Moralar.WebApi.Controllers
                 entityFamily = await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
 
 
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName().Value, Request.GetUserId()
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
 
                 return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
@@ -1669,13 +1755,13 @@ namespace Moralar.WebApi.Controllers
                 entityFamily.Members.RemoveAt(entityFamily.Members.FindIndex(x => x.Name == model.Name));
                 await _familyRepository.UpdateOneAsync(entityFamily).ConfigureAwait(false);
 
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Remover membro de nova família {model.Name}", Request.GetUserId(), Request.GetUserName().Value, entityFamily._id.ToString());
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Remover membro de nova família {model.Name}", Request.GetUserId(), Request.GetUserName()?.Value, entityFamily._id.ToString());
 
                 return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Não foi possível remover membro de nova família", Request.GetUserId(), Request.GetUserName().Value, model.FamilyId, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Não foi possível remover membro de nova família", Request.GetUserId(), Request.GetUserName()?.Value, model.FamilyId, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -1736,13 +1822,13 @@ namespace Moralar.WebApi.Controllers
                 entityFamily.Members.AddRange(_mapper.Map<List<FamilyMember>>(model.Members));
                 await _familyRepository.UpdateOneAsync(entityFamily).ConfigureAwait(false);
 
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Inclusão de membro(s) de nova família {namesMembers}", Request.GetUserId(), Request.GetUserName().Value, entityFamily._id.ToString());//Request.GetUserName().Value Request.GetUserId()
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Inclusão de membro(s) de nova família {namesMembers}", Request.GetUserId(), Request.GetUserName()?.Value, entityFamily._id.ToString());//Request.GetUserName()?.Value Request.GetUserId()
 
                 return Ok(Utilities.ReturnSuccess(data: "Atualizado com sucesso!"));
             }
             catch (Exception ex)
             {
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Não foi possível Inclusão de membro(s) de nova família", Request.GetUserId(), Request.GetUserName().Value, model.FamilyId, "", ex);
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Não foi possível Inclusão de membro(s) de nova família", Request.GetUserId(), Request.GetUserName()?.Value, model.FamilyId, "", ex);
                 return BadRequest(ex.ReturnErro());
             }
         }
@@ -1792,7 +1878,7 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(model.RefreshToken) == false)
                     return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
 
-                Data.Entities.Family entity;
+                Data.Entities.Family familyEntity;
 
                 model.TrimStringProperties();
                 var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.HolderCpf), nameof(model.Password));
@@ -1801,32 +1887,31 @@ namespace Moralar.WebApi.Controllers
                 {
                     isInvalidState.Data = response;
                     return BadRequest(isInvalidState);
-                }                   
-
-                entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Password == model.Password).ConfigureAwait(false);
-
-                if (entity == null)
-                {
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin, data: response));
                 }
 
+                familyEntity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Password == model.Password).ConfigureAwait(false);
+
+                if (familyEntity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin, data: response));
+
                 /* VERIFICA SE EXISTE UM DISPOSITIVO LOGADO  */
-                if (entity != null && string.IsNullOrEmpty(deviceId) == false && entity.DeviceId != null && entity.DeviceId.Count() > 0 && entity.DeviceId[0] != deviceId && model.UseNewDevice == false)
+                if (familyEntity != null && string.IsNullOrEmpty(deviceId) == false && familyEntity.DeviceId != null && familyEntity.DeviceId.Count() > 0 && familyEntity.DeviceId[0] != deviceId && model.UseNewDevice == false)
                 {
                     response.HasAnotherSession = true;
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.DeviceInUse, data: response));
                 }
 
-                claims.Add(new Claim("UserName", entity.Holder.Name));
+                if (claims.Count(x => x.Type == "UserName") == 0)
+                    claims.Add(new Claim("UserName", familyEntity.Holder.Name));
 
-                if (string.IsNullOrEmpty(deviceId) == false && (entity.DeviceId.Count() == 0 || model.UseNewDevice))
+                if (string.IsNullOrEmpty(deviceId) == false && (familyEntity.DeviceId.Count() == 0 || model.UseNewDevice))
                 {
-                    entity.DeviceId = new List<string>() { deviceId };
+                    familyEntity.DeviceId = new List<string>() { deviceId };
 
-                    await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
+                    await _familyRepository.UpdateAsync(familyEntity).ConfigureAwait(false);
                 }
 
-                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
+                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(familyEntity._id.ToString(), false, claims.ToArray())));
             }
             catch (Exception ex)
             {

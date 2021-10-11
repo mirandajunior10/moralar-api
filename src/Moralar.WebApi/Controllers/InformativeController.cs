@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -20,12 +26,6 @@ using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
 using Moralar.WebApi.Services;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -181,11 +181,11 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-               
+
                 var entityInformative = await _informativeRepository.FindIn("_id", entity.Select(x => ObjectId.Parse(x.InformativeId)).ToList()) as List<Informative>;
-                                
-                
-                var vieoViewModel = _mapper.Map<List<InformativeSendedViewModel>>(entity); 
+
+
+                var vieoViewModel = _mapper.Map<List<InformativeSendedViewModel>>(entity);
 
                 for (int i = 0; i < vieoViewModel.Count(); i++)
                 {
@@ -193,11 +193,11 @@ namespace Moralar.WebApi.Controllers
 
                     if (informativeSended != null)
                         vieoViewModel[i].Description = informativeSended.Description;
-                        vieoViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
-                        vieoViewModel[i].Image = informativeSended.Image;
+                    vieoViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
+                    vieoViewModel[i].Image = informativeSended.Image;
                 }
 
-                    return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
             }
             catch (Exception ex)
             {
@@ -239,7 +239,7 @@ namespace Moralar.WebApi.Controllers
                     };
                     await _informativeSendedRepository.CreateAsync(informationSended);
                 }
-                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName()?.Value}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Registred));
 
             }
@@ -276,7 +276,8 @@ namespace Moralar.WebApi.Controllers
                 if (informativeSended.DateViewed == 0)
                 {
                     /* Informativo lido */
-                    informativeSended.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
+                    var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                    informativeSended.DateViewed = now;
                 }
                 else
                 {
@@ -285,8 +286,8 @@ namespace Moralar.WebApi.Controllers
 
                 await _informativeSendedRepository.UpdateOneAsync(informativeSended).ConfigureAwait(false);
 
-                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Mudou a situação para visualizada {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, informativeId);
-                
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Mudou a situação para visualizada {Request.GetUserName()?.Value}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
+
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated));
 
             }
@@ -438,7 +439,7 @@ namespace Moralar.WebApi.Controllers
                 await _informativeRepository.DeleteOneAsync(id).ConfigureAwait(false);
 
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Deleted)));
-                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Deletou o registro {Request.GetUserName().Value}", Request.GetUserId(), Request.GetUserName().Value, id);
+                await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Deletou o registro {Request.GetUserName()?.Value}", Request.GetUserId(), Request.GetUserName()?.Value, id);
             }
             catch (Exception ex)
             {
@@ -478,7 +479,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityId = await _informativeRepository.UpdateOneAsync(entityInformative).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Informativo, model.Block==true? TypeAction.Block: TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Cadastrou bloqueou o informativo {entityInformative.Description}", Request.GetUserId(), Request.GetUserName().Value, entityId, "");
+                await _utilService.RegisterLogAction(LocalAction.Informativo, model.Block == true ? TypeAction.Block : TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Cadastrou bloqueou o informativo {entityInformative.Description}", Request.GetUserId(), Request.GetUserName()?.Value, entityId, "");
                 return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
             }
             catch (Exception ex)
@@ -502,7 +503,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        
+
         public async Task<IActionResult> Export()
         {
             try

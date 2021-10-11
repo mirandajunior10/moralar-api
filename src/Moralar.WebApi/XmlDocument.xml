@@ -302,6 +302,26 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.SearchTimeLineExport(Moralar.Domain.ViewModels.Family.SearchViewModel)">
+            <summary>
+            BUSCAR LINHA DO TEMPO DAS FAMILIAS
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                           "searchTerm": "string",  Ex: (nome, cpf ou nº de cadastro)
+                           "typeSubject": 2         Ex: ReuniaoPGM = 2 - EscolhaDoImovel = 4 - Mudanca = 7 - AcompanhamentoPosMudança = 8
+                           
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.TimeLineProcessMandatory(System.String)">
             <summary>
             TIME LINE DO PROCESSO OBRIGATÓRIO

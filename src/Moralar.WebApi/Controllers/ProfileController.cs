@@ -1,4 +1,14 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
+using System.IO;
+using System.Linq;
+using System.Net;
+using System.Reflection;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -16,16 +26,6 @@ using Moralar.Domain.ViewModels.Profile;
 using Moralar.Repository.Interface;
 using Moralar.WebApi.Services;
 using OfficeOpenXml;
-using System;
-using System.Collections.Generic;
-using System.IdentityModel.Tokens.Jwt;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Reflection;
-using System.Security.Claims;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -130,7 +130,7 @@ namespace Moralar.WebApi.Controllers
 
                     for (int linha = 2; linha < 300; linha++)
                     {
-                        if (package.Workbook.Worksheets[1].Cells[linha, 1].Value  != null)
+                        if (package.Workbook.Worksheets[1].Cells[linha, 1].Value != null)
                             break;
                         Data.Entities.Profile profile = new Data.Entities.Profile();
                         profile.Name = package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString();
@@ -251,7 +251,7 @@ namespace Moralar.WebApi.Controllers
                     });
                 }
 
-              
+
                 //package.Save();
 
                 return Ok(Utilities.ReturnSuccess());
@@ -574,7 +574,7 @@ namespace Moralar.WebApi.Controllers
         public async Task<IActionResult> Token([FromBody] LoginViewModel model)
         {
             var claims = new List<Claim>();
-            var claim = model.TypeUserProfile== TypeUserProfile.Gestor? Util.SetRole(TypeProfile.Gestor): Util.SetRole(TypeProfile.TTS);
+            var claim = model.TypeUserProfile == TypeUserProfile.Gestor ? Util.SetRole(TypeProfile.Gestor) : Util.SetRole(TypeProfile.TTS);
             var claimUserName = Request.GetUserName();
             claims.Add(claim);
 
@@ -585,19 +585,19 @@ namespace Moralar.WebApi.Controllers
 
                 model.TrimStringProperties();
 
-              
+
                 if (string.IsNullOrEmpty(model.RefreshToken) == false)
                     return TokenProviderMiddleware.RefreshToken(model.RefreshToken, false, claims.ToArray());
 
-                
 
-                Data.Entities.Profile entity;
+
+                Data.Entities.Profile profileEntity;
                 if (model.TypeProvider != TypeProvider.Password)
                 {
-                    entity = await _profileRepository.FindOneByAsync(x => x.ProviderId == model.ProviderId)
+                    profileEntity = await _profileRepository.FindOneByAsync(x => x.ProviderId == model.ProviderId)
                         .ConfigureAwait(false);
 
-                    if (entity == null)
+                    if (profileEntity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileNotFound, new { IsRegister = true }));
                 }
                 else
@@ -608,20 +608,22 @@ namespace Moralar.WebApi.Controllers
                     if (isInvalidState != null)
                         return BadRequest(isInvalidState);
 
-                    entity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
+                    profileEntity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
                             : await _profileRepository.FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password && x.TypeProfile == model.TypeUserProfile).ConfigureAwait(false);
 
-                   
-                    if (entity == null)
+
+                    if (profileEntity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 
-
                 }
-                claims.Add(new Claim("UserName", entity.Name));
+
+                if (claims.Count(x => x.Type == "UserName") == 0)
+                    claims.Add(new Claim("UserName", profileEntity.Name));
+
                 //if (entity.DataBlocked != null)
                 //    return BadRequest(Utilities.ReturnErro($"Usuário bloqueado : {entity.Reason}"));
 
-                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
+                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(profileEntity._id.ToString(), false, claims.ToArray())));
             }
             catch (Exception ex)
             {
