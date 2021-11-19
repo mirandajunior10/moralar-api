@@ -1,5 +1,6 @@
 ﻿using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
+using Moralar.Data.Enum;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
 using Moralar.Domain.ViewModels.Course;
@@ -146,7 +147,7 @@ namespace Moralar.Domain.AutoMapper
 
             CreateMap<QuizFamily, QuizFamilyListViewModel>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
-            .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.TypeStatus == 0 ? "Não respondido" : "Respondido"));
+            .ForMember(dest => dest.TypeStatus, opt => opt.MapFrom(src => src.TypeStatus));
             CreateMap<Quiz, QuizListViewModel>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 

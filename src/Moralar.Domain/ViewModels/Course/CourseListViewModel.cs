@@ -58,5 +58,9 @@ namespace Moralar.Domain.ViewModels.Course
 
        
         public int NumberOfVacancies { get; set; }
+
+        public int TotalInscriptions { get; set; }
+
+        public int TotalWaitingList { get; set; }
     }
 }

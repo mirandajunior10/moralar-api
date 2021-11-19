@@ -402,6 +402,7 @@ namespace Moralar.WebApi.Controllers
         ///  ],
         ///  "project": "project",
         /// "residencialPropertyAdress": {
+        ///  "cep": "string",
         ///  "streetAddress": "streetAddress",
         ///  "number": "number",
         ///  "cityName": "cityName",

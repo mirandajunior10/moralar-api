@@ -313,7 +313,7 @@ namespace Moralar.Data.Enum
     public enum TypeStatus
     {
         
-        [EnumMember(Value = "Não Respondido")]
+        [EnumMember(Value = "Não Respondido")] 
         [Description("Não Respondido")]
         NaoRespondido = 0,
         [EnumMember(Value = "Respondido")]
@@ -323,8 +323,8 @@ namespace Moralar.Data.Enum
     }
     public enum TypeSubject
     {
-        [EnumMember(Value = " Visita do TTS")]
-        [Description(" Visita do TTS")]
+        [EnumMember(Value = "Visita do TTS")]
+        [Description("Visita do TTS")]
         VisitaTTS = 0,
         [EnumMember(Value = "Reunião com TTS")]
         [Description("Reunião com TTS")]

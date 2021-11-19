@@ -322,18 +322,15 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.FamilyController.TimeLineProcessMandatory(System.String)">
+        <member name="M:Moralar.WebApi.Controllers.FamilyController.TimeLineExport(Moralar.Domain.ViewModels.Family.SearchViewModel)">
             <summary>
-            TIME LINE DO PROCESSO OBRIGATÓRIO
+            EXPORTAR LINHA DO TEMPO DAS FAMILIAS USO NO APP
             </summary>
-             <remarks>
-            OBJ DE ENVIO
-            
-                    POST
-                        {
-                         "familyId": "", // required
-                        }
-            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.FamilyController.TimeLineProcessOptional(System.String)">
             <summary>
@@ -1919,6 +1916,7 @@
               ],
               "project": "project",
              "residencialPropertyAdress": {
+              "cep": "string",
               "streetAddress": "streetAddress",
               "number": "number",
               "cityName": "cityName",

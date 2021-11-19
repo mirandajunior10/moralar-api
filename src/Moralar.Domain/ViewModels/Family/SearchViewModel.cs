@@ -12,7 +12,7 @@ namespace Moralar.Domain.ViewModels.Family
         /// <example>Nome</example>
        // [Required(ErrorMessage = nameof(DefaultMessages.FieldRequired))]
         [Display(Name = nameof(DefaultMessages.FieldSearchTerm))]
-        public string SearchTerm { get; set; }
+        public string SearchTerm { get; set; }       
         public TypeSubject? TypeSubject { get; set; }
         
     }

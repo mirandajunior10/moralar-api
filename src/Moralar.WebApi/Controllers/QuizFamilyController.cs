@@ -120,10 +120,11 @@ namespace Moralar.WebApi.Controllers
                     listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId))?.Title;
                     listQuizFamily[i].TypeQuiz = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId)).TypeQuiz;
                 }
+               
                 response.Data = listQuizFamily.Where(x => x.TypeQuiz == TypeQuiz.Quiz).ToList();
                 response.Draw = model.Draw;
-                response.RecordsFiltered = totalrecordsFiltered;
-                response.RecordsTotal = totalRecords;
+                response.RecordsFiltered = response.Data.Count();   //totalrecordsFiltered;
+                response.RecordsTotal = response.Data.Count();  //totalRecords;
 
                 return Ok(response);
 

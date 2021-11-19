@@ -8,6 +8,9 @@ namespace Moralar.Domain.ViewModels.Property
 {
     public class ResidencialPropertyAdressViewModel
     {
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        [Display(Name = "CEP")]
+        public string CEP { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Endereço")]

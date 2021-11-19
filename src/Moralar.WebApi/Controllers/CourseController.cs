@@ -154,13 +154,27 @@ namespace Moralar.WebApi.Controllers
                     : Builders<Data.Entities.Course>.Sort.Ascending(sortColumn);
 
                 var retorno = await _courseRepository
-                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns);
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Course>;
 
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
                     ? (int)await _courseRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                response.Data = _mapper.Map<List<CourseListViewModel>>(retorno);
+                var viewModelData = _mapper.Map<List<CourseListViewModel>>(retorno);
+
+                /*TOTAL DE INSCRITOS NO CURSO*/
+                for (int i = 0; i < retorno.Count(); i++)
+                {
+                    var item = retorno[i];
+
+                    var totalInscriptions = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.Inscrito).ConfigureAwait(false);
+                    var totalWaitingList = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.ListaEspera).ConfigureAwait(false);
+
+                    viewModelData[i].TotalInscriptions = totalInscriptions;
+                    viewModelData[i].TotalWaitingList = totalWaitingList;
+                }
+
+                response.Data = viewModelData;
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;

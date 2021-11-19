@@ -266,8 +266,8 @@ namespace Moralar.WebApi.Controllers
 
                 response.Data = _vwFamiliHolder;
                 response.Draw = model.Draw;
-                response.RecordsFiltered = totalrecordsFiltered;
-                response.RecordsTotal = totalRecords;
+                response.RecordsFiltered = _vwFamiliHolder.Count(); //totalrecordsFiltered;
+                response.RecordsTotal = _vwFamiliHolder.Count(); //totalRecords;
 
                 return Ok(response);
 
@@ -518,57 +518,66 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
-
         /// <summary>
-        /// TIME LINE DO PROCESSO OBRIGATÓRIO
+        /// EXPORTAR LINHA DO TEMPO DAS FAMILIAS USO NO APP
         /// </summary>
-        ///  <remarks>
-        /// OBJ DE ENVIO
-        /// 
-        ///         POST
-        ///             {
-        ///              "familyId": "", // required
-        ///             }
-        /// </remarks>
-        //// <response code = "200" > Returns success</response>
-        //// <response code = "400" > Custom Error</response>
-        //// <response code = "401" > Unauthorize Error</response>
-        //// <response code = "500" > Exception Error</response>
-        //// <returns></returns>
-        [HttpGet("TimeLineProcessMandatory/{familyId}")]
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("TimeLineExport")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> TimeLineProcessMandatory([FromRoute] string familyId)
+        public async Task<IActionResult> TimeLineExport([FromQuery] SearchViewModel model)
         {
             try
             {
-                //Reunião PGM -  ReuniaoPGM = 2,
-                //Escolha do imóvel -  EscolhaDoImovel = 4,
-                //Mudança -    Mudanca = 7,
-                //Acompanhamento pós-mudança -  AcompanhamentoPosMudança = 8
-                List<int> enumsValid = new List<int> { (int)TypeSubject.ReuniaoPGM, (int)TypeSubject.EscolhaDoImovel, (int)TypeSubject.Mudanca, (int)TypeSubject.AcompanhamentoPosMudança };
-                var scheduleHistories = await _scheduleHistoryRepository.FindIn(x => x.FamilyId == familyId, "TypeSubject", enumsValid.ToList(), Builders<ScheduleHistory>.Sort.Ascending(nameof(ScheduleHistory.LastUpdate))) as List<ScheduleHistory>;
-                if (scheduleHistories.Count() == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+                //model.TrimStringProperties();
+                //var isInvalidState = ModelState.ValidModelState();
 
-                var schedule = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
-                if (schedule == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
-                var objReturn = new
-                {
-                    data = _mapper.Map<List<ScheduleHistoryViewModel>>(scheduleHistories.Where(x => x.ParentId == null)).OrderBy(c => c.TypeSubject).ToList(),
-                    schedule = _mapper.Map<ScheduleListViewModel>(schedule)
-                };
-                var parentIds = scheduleHistories.Where(x => x.ParentId != null).ToList();
-                for (int i = 0; i < parentIds.Count(); i++)
-                {
-                    objReturn.data.Find(x => x.Id == parentIds[i].ParentId).Children.Add(_mapper.Map<ScheduleHistoryViewModel>(parentIds[i]));
-                }
-                return Ok(Utilities.ReturnSuccess(data: objReturn));
+                //if (isInvalidState != null)
+                //    return BadRequest(isInvalidState);
+
+
+                var builder = Builders<Data.Entities.Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Schedule>>();
+
+
+                conditions.Add(builder.Where(x => x.Created != null));
+
+                if (string.IsNullOrEmpty(model.SearchTerm) == false)
+                    conditions.Add(
+                        builder.Or(
+                        builder.Regex(x => x.HolderName, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.HolderNumber, new BsonRegularExpression(model.SearchTerm, "i")),
+                        builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.SearchTerm, "i"))
+                )
+                );    
+
+                if (model.TypeSubject != null)
+                    conditions.Add(builder.Where(x => x.TypeSubject == model.TypeSubject.GetValueOrDefault()));
+
+                var retorno = await _scheduleRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Schedule>()).ToListAsync();
+
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var fileName = $"linhadotempo_{now}.xlsx";
+
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = _mapper.Map<List<ScheduleExportViewModel>>(retorno);
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
             catch (Exception ex)
             {
@@ -1642,70 +1651,87 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var validOnly = _httpContextAccessor.GetFieldsFromBody();
+                var validOnly = _httpContextAccessor.GetFieldsFromBody();               
 
-                var entityFamily = await _familyRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
+                model.TrimStringProperties();
 
-                if (entityFamily == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+                Family entityFamily = null;
 
-                //var entity = _mapper.Map<Data.Entities.Family>(model);
-                //entity.Holder.Number = entityFamily.Holder.Number;
-                //entity.Holder.Cpf = entityFamily.Holder.Cpf;
-                //entity.Holder.Birthday = entityFamily.Holder.Birthday;
+                // var entityFamily = await _familyRepository.FindByIdAsync(model.Id);
 
-                //entity.SetIfDifferent(model, validOnly);
+                // if (entityFamily == null)
+                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                entityFamily.IsFirstAcess = model.IsFirstAcess;
 
-                entityFamily.SetIfDifferent(model, validOnly);
 
-                if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
-                {
-                    entityFamily.Holder.SetIfDifferentCustom(model.Holder);
-                }
 
-                if (validOnly.Count(x => x == nameof(Family.Address)) > 0)
-                {
-                    entityFamily.Address.SetIfDifferentCustom(model.Address);
-                }
+                // entityFamily.IsFirstAcess = model.IsFirstAcess;
 
-                if (validOnly.Count(x => x == nameof(Family.Members)) > 0)
-                {
-                    entityFamily.Members = _mapper.Map<List<FamilyMember>>(model.Members);
-                }
+                //// entityFamily.SetIfDifferent(model, validOnly);
+
+                // if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
+                // {
+                //     entityFamily.Holder.SetIfDifferentCustom(model.Holder);
+                // }
+
+                // if (validOnly.Count(x => x == nameof(Family.Address)) > 0)
+                // {
+                //     entityFamily.Address.SetIfDifferentCustom(model.Address);
+                // }
+
+                // if (validOnly.Count(x => x == nameof(Family.Members)) > 0)
+                // {
+                //     entityFamily.Members = _mapper.Map<List<FamilyMember>>(model.Members);
+                // }
 
                 if (validOnly.Count(x => x == nameof(Family.Spouse)) > 0)
                 {
                     entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);
                 }
 
-                if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)
-                {
-                    entityFamily.Financial.SetIfDifferentCustom(model.Financial);
+                // if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)
+                // {
+                //     entityFamily.Financial.SetIfDifferentCustom(model.Financial);
 
-                    //if (model.Financial.FamilyIncome > 0)
-                    //    entityFamily.Financial.FamilyIncome = model.Financial.FamilyIncome;                    
+                //lixo
+                //if (model.Financial.FamilyIncome > 0)
+                //    entityFamily.Financial.FamilyIncome = model.Financial.FamilyIncome;                    
 
-                    //if (model.Financial.PropertyValueForDemolished > 0)
-                    //    entityFamily.Financial.PropertyValueForDemolished = model.Financial.PropertyValueForDemolished;
+                //if (model.Financial.PropertyValueForDemolished > 0)
+                //    entityFamily.Financial.PropertyValueForDemolished = model.Financial.PropertyValueForDemolished;
 
-                    //if (model.Financial.MaximumPurchase > 0)
-                    //    entityFamily.Financial.MaximumPurchase = model.Financial.MaximumPurchase;
+                //if (model.Financial.MaximumPurchase > 0)
+                //    entityFamily.Financial.MaximumPurchase = model.Financial.MaximumPurchase;
 
-                    //if (model.Financial.IncrementValue > 0)
-                    //    entityFamily.Financial.IncrementValue = model.Financial.IncrementValue;
+                //if (model.Financial.IncrementValue > 0)
+                //    entityFamily.Financial.IncrementValue = model.Financial.IncrementValue;
 
-                }
+                //}
 
-                if (validOnly.Count(x => x == nameof(Family.Priorization)) > 0)
-                {
-                    entityFamily.Priorization.SetIfDifferentCustom(model.Priorization);
-                }
+                //if (validOnly.Count(x => x == nameof(Family.Priorization)) > 0)
+                //{
+                //    entityFamily.Priorization.SetIfDifferentCustom(model.Priorization);
+                //}
 
-                //var entityId = await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
 
-                entityFamily = await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
+                //entityFamily.SetIfDifferent(model, validOnly);
+
+                //entityFamily = await _familyRepository.UpdateAsync(entityFamily);
+
+                //UPDATE
+                var isInvalidState = ModelState.ValidModelStateOnlyFields(validOnly);
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                entityFamily = await _familyRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
+
+                if (entityFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                entityFamily.SetIfDifferent(model, validOnly);
+
+                await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
 
 
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
