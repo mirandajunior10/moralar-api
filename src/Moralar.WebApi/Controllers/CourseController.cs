@@ -590,6 +590,20 @@ namespace Moralar.WebApi.Controllers
 
                 var fullPathFile = Path.Combine(path, fileName);
                 var listViewModel = _mapper.Map<List<CourseExportViewModel>>(allData);
+
+
+                /*TOTAL DE INSCRITOS NO CURSO*/
+                for (int i = 0; i < allData.Count(); i++)
+                {
+                    var item = allData[i];
+
+                    var totalInscriptions = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.Inscrito).ConfigureAwait(false);
+                    var totalWaitingList = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.ListaEspera).ConfigureAwait(false);
+
+                    listViewModel[i].TotalSubscribers = totalInscriptions;
+                    listViewModel[i].TotalWaitingList = totalWaitingList;
+                }
+
                 Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
                 if (System.IO.File.Exists(fullPathFile) == false)
                     return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
