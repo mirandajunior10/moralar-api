@@ -1657,43 +1657,51 @@ namespace Moralar.WebApi.Controllers
 
                 Family entityFamily = null;
 
-                // var entityFamily = await _familyRepository.FindByIdAsync(model.Id);
+                var isInvalidState = ModelState.ValidModelStateOnlyFields(validOnly);
 
-                // if (entityFamily == null)
-                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+                entityFamily = await _familyRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
+
+                if (entityFamily == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+
+                 entityFamily.IsFirstAcess = model.IsFirstAcess;
 
 
 
+                if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
+                {
+                    entityFamily.Holder.SetIfDifferentCustom(model.Holder);
+                }
 
-                // entityFamily.IsFirstAcess = model.IsFirstAcess;
+                if (validOnly.Count(x => x == nameof(Family.Address)) > 0)
+                {
+                    entityFamily.Address.SetIfDifferentCustom(model.Address);
+                }
 
-                //// entityFamily.SetIfDifferent(model, validOnly);
-
-                // if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
-                // {
-                //     entityFamily.Holder.SetIfDifferentCustom(model.Holder);
-                // }
-
-                // if (validOnly.Count(x => x == nameof(Family.Address)) > 0)
-                // {
-                //     entityFamily.Address.SetIfDifferentCustom(model.Address);
-                // }
-
-                // if (validOnly.Count(x => x == nameof(Family.Members)) > 0)
-                // {
-                //     entityFamily.Members = _mapper.Map<List<FamilyMember>>(model.Members);
-                // }
+                if (validOnly.Count(x => x == nameof(Family.Members)) > 0)
+                {
+                    entityFamily.Members = _mapper.Map<List<FamilyMember>>(model.Members);
+                }
 
                 if (validOnly.Count(x => x == nameof(Family.Spouse)) > 0)
                 {
                     entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);
                 }
 
-                // if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)
-                // {
-                //     entityFamily.Financial.SetIfDifferentCustom(model.Financial);
+                if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)
+                {
+                    entityFamily.Financial.SetIfDifferentCustom(model.Financial);
+                }
 
-                //lixo
+                if (validOnly.Count(x => x == nameof(Family.Priorization)) > 0)
+                {
+                    entityFamily.Priorization.SetIfDifferentCustom(model.Priorization);
+                }
+
                 //if (model.Financial.FamilyIncome > 0)
                 //    entityFamily.Financial.FamilyIncome = model.Financial.FamilyIncome;                    
 
@@ -1708,26 +1716,7 @@ namespace Moralar.WebApi.Controllers
 
                 //}
 
-                //if (validOnly.Count(x => x == nameof(Family.Priorization)) > 0)
-                //{
-                //    entityFamily.Priorization.SetIfDifferentCustom(model.Priorization);
-                //}
 
-
-                //entityFamily.SetIfDifferent(model, validOnly);
-
-                //entityFamily = await _familyRepository.UpdateAsync(entityFamily);
-
-                //UPDATE
-                var isInvalidState = ModelState.ValidModelStateOnlyFields(validOnly);
-
-                if (isInvalidState != null)
-                    return BadRequest(isInvalidState);
-
-                entityFamily = await _familyRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
-
-                if (entityFamily == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
                 entityFamily.SetIfDifferent(model, validOnly);
 
