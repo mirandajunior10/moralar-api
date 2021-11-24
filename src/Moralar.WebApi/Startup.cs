@@ -141,8 +141,11 @@ namespace Moralar.WebApi
             //     SupportedUICultures = SupportedCultures
             // });
 
+            app.UseRequestResponseLoggingLite();
+
             /*JWT TOKEN*/
             app.UseJwtTokenApiAuth(Configuration);
+         
 
             app.UseMvc();
 

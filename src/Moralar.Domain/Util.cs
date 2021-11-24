@@ -3,9 +3,11 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
 using Moralar.Data.Enum;
 using Moralar.Domain.ViewModels;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
+using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
@@ -157,6 +159,35 @@ namespace Moralar.Domain
                     Utilities.SetPropertyValue(target, allProperties[i].Name, sourceValue);
             }
             return target;
+        }
+
+        /// <summary>
+        ///  METODO PARA OBTER OS CAMPOS QUE FORAM RECEBIDOS NO JSON  UTILIZADO EM CONJUNTO COM SETIFDIFERENT PARA SIMULAR
+        ///  METODO PUT
+        /// </summary>
+        /// <param name="httpContext"></param>
+        /// <returns></returns>
+        public static string[] GetFieldsFromBodyCustom(this IHttpContextAccessor httpContext)
+        {
+            var dic = new string[] { };
+            try
+            {
+               
+                if (httpContext.HttpContext.Request.Body.CanSeek)
+                {
+                    httpContext.HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
+                    using (var reader = new StreamReader(httpContext.HttpContext.Request.Body)) { 
+                    var body = reader.ReadToEnd();
+                    dic = JsonConvert.DeserializeObject<Dictionary<string, object>>(body)
+                        .Select(x => x.Key?.UppercaseFirst()).ToArray(); }
+                }
+            }
+            catch (Exception ex)
+            {
+                //ignored
+            }
+
+            return dic;
         }
     }
 }

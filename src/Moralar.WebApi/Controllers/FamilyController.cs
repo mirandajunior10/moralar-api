@@ -1,12 +1,4 @@
-﻿
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Net;
-using System.Security.Claims;
-using System.Threading.Tasks;
-using AutoMapper;
+﻿using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -23,12 +15,16 @@ using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
-using Moralar.Domain.ViewModels.Import;
 using Moralar.Domain.ViewModels.Schedule;
-using Moralar.Domain.ViewModels.ScheduleHistory;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
 using OfficeOpenXml;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -528,7 +524,7 @@ namespace Moralar.WebApi.Controllers
         /// <returns></returns>
         [HttpGet("TimeLineExport")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]       
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
@@ -1651,7 +1647,7 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var validOnly = _httpContextAccessor.GetFieldsFromBody();               
+                var validOnly = _httpContextAccessor.GetFieldsFromBodyCustom();               
 
                 model.TrimStringProperties();
 
@@ -1667,9 +1663,9 @@ namespace Moralar.WebApi.Controllers
                 if (entityFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
+                entityFamily.SetIfDifferent(model, validOnly);
 
-                 entityFamily.IsFirstAcess = model.IsFirstAcess;
-
+                entityFamily.IsFirstAcess = model.IsFirstAcess;
 
 
                 if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
@@ -1698,10 +1694,11 @@ namespace Moralar.WebApi.Controllers
                 }
 
                 if (validOnly.Count(x => x == nameof(Family.Priorization)) > 0)
-                {
-                    entityFamily.Priorization.SetIfDifferentCustom(model.Priorization);
+                {                   
+                    entityFamily.Priorization = _mapper.Map<FamilyPriorization>(model.Priorization);
                 }
 
+                
                 //if (model.Financial.FamilyIncome > 0)
                 //    entityFamily.Financial.FamilyIncome = model.Financial.FamilyIncome;                    
 
@@ -1716,12 +1713,7 @@ namespace Moralar.WebApi.Controllers
 
                 //}
 
-
-
-                entityFamily.SetIfDifferent(model, validOnly);
-
                 await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
-
 
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
 

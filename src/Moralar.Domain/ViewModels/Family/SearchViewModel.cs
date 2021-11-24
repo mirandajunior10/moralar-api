@@ -14,6 +14,6 @@ namespace Moralar.Domain.ViewModels.Family
         [Display(Name = nameof(DefaultMessages.FieldSearchTerm))]
         public string SearchTerm { get; set; }       
         public TypeSubject? TypeSubject { get; set; }
-        
+
     }
 }

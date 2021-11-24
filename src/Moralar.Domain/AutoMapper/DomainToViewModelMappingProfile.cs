@@ -59,6 +59,7 @@ namespace Moralar.Domain.AutoMapper
                 //.ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo.SetPhotoProfile(src.ProviderId, null, null, null, null, 600)))
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<PriorityRate, PriorityRateViewModel>().ReverseMap();
             CreateMap<State, StateDefaultViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<City, CityDefaultViewModel>()
@@ -174,6 +175,10 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Date, opt => opt.MapFrom(src => src.Date.TimeStampToDateTime().ToString("dd/MM/yyyy HH:mm")))
                 .ForMember(dest => dest.TypeSubject, opt => opt.MapFrom(src => src.TypeSubject.GetEnumMemberValue()))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.TypeScheduleStatus.GetEnumMemberValue()));
+
+            CreateMap<Schedule, SearchViewModel>()
+                .ForMember(dest => dest.TypeSubject, opt => opt.MapFrom(src => src.TypeSubject));
+               
 
             #endregion
             #region ScheduleHistory
