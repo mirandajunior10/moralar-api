@@ -413,6 +413,8 @@ namespace Moralar.WebApi.Controllers
         ///  "neighborhood": "neighborhood",
         ///  "complement": "complement",
         ///  "location": "location",
+        ///  "latitude": 0,
+        ///  "longitude": 0
         ///},
         ///  "residencialPropertyFeatures": {
         ///    "propertyValue": 200,

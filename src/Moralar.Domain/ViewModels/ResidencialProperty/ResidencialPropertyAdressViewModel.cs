@@ -52,7 +52,7 @@ namespace Moralar.Domain.ViewModels.Property
         public string Neighborhood { get; set; }
 
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+       
         [Display(Name = "Complemento")]
         public string Complement { get; set; }
 

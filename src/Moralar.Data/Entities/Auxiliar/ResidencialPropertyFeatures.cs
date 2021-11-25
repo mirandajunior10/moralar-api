@@ -8,7 +8,7 @@ namespace Moralar.Data.Entities.Auxiliar
 {
     public class ResidencialPropertyFeatures
     {
-        public decimal PropertyValue { get; set; }
+        public double PropertyValue { get; set; }
         public TypeProperty TypeProperty { get; set; }
         public double SquareFootage { get; set; }
         public double CondominiumValue { get; set; }

@@ -10,7 +10,7 @@ namespace Moralar.Domain.ViewModels.Property
     {
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Valor do imóvel")]
-        public decimal PropertyValue { get; set; }
+        public double PropertyValue { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
@@ -26,11 +26,11 @@ namespace Moralar.Domain.ViewModels.Property
 
 
         [Display(Name = "Valor do condomínio")]
-        public decimal? CondominiumValue { get; set; }
+        public double CondominiumValue { get; set; }
 
 
         [Display(Name = "Valor do IPTU")]
-        public decimal? IptuValue { get; set; }
+        public double IptuValue { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
