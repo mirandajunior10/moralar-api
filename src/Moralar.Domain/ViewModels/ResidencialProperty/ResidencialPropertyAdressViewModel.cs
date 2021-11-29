@@ -57,7 +57,7 @@ namespace Moralar.Domain.ViewModels.Property
         public string Complement { get; set; }
 
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+       
         [Display(Name = "Localização")]
         public string Location { get; set; }
 

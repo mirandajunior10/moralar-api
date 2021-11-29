@@ -89,8 +89,7 @@ namespace Moralar.WebApi.Controllers
 
                 var builderAnswer = Builders<QuestionAnswer>.Filter;
                 var conditionsAnswer = new List<FilterDefinition<QuestionAnswer>>();
-
-                //conditionsAnswer.Add(builderAnswer.Eq(x => x.QuizId, quizId));
+               
                 conditionsAnswer.Add(builderAnswer.Where(x => x.QuizId == quizId && x.FamilyId == userId));
 
                 var answers = await _questionAnswerRepository.GetCollectionAsync().FindSync(builderAnswer.And(conditionsAnswer)).ToListAsync();
@@ -103,34 +102,45 @@ namespace Moralar.WebApi.Controllers
 
                 var question = await _questionRepository.GetCollectionAsync().FindSync(builderQuestion.And(conditionsQuestion)).ToListAsync();
 
-                var builderQuestionDescrip = Builders<QuestionDescription>.Filter;
-                var conditionsQuestionDescrip = new List<FilterDefinition<QuestionDescription>>();
+                //var builderQuestionDescrip = Builders<QuestionDescription>.Filter;
+                //var conditionsQuestionDescrip = new List<FilterDefinition<QuestionDescription>>();               
 
-                conditionsQuestionDescrip.Add(builderQuestionDescrip.In(x => x.QuestionId, answers.SelectMany(x => x.Questions).Select(x => x.QuestionId).ToList()));
 
-                var questionDescription = await _questionDescriptionRepository.GetCollectionAsync().FindSync(builderQuestionDescrip.And(conditionsQuestionDescrip)).ToListAsync();
+                //var questionsId = answers.SelectMany(x => x.Questions).Select(x => x.QuestionId).ToList();
+               //conditionsQuestionDescrip.Add(builderQuestionDescrip.In(x => x.QuestionId, questionsId));
+                
+
+                //var descriptionsId = answers.SelectMany(x => x.Questions).SelectMany(x => x.QuestionDescriptionId).Select(ObjectId.Parse).ToList();
+               // conditionsAnswer.Add(builderAnswer.In(x => x._id, descriptionsId));
+
+              
+                //var questionDescription = await _questionDescriptionRepository.GetCollectionAsync().FindSync(builderQuestionDescrip.And(conditionsQuestionDescrip)).ToListAsync();
 
                 var response = new List<QuestionAnswerListViewModel>();
 
                 for (int i = 0; i < question.Count; i++)
                 {
-                    var item = question[i];
+                    var item = question[i];                   
 
-                    var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0);
+                    var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0).ToList();
 
-                    response.Add( new QuestionAnswerListViewModel()
+                    
+                    if (itemAnswers.Count() > 0)
                     {
-                        Title = quiz.Title,
-                        Date = answers[i].Created.Value,
-                        Question = item.NameQuestion,
-                        QuestionId = item._id.ToString(),
-                        QuizId = item.QuizId,
-                        Answers = itemAnswers.SelectMany(x => x.Questions).Select(x => x.AnswerDescription?.Trim()).Distinct().ToList(),
-                        TypeResponse = item.TypeResponse,
-                        FamilyNumber = answers[i].FamilyNumber,
-                        FamilyHolderName = answers[i].FamilyHolderName,
-                        FamilyHolderCpf = answers[i].FamilyHolderCpf
-                    });
+                        response.Add(new QuestionAnswerListViewModel()
+                        {
+                            Title = quiz.Title,
+                            Date = itemAnswers[0].Created.Value,
+                            Question = item.NameQuestion,
+                            QuestionId = item._id.ToString(),
+                            QuizId = item.QuizId,
+                            Answers = itemAnswers.Where(x => x.Questions.Count(y => y.QuestionId == item._id.ToString())>0).SelectMany(x => x.Questions).Where(y => y.QuestionId == item._id.ToString()).Select(x => x.AnswerDescription).Distinct().ToList(),
+                            TypeResponse = item.TypeResponse,
+                            FamilyNumber = itemAnswers[0].FamilyNumber,
+                            FamilyHolderName = itemAnswers[0].FamilyHolderName,
+                            FamilyHolderCpf = itemAnswers[0].FamilyHolderCpf
+                        });
+                    }
                 }
                
                 return Ok(Utilities.ReturnSuccess(data: response));
@@ -177,14 +187,7 @@ namespace Moralar.WebApi.Controllers
 
                 conditionsQuestion.Add(builderQuestion.Eq(x => x.QuizId, quizId));
 
-                var question = await _questionRepository.GetCollectionAsync().FindSync(builderQuestion.And(conditionsQuestion)).ToListAsync();
-
-                var builderQuestionDescrip = Builders<QuestionDescription>.Filter;
-                var conditionsQuestionDescrip = new List<FilterDefinition<QuestionDescription>>();
-
-                conditionsQuestionDescrip.Add(builderQuestionDescrip.In(x => x.QuestionId, answers.SelectMany(x => x.Questions).Select(x => x.QuestionId).ToList()));
-
-                var questionDescription = await _questionDescriptionRepository.GetCollectionAsync().FindSync(builderQuestionDescrip.And(conditionsQuestionDescrip)).ToListAsync();
+                var question = await _questionRepository.GetCollectionAsync().FindSync(builderQuestion.And(conditionsQuestion)).ToListAsync();                
 
                 var response = new List<QuestionAnswerListViewModel>();
 
@@ -192,21 +195,24 @@ namespace Moralar.WebApi.Controllers
                 {
                     var item = question[i];
 
-                    var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0);
+                    var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0).ToList();
 
-                    response.Add(new QuestionAnswerListViewModel()
+                    if (itemAnswers.Count() > 0)
                     {
-                        Title = quiz.Title,
-                        Date = answers[i].Created.Value,
-                        Question = item.NameQuestion,
-                        QuestionId = item._id.ToString(),
-                        QuizId = item.QuizId,
-                        Answers = itemAnswers.SelectMany(x => x.Questions).Select(x => x.AnswerDescription?.Trim()).Distinct().ToList(),
-                        TypeResponse = item.TypeResponse,
-                        FamilyNumber = answers[i].FamilyNumber,
-                        FamilyHolderName = answers[i].FamilyHolderName,
-                        FamilyHolderCpf = answers[i].FamilyHolderCpf
-                    });
+                        response.Add(new QuestionAnswerListViewModel()
+                        {
+                            Title = quiz.Title,
+                            Date = itemAnswers[0].Created.Value,
+                            Question = item.NameQuestion,
+                            QuestionId = item._id.ToString(),
+                            QuizId = item.QuizId,
+                            Answers = itemAnswers.Where(x => x.Questions.Count(y => y.QuestionId == item._id.ToString()) > 0).SelectMany(x => x.Questions).Where(y => y.QuestionId == item._id.ToString()).Select(x => x.AnswerDescription).Distinct().ToList(),
+                            TypeResponse = item.TypeResponse,
+                            FamilyNumber = itemAnswers[0].FamilyNumber,
+                            FamilyHolderName = itemAnswers[0].FamilyHolderName,
+                            FamilyHolderCpf = itemAnswers[0].FamilyHolderCpf
+                        });
+                    }                    
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: response));

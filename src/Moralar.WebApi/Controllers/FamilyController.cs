@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MimeTypes.Core;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
@@ -52,6 +53,7 @@ namespace Moralar.WebApi.Controllers
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
         private readonly IHttpContextAccessor _httpContextAccessor;
+        public readonly List<string> _acceptedFiles = new List<string>() { ".xls", ".xlsx" };
 
 
         public FamilyController(IHostingEnvironment env, IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, ICourseFamilyRepository courseFamilyRepository, IQuizFamilyRepository quizFamilyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, ICityRepository cityRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
@@ -689,27 +691,41 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpGet("Import/{file}")]
+        //[HttpGet("Import/{file}")]
+        [HttpPost("FileImport")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Import([FromRoute] string file)
+        public async Task<IActionResult> Import([FromForm] IFormFile file) //[FromRoute] string file
         {
             try
             {
-                var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
+                //var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
 
-                var exists = Directory.Exists(folder);
+                //var exists = Directory.Exists(folder);
 
-                if (!exists)
-                    Directory.CreateDirectory(folder);
+                //if (!exists)
+                //    Directory.CreateDirectory(folder);
 
-                var fi = new System.IO.FileInfo(folder + "\\" + file);
-                using (var package = new ExcelPackage(fi))
+                //var fi = new System.IO.FileInfo(folder + "\\" + file);
+
+                if (file == null || file.Length <= 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotFound));
+
+                var extension = MimeTypeMap.GetExtension(file.ContentType).ToLower();
+
+                if (_acceptedFiles.Count(x => x == extension) == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));           
+
+
+
+
+                using (var package = new ExcelPackage(file.OpenReadStream()))
                 {
                     ExcelWorksheet sheet = package.Workbook.Worksheets[1];
+
 
                     for (int linha = 2; linha < 300; linha++)
                     {
@@ -2231,5 +2247,44 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(Utilities.ReturnErro(ex.Message));
             }
         }
+
+        /// <summary>
+        /// DOWNLOAD DE ARQUIVO DE EXEMPLO DE IMPORTAÇÃO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ExampleFileImport")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]        
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> ExampleFileImport()
+        {
+            try
+            {
+                var fileName = "Modelo Importar Familias.xlsx";
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content/Upload/");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
     }
 }
