@@ -37,7 +37,7 @@ namespace Moralar.WebApi.Services
                     if (familyEntity?.DeviceId != null && familyEntity.DeviceId.Count() > 0 && familyEntity.DeviceId[0] != deviceId)
                     {
 
-                        /*CASO LOGADO EM OUTRO DEVICE DEVE DERRUBAR A SESS√O*/
+                        /*CASO LOGADO EM OUTRO DEVICE DEVE DERRUBAR A SESS√ÉO*/
                         response.Message = DefaultMessages.InvalidDeviceID;
                         context.Result = new ContentResult()
                         {

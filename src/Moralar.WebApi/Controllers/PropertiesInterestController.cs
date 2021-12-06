@@ -1,36 +1,27 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
 using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
-using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.PropertiesInterest;
 using Moralar.Domain.ViewModels.Property;
-using Moralar.Domain.ViewModels.Question;
-using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reflection;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
-using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Core.Interface;
-
 
 namespace Moralar.WebApi.Controllers
 {
@@ -203,7 +194,7 @@ namespace Moralar.WebApi.Controllers
                 var propertyChoiceFamily = await _propertiesInterestRepository.CountAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false);
                 if (propertyChoiceFamily >= 3)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ChoiceLimitExceeded));
-               
+
 
                 var entityProperty = _mapper.Map<PropertiesInterest>(model);
                 entityProperty.HolderName = familyEntity.Holder.Name;
@@ -242,7 +233,7 @@ namespace Moralar.WebApi.Controllers
                 /* Informa os gestores sobre o término do processo de escolha de imóveis  */
                 var propertyChoice = await _propertiesInterestRepository.CountAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false);
                 if (propertyChoice == 3)
-                {                   
+                {
 
 
                     var entityProfile = await _profileRepository.FindByAsync(x => x.TypeProfile == TypeUserProfile.Gestor || x.TypeProfile == TypeUserProfile.TTS && x.DataBlocked != null).ConfigureAwait(false);
@@ -264,7 +255,7 @@ namespace Moralar.WebApi.Controllers
                     }
                 }
 
-                    return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
             {
@@ -286,47 +277,41 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        //[ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf)
         {
-            //, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf
             var response = new DtResult<PropertiesInterestViewModel>();
             //
             try
             {
-                var builder = Builders<Data.Entities.PropertiesInterest>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.PropertiesInterest>>();
+                var builder = Builders<PropertiesInterest>.Filter;
+                var conditions = new List<FilterDefinition<PropertiesInterest>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
-                if (!string.IsNullOrEmpty(number))
+                if (string.IsNullOrEmpty(number) == false)
                     conditions.Add(builder.Where(x => x.HolderNumber == number));
-                if (!string.IsNullOrEmpty(holderName))
+                if (string.IsNullOrEmpty(holderName) == false)
                     conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
-                if (!string.IsNullOrEmpty(holderCpf))
+                if (string.IsNullOrEmpty(holderCpf) == false)
                     conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
-                
 
-                //var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
                 var totalRecords = (int)await _propertiesInterestRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
 
                 var sortBy =
                 model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
-                ? Builders<Data.Entities.PropertiesInterest>.Sort.Descending(sortColumn)
-                : Builders<Data.Entities.PropertiesInterest>.Sort.Ascending(sortColumn);
+                ? Builders<PropertiesInterest>.Sort.Descending(sortColumn)
+                : Builders<PropertiesInterest>.Sort.Ascending(sortColumn);
 
                 var retorno = await _propertiesInterestRepository
-                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns);
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<PropertiesInterest>;
 
-
-                //var t = retorno.ToList();
                 var propertiesEntity = _mapper.Map<List<PropertiesInterestViewModel>>(retorno);
                 for (int i = 0; i < retorno.Count(); i++)
                 {
-                    var s = retorno.ToList()[i].Priorization;
+                    var s = retorno[i].Priorization;
 
                     foreach (var p in s.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
                     {
@@ -342,17 +327,21 @@ namespace Moralar.WebApi.Controllers
                     ? (int)await _propertiesInterestRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                var teste = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
+                //var teste = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
 
-                var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
-                for (int i = 0; i < propertiesEntity.Count(); i++)
+                if (propertiesEntity.Count() > 0)
                 {
-                    var objResidencial = residencialEntity.FirstOrDefault(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidencialPropertyId));
-                    if (objResidencial != null)
-                        propertiesEntity[i].ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(objResidencial.ResidencialPropertyAdress);
+                    var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                    for (int i = 0; i < propertiesEntity.Count(); i++)
+                    {
+                        var objResidencial = residencialEntity.FirstOrDefault(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidencialPropertyId));
+                        if (objResidencial != null)
+                            propertiesEntity[i].ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(objResidencial.ResidencialPropertyAdress);
+                    }
                 }
 
-                response.Data = propertiesEntity.OrderBy(c => c.PriorityRates.Min(x => x.Rate)).ToList();
+                // response.Data = propertiesEntity.OrderBy(c => c.PriorityRates.Min(x => x.Rate)).ToList();
+                response.Data = propertiesEntity;
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;
@@ -405,8 +394,8 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(isInvalidState);
 
 
-                var builder = Builders<Data.Entities.PropertiesInterest>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.PropertiesInterest>>();
+                var builder = Builders<PropertiesInterest>.Filter;
+                var conditions = new List<FilterDefinition<PropertiesInterest>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
@@ -423,13 +412,13 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(model.ResidencialCode) == false)
                     conditions.Add(builder.Where(x => x.ResidencialCode == model.ResidencialCode));
 
-                var retorno = await _propertiesInterestRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Data.Entities.PropertiesInterest>()
+                var retorno = await _propertiesInterestRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<PropertiesInterest>()
                 {
-                    Sort = Builders<Data.Entities.PropertiesInterest>.Sort.Ascending(nameof(PropertiesInterest.Created))
-                    
+                    Sort = Builders<PropertiesInterest>.Sort.Ascending(nameof(PropertiesInterest.Created))
+
                 }).ToListAsync();
 
-               
+
                 var propertiesEntity = _mapper.Map<List<PropertiesInterestViewModel>>(retorno);
 
 
@@ -442,7 +431,7 @@ namespace Moralar.WebApi.Controllers
 
                     propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).Interest = retorno.Count(x => x.ResidencialPropertyId == retorno.ToList()[i].ResidencialPropertyId.ToString());
                 }
-                
+
 
                 return Ok(Utilities.ReturnSuccess(data: propertiesEntity));
             }
@@ -492,15 +481,13 @@ namespace Moralar.WebApi.Controllers
                 if (entityPropertyFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-               await _propertiesInterestRepository.DeleteOneAsync(entityPropertyFamily._id.ToString()).ConfigureAwait(false);
+                await _propertiesInterestRepository.DeleteOneAsync(entityPropertyFamily._id.ToString()).ConfigureAwait(false);
 
-                                
-                
                 return Ok(Utilities.ReturnSuccess(data: "Cancelado com sucesso!"));
             }
             catch (Exception ex)
             {
-               return BadRequest(ex.ReturnErro());
+                return BadRequest(ex.ReturnErro());
             }
         }
 

@@ -127,7 +127,7 @@ namespace Moralar.WebApi
 
             app.UseCors("AllowAllOrigin");
             /*LOG BASICO*/
-            // app.UseRequestResponseLoggingLite();
+            app.UseRequestResponseLoggingLite();
             /*RETORNO COM GZIP*/
             app.UseResponseCompression();
 
@@ -141,12 +141,9 @@ namespace Moralar.WebApi
             //     SupportedUICultures = SupportedCultures
             // });
 
-            app.UseRequestResponseLoggingLite();
-
             /*JWT TOKEN*/
             app.UseJwtTokenApiAuth(Configuration);
          
-
             app.UseMvc();
 
             if (EnableSwagger)
@@ -161,8 +158,6 @@ namespace Moralar.WebApi
 
                });
             }
-
-
         }
     }
 }

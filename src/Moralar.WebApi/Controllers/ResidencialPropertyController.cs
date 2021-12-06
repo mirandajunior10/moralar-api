@@ -1,4 +1,9 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -6,29 +11,18 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
-using Moralar.Data.Entities;
-using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
-using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.ResidencialProperty;
 using Moralar.Repository.Interface;
 using Moralar.WebApi.Services;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Core.Interface;
-
 
 namespace Moralar.WebApi.Controllers
 {
@@ -129,7 +123,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string code, string status, int availableForSale)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string code, [FromForm] string status, [FromForm] int availableForSale, [FromForm] TypeStatusResidencial? typeStatusResidencialProperty)
         {
             var response = new DtResult<ResidencialPropertyViewModel>();
             try
@@ -138,9 +132,14 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
-                if (!string.IsNullOrEmpty(code))
+
+                if (typeStatusResidencialProperty != null)
+                    conditions.Add(builder.Eq(x => x.TypeStatusResidencialProperty, typeStatusResidencialProperty));
+
+                if (string.IsNullOrEmpty(code) == false)
                     conditions.Add(builder.Where(x => x.Code.ToUpper() == code.ToUpper()));
-                if (!string.IsNullOrEmpty(status))
+
+                if (string.IsNullOrEmpty(status) == false)
                     if (status == "0")
                         conditions.Add(builder.Where(x => x.DataBlocked == null));
                     else if (status == "1")
@@ -196,7 +195,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
-            
+
             try
             {
                 if (ObjectId.TryParse(id, out var unused) == false)
@@ -344,7 +343,7 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.Created != null));
 
                 //if (model.TypeProperty == TypeProperty.Apartamento || model.TypeProperty == TypeProperty.Casa)
-                if(model.TypeProperty != null)
+                if (model.TypeProperty != null)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
 
                 if (model.StartSquareFootage > 0 && model.EndSquareFootage > 0)
@@ -362,10 +361,10 @@ namespace Moralar.WebApi.Controllers
                 if (!string.IsNullOrEmpty(model.Neighborhood))
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
 
-                if (model.HasGarage != null ) 
+                if (model.HasGarage != null)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasGarage == model.HasGarage.GetValueOrDefault()));
 
-                if(model.HasAccessLadder != null)
+                if (model.HasAccessLadder != null)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessLadder == model.HasAccessLadder.GetValueOrDefault()));
 
                 if (model.HasAccessRamp != null)
@@ -524,7 +523,7 @@ namespace Moralar.WebApi.Controllers
                 await _residencialPropertyRepository.UpdateAsync(entityResidencial).ConfigureAwait(false);
 
                 var scheduleEntity = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == model.FamiliIdResidencialChosen).ConfigureAwait(false); ;
-                if (scheduleEntity==null)
+                if (scheduleEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
                 scheduleEntity.Date = Utilities.ToTimeStamp(DateTime.Now);
                 scheduleEntity.TypeSubject = TypeSubject.Mudanca;
@@ -701,7 +700,7 @@ namespace Moralar.WebApi.Controllers
                     else if (status == "1")
                         conditions.Add(builder.Where(x => x.DataBlocked != null));
 
-                              
+
                 var condition = builder.And(conditions);
                 var fileName = "Imoveis_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
                 var allData = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();

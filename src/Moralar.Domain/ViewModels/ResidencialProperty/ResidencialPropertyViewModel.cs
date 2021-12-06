@@ -25,7 +25,6 @@ namespace Moralar.Domain.ViewModels.Property
         [Display(Name = "Planta")]
         public string Project { get; set; }
         public bool Blocked { get; set; }
-        [JsonIgnore]
         public TypeStatusResidencial TypeStatusResidencialProperty { get; set; }
         public ResidencialPropertyAdressViewModel ResidencialPropertyAdress { get; set; }
         public ResidencialPropertyFeatureViewModel ResidencialPropertyFeatures { get; set; }

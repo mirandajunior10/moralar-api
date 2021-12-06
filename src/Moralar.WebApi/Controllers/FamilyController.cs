@@ -287,7 +287,7 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("ExportTimeLine")]
+        [HttpPost("Export")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
@@ -691,8 +691,7 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        //[HttpGet("Import/{file}")]
-        [HttpPost("FileImport")]
+        [HttpPost("Import")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]

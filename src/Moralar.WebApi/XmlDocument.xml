@@ -1860,7 +1860,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.Int32)">
+        <member name="M:Moralar.WebApi.Controllers.ResidencialPropertyController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.Int32,System.Nullable{Moralar.Data.Enum.TypeStatusResidencial})">
             <summary>
             LISTAGEM DOS RESIDÊNCIAS
             </summary>
