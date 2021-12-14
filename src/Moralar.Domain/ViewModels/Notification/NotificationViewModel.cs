@@ -1,13 +1,21 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Text;
+
+using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Notification
 {
     public class NotificationViewModel : BaseViewModel
     {
+
+        [IsReadOnly]
+        /// <summary>
+        /// Data do cadastro
+        /// </summary>
+        [Display(Name = "Data do cadastro")]
+        public long? Created { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Título da notificação")]
         public string Title { get; set; }
@@ -15,7 +23,7 @@ namespace Moralar.Domain.ViewModels.Notification
         [Display(Name = "Descrição da notificação")]
         public string Description { get; set; }
         [Display(Name = "Imagem")]
-        public string Image { get; set; }       
+        public string Image { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Enviar para todas as famílias?")]

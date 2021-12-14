@@ -44,10 +44,10 @@ namespace Moralar.WebApi.Controllers
         private readonly IQuestionDescriptionRepository _questionDescriptionRepository;
         private readonly IQuizFamilyRepository _quizFamilyRepository;
         private readonly IFamilyRepository _familyRepository;
-        private readonly INotificationSendedRepository _notificationSendedRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly IUtilService _utilService;
 
-        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, INotificationSendedRepository notificationSendedRepository, IUtilService utilService)
+        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, INotificationRepository notificationRepository, IUtilService utilService)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
@@ -55,7 +55,7 @@ namespace Moralar.WebApi.Controllers
             _questionDescriptionRepository = questionDescriptionRepository;
             _quizFamilyRepository = quizFamilyRepository;
             _familyRepository = familyRepository;
-            _notificationSendedRepository = notificationSendedRepository;
+            _notificationRepository = notificationRepository;
             _utilService = utilService;
         }
 
@@ -67,7 +67,7 @@ namespace Moralar.WebApi.Controllers
         /// 
         ///         POST
         ///             {
-        ///              "id": "string", // required
+        ///              "targetId": "string", // required
         ///              "block": true,
         ///              "reason": "" //motivo de bloquear o usuário
         ///             }
@@ -215,10 +215,10 @@ namespace Moralar.WebApi.Controllers
         /// <returns></returns>
         [HttpPost("LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(QuizViewModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        //[ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, [FromForm] TypeQuiz typeQuiz)
         {
             var response = new DtResult<QuizViewModel>();
@@ -279,7 +279,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -484,7 +483,7 @@ namespace Moralar.WebApi.Controllers
                         await _quizFamilyRepository.CreateAsync(entityQuizFamily).ConfigureAwait(false);
 
                     /// ENVIAR MSG PARA O APP DO CLIENTE
-                    await _notificationSendedRepository.CreateAsync(new NotificationSended
+                    await _notificationRepository.CreateAsync(new Notification
                     {
                         Title = "Novo questionário disponibilizado",
                         Description = $"Olá { item.Holder.Name  }," +
@@ -531,15 +530,14 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
 
-                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId).ConfigureAwait(false) as List<QuizFamily>;
+                var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == userId).ConfigureAwait(false) as List<QuizFamily>;
 
-
-                var entityFamily = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
-                if (entityFamily.Count(x => x.TypeQuiz == typeQuiz) == 0)
+                var listQuiz = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz && x.DataBlocked == null, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
+                if (listQuiz.Count(x => x.TypeQuiz == typeQuiz) == 0)
                     return Ok(Utilities.ReturnSuccess(DefaultMessages.AnyQuiz, new List<object>()));
 
 
-                var _quizViewModel = _mapper.Map<List<QuizViewModel>>(entityFamily);
+                var _quizViewModel = _mapper.Map<List<QuizViewModel>>(listQuiz);
 
                 for (int i = 0; i < _quizViewModel.Count(); i++)
                 {

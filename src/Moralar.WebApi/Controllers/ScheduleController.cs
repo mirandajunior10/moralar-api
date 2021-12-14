@@ -630,7 +630,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> DetailTimeLineProcessReunionPGM([FromRoute] string familyId)
         {
             try
@@ -710,7 +709,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> ChangeStatus([FromBody] ScheduleChangeStatusViewModel model)
         {
 
@@ -783,7 +781,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> ChangeSubject([FromBody] ScheduleChangeSubjectViewModel model)
         {
 

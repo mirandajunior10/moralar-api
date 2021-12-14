@@ -1,9 +1,3 @@
-using Microsoft.AspNetCore.Http;
-using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Localization;
-using Moralar.Data.Enum;
-using Moralar.Domain.ViewModels;
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
@@ -11,6 +5,13 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Security.Claims;
+using Microsoft.AspNetCore.Http;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Localization;
+using Moralar.Data.Entities;
+using Moralar.Data.Enum;
+using Moralar.Domain.ViewModels;
+using Newtonsoft.Json;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 
@@ -48,11 +49,11 @@ namespace Moralar.Domain
         public static Claim GetUserName(this HttpRequest httpRequest)
         {
             var userName = httpRequest.GetClaimFromToken("UserName");
-            if (string.IsNullOrEmpty(userName)== false)
-                return new Claim("UserName",userName);
+            if (string.IsNullOrEmpty(userName) == false)
+                return new Claim("UserName", userName);
             return null;
         }
-      
+
 
         public static List<string> GetDiferentFields<T, TY>(this T target, TY source) where T : class
           where TY : class
@@ -172,14 +173,16 @@ namespace Moralar.Domain
             var dic = new string[] { };
             try
             {
-               
+
                 if (httpContext.HttpContext.Request.Body.CanSeek)
                 {
                     httpContext.HttpContext.Request.Body.Seek(0, SeekOrigin.Begin);
-                    using (var reader = new StreamReader(httpContext.HttpContext.Request.Body)) { 
-                    var body = reader.ReadToEnd();
-                    dic = JsonConvert.DeserializeObject<Dictionary<string, object>>(body)
-                        .Select(x => x.Key?.UppercaseFirst()).ToArray(); }
+                    using (var reader = new StreamReader(httpContext.HttpContext.Request.Body))
+                    {
+                        var body = reader.ReadToEnd();
+                        dic = JsonConvert.DeserializeObject<Dictionary<string, object>>(body)
+                            .Select(x => x.Key?.UppercaseFirst()).ToArray();
+                    }
                 }
             }
             catch (Exception ex)
@@ -188,6 +191,31 @@ namespace Moralar.Domain
             }
 
             return dic;
+        }
+
+        public static bool HasValidMemberBirthDay(Family entityFamily, int startTargetAudienceAge, int endTargetAudienceAge)
+        {
+            try
+            {
+                var listAges = new List<int>();
+
+                if (entityFamily.Holder.Birthday != null)
+                    listAges.Add(entityFamily.Holder.Birthday.Value.TimeStampToDateTime().CalculeAge());
+
+                for (int i = 0; i < entityFamily.Members.Count(); i++)
+                {
+                    if (entityFamily.Members[i].Birthday > 0)
+                        listAges.Add(entityFamily.Members[i].Birthday.TimeStampToDateTime().CalculeAge());
+                }
+
+                return listAges.Count(age => age >= startTargetAudienceAge && age <= endTargetAudienceAge) > 0;
+
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

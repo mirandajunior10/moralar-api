@@ -111,7 +111,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> ImportGestor([FromRoute] string file)
         {
             try
@@ -191,7 +190,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> ImportTTS([FromRoute] string file)
         {
             try
@@ -424,7 +422,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> UpdateProfile([FromBody] ProfileUpdateViewModel model)
         {
             try
@@ -655,7 +652,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> BlockUnBlock([FromBody] BlockViewModel model)
         {
             try
@@ -757,7 +753,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] TypeUserProfile typeProfile)
         {
             //string name = "sergio";

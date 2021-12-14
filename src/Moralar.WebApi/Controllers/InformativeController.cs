@@ -107,7 +107,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> DetailInformativeSended([FromRoute] string id)
         {
             try
@@ -367,7 +366,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadDataInformativeSended([FromForm] DtParameters model, [FromForm] string description, [FromForm] long startDate, [FromForm] long endDate)
         {
             var response = new DtResult<InformativeSendedViewModel>();
@@ -455,10 +453,9 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [AllowAnonymous]
         [HttpPost("BlockUnblock")]
         [Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]

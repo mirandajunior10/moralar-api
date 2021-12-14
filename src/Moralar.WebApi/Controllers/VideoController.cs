@@ -1,4 +1,8 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -7,16 +11,13 @@ using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Moralar.Data.Entities;
+using Moralar.Data.Entities.Auxiliar;
 using Moralar.Domain;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Video;
 using Moralar.Domain.ViewModels.VideoViewed;
 using Moralar.Repository.Interface;
 using RestSharp;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -66,10 +67,10 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                //var userId = Request.GetUserId();
+                var userId = Request.GetUserId();
 
-                //if (string.IsNullOrEmpty(userId))
-                //    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InvalidCredentials)));
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InvalidCredentials)));
 
                 var videoEntity = await _videoRepository.FindByIdAsync(id).ConfigureAwait(false);
                 if (videoEntity == null)
@@ -108,7 +109,7 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InvalidCredentials)));
 
-                var videoEntity = await _videoRepository.FindAllAsync().ConfigureAwait(false);
+                var videoEntity = await _videoRepository.FindByAsync(x => x.DataBlocked == null).ConfigureAwait(false);
                 if (videoEntity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.VideoNotFound)));
 
@@ -298,7 +299,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model)
         {
             var response = new DtResult<VideoListViewModel>();
@@ -307,7 +307,7 @@ namespace Moralar.WebApi.Controllers
                 var builder = Builders<Video>.Filter;
                 var conditions = new List<FilterDefinition<Video>>();
 
-                conditions.Add(builder.Where(x => x.Disabled == null && x.DataBlocked == null));
+                conditions.Add(builder.Ne(x => x._id, ObjectId.Empty));
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
@@ -319,29 +319,27 @@ namespace Moralar.WebApi.Controllers
                    : Builders<Video>.Sort.Ascending(sortColumn);
 
                 var retorno = await _videoRepository
-                 .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, fields: columns);
+                 .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, fields: columns) as List<Video>;
 
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
                    ? (int)await _videoRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                    : totalRecords;
 
-                var _amoutViewed = _videoViewedRepository.FindAll().GroupBy(x => new { x.VideoId })
-                     .Select(gp => new
-                     {
-                         VideoId = gp.Key.VideoId,
-                         Qtd = gp.Count(),
-                     }).ToList();
-                var listReturn = _mapper.Map<List<VideoListViewModel>>(retorno);
+                var group = await _videoViewedRepository
+                                                  .GetCollectionAsync()
+                                                  .Aggregate()
+                                                  .Match(Builders<VideoViewed>.Filter.In(x => x.VideoId, retorno.Select(x => x._id.ToString()).ToList()))
+                                                  .Group(x => x.VideoId, x => new Viewed() { VideoId = x.Key, TotalView = x.LongCount() })
+                                                  .ToListAsync();
 
-                foreach (var item in listReturn)
+                var listReturn = _mapper.Map<List<Video>, List<VideoListViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
                 {
-                    var amountView = _amoutViewed.Find(x => x.VideoId == item.Id);
-                    if (amountView == null)
-                        item.AmountViewed = 0;
-                    else 
-                        item.AmountViewed = amountView.Qtd;
-                }
+                    for (int i = 0; i < src.Count; i++)
+                    {
+                        dest[i].AmountViewed = group.Find(x => x.VideoId == dest[i].Id)?.TotalView ?? 0;
+                    }
 
+                }));
 
                 response.Data = listReturn;
                 response.Draw = model.Draw;
@@ -373,7 +371,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> Delete([FromRoute] string id)
         {
             try
@@ -398,10 +395,9 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [AllowAnonymous]
         [HttpPost("BlockUnblock")]
         [Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]

@@ -1,4 +1,5 @@
 ﻿using MongoDB.Bson;
+
 using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
 using Moralar.Domain.ViewModels;
@@ -7,18 +8,17 @@ using Moralar.Domain.ViewModels.Course;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Informative;
 using Moralar.Domain.ViewModels.Notification;
+using Moralar.Domain.ViewModels.NotificationSended;
 using Moralar.Domain.ViewModels.Profile;
 using Moralar.Domain.ViewModels.PropertiesInterest;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
-using Moralar.Domain.ViewModels.QuizFamily;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Video;
 using Moralar.Domain.ViewModels.VideoViewed;
-using System.Collections.Generic;
-using UtilityFramework.Application.Core;
+
 using AutoMapperProfile = AutoMapper.Profile;
 
 namespace Moralar.Domain.AutoMapper
@@ -55,7 +55,7 @@ namespace Moralar.Domain.AutoMapper
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<FamilyCompleteWebViewModel, Family>()
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)))
-                 .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.Priorization))                 
+                 .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.Priorization))
                  ;
 
             CreateMap<FamilyHolderExportViewModel, Family>()
@@ -101,10 +101,10 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<QuizUpdateViewModel, Quiz>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
 
-            CreateMap<QuestionAnswerAuxViewModel,QuestionAnswerAux>();
+            CreateMap<QuestionAnswerAuxViewModel, QuestionAnswerAux>();
 
             CreateMap<QuestionAnswerRegisterViewModel, QuestionAnswer>();
-       
+
 
 
             #endregion
@@ -115,7 +115,7 @@ namespace Moralar.Domain.AutoMapper
             #endregion
             #region QuizFamily
             CreateMap<QuizFamilyViewModel, QuizFamily>()
-                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));          
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
 
 
             #endregion
@@ -153,26 +153,31 @@ namespace Moralar.Domain.AutoMapper
             #endregion
             #region Notification
             CreateMap<NotificationViewModel, Notification>()
+
                  .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
             #region PropertiesInterest
             CreateMap<PropertiesInterestRegisterViewModel, PropertiesInterest>()
-             .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
 
             #region Course
             CreateMap<CourseViewModel, Course>()
-        .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
             #region Video
             CreateMap<VideoViewModel, Video>()
-       .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #endregion
             #region VideoViewed
             CreateMap<VideoViewedViewModel, VideoViewed>()
-                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
-            
+                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
             #endregion
+
+            CreateMap<NotificationSendedViewModel, NotificationSended>()
+                .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
 
 
         }

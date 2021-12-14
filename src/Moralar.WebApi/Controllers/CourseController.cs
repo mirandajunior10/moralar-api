@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -17,12 +23,6 @@ using Moralar.Domain.ViewModels.Course;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Repository.Interface;
 using Moralar.WebApi.Services;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -40,7 +40,7 @@ namespace Moralar.WebApi.Controllers
 
         private readonly IMapper _mapper;
         private readonly ICourseRepository _courseRepository;
-        private readonly INotificationRepository  _notificationRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly INotificationSendedRepository _notificationSendedRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly ICourseFamilyRepository _courseFamilyRepository;
@@ -125,7 +125,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        [AllowAnonymous]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, [FromForm] long? startDate, [FromForm] long? endDate)
         {
             var response = new DtResult<CourseListViewModel>();
@@ -231,7 +230,7 @@ namespace Moralar.WebApi.Controllers
                 var entityCourseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == userId && x.CourseId == id).ConfigureAwait(false);
                 if (entityCourseFamily.Count() > 0)
                 {
-                   viewmodelData.IsSubscribed = true;
+                    viewmodelData.IsSubscribed = true;
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: viewmodelData));
@@ -260,7 +259,7 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                
+
                 var entity = await _courseRepository.FindAllAsync().ConfigureAwait(false);
 
                 if (entity == null)
@@ -298,14 +297,14 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
 
-                var entityCourseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == entityFamily._id.ToString()).ConfigureAwait(false) as List<CourseFamily>; 
+                var entityCourseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == entityFamily._id.ToString()).ConfigureAwait(false) as List<CourseFamily>;
 
                 if (entityCourseFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
 
 
                 var entityCourse = await _courseRepository.FindIn("_id", entityCourseFamily.Select(x => ObjectId.Parse(x.CourseId)).ToList()) as List<Course>;
-       
+
                 if (entityCourse == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
 
@@ -374,7 +373,7 @@ namespace Moralar.WebApi.Controllers
                 model.TrimStringProperties();
                 var ignoreValidation = new List<string>();
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
-             
+
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
@@ -382,7 +381,7 @@ namespace Moralar.WebApi.Controllers
                 entity.Img = model.Img.SetPathImage();
                 var entityId = await _courseRepository.CreateAsync(entity).ConfigureAwait(false);
 
-              
+
                 await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou novo curso {model.Title}", Request.GetUserId(), Request.GetUserName()?.Value, entityId, "");
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
@@ -419,7 +418,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> RegisterFamilyToTrainning([FromBody] CourseFamilyViewModel model)
         {
             try
@@ -434,7 +432,9 @@ namespace Moralar.WebApi.Controllers
                 if (entityCourse == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
 
-                if (!entityFamily.Members.Exists(x => x.Birthday.TimeStampToDateTime().CalculeAge() >= entityCourse.StartTargetAudienceAge && x.Birthday.TimeStampToDateTime().CalculeAge() <= entityCourse.EndTargetAudienceAge))
+                var canRegister = Util.HasValidMemberBirthDay(entityFamily, entityCourse.StartTargetAudienceAge, entityCourse.EndTargetAudienceAge);
+
+                if (canRegister == false)
                     return BadRequest(Utilities.ReturnErro("Não é possível realizar a inscrição neste curso, por não condizer com o público a que é destinado"));
 
                 var qtdCourse = await _courseFamilyRepository.FindByAsync(x => x.CourseId == model.CourseId).ConfigureAwait(false) as List<CourseFamily>;
@@ -446,13 +446,13 @@ namespace Moralar.WebApi.Controllers
                 var entityId = await _courseFamilyRepository.CreateAsync(entity).ConfigureAwait(false);
 
 
-                await _notificationSendedRepository.CreateAsync(new NotificationSended
+                await _notificationRepository.CreateAsync(new Notification
                 {
                     Title = "Confirmação de inscrição em curso",
-                    Description = $"Olá {  entityFamily.Holder.Name }!"+
-                                  $"Sua inscrição no curso {  entityCourse.Title }"+
+                    Description = $"Olá {  entityFamily.Holder.Name }!" +
+                                  $"Sua inscrição no curso {  entityCourse.Title }" +
                                   "foi realizada com sucesso!Fique atento, seu curso começará em breve.",
-                    FamilyId=entity._id.ToString(),
+                    FamilyId = entity._id.ToString(),
                 });
                 await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou família  {entityFamily.Holder.Name} para fazer o curso", Request.GetUserId(), "", entityId, "");
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
@@ -506,7 +506,7 @@ namespace Moralar.WebApi.Controllers
 
                 await _courseFamilyRepository.DeleteOneAsync(entityCourseFamily._id.ToString()).ConfigureAwait(false);
 
-               
+
                 if (courses.ToList().Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera) > 0)
                 {
                     var familyToCourseAvaliable = courses.ToList().Where(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera).OrderBy(x => x.Created).FirstOrDefault();
@@ -516,7 +516,7 @@ namespace Moralar.WebApi.Controllers
                         await _courseFamilyRepository.UpdateOneAsync(familyToCourseAvaliable).ConfigureAwait(false);
 
 
-                        await _notificationSendedRepository.CreateAsync(new NotificationSended
+                        await _notificationRepository.CreateAsync(new Notification
                         {
                             Title = "Liberação de vaga em curso",
                             Description = $"Olá {  entityFamily.Holder.Name }!" +
@@ -526,7 +526,7 @@ namespace Moralar.WebApi.Controllers
                         });
                     }
                 }
-                await _notificationSendedRepository.CreateAsync(new NotificationSended
+                await _notificationRepository.CreateAsync(new Notification
                 {
                     Title = "Cancelamento de inscrição em curso",
                     Description = $"Olá {  entityFamily.Holder.Name }!" +
@@ -558,7 +558,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        
+
 
         public async Task<IActionResult> Export([FromForm] string title, [FromForm] long? startDate, [FromForm] long? endDate)
         {

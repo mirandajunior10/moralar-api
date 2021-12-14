@@ -1,6 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Newtonsoft.Json;
+using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Notification
@@ -11,7 +10,9 @@ namespace Moralar.Domain.ViewModels.Notification
         public long? DateViewed { get; set; }
         public long Created { get; set; }
         public string Title { get; set; }
-        public string Description { get; set; }        
+        public string Description { get; set; }
+        [JsonConverter(typeof(PathImage))]
         public string Image { get; set; }
+        public bool Arquived { get; set; }
     }
 }

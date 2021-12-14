@@ -154,8 +154,7 @@ namespace Moralar.WebApi
                {
                    c.SwaggerEndpoint($"../swagger/v1/swagger.json".Trim(), $"API {ApplicationName} {env.EnvironmentName}");
                    c.EnableDeepLinking();
-                   c.DocExpansion(DocExpansion.None);
-
+                   c.EnableFilter();
                });
             }
         }

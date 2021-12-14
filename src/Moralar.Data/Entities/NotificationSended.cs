@@ -1,8 +1,8 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
+using Moralar.Data.Enum;
 using UtilityFramework.Infra.Core.MongoDb.Data.Modelos;
 
 namespace Moralar.Data.Entities
@@ -12,9 +12,9 @@ namespace Moralar.Data.Entities
     {
         public string Title { get; set; }
         public string Description { get; set; }
-        public string NotificationId { get; set; }
-        public string FamilyId { get; set; }
-        public long? DateViewed { get; set; }
+        public string Image { get; set; }
+        public List<string> FamilyId { get; set; } = new List<string>();
+        public bool AllFamily { get; set; }
         public override string CollectionName => nameof(NotificationSended);
     }
 }

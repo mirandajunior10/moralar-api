@@ -1,10 +1,9 @@
-﻿
-using Microsoft.AspNetCore.Mvc;
+﻿using System;
+using System.Threading.Tasks;
+
 using Moralar.Data.Entities;
 using Moralar.Data.Enum;
 using Moralar.Domain.ViewModels;
-using System;
-using System.Threading.Tasks;
 
 namespace Moralar.Domain.Services.Interface
 {

@@ -1,37 +1,28 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
 using Moralar.Data.Entities;
-using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
-using Moralar.Domain.ViewModels.Informative;
-using Moralar.Domain.ViewModels.InformativeSended;
 using Moralar.Domain.ViewModels.Notification;
 using Moralar.Domain.ViewModels.NotificationSended;
-using Moralar.Domain.ViewModels.Question;
-using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Core.Interface;
-
 
 namespace Moralar.WebApi.Controllers
 {
@@ -75,7 +66,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> DetailNotification([FromRoute] string id)
         {
             try
@@ -104,10 +94,10 @@ namespace Moralar.WebApi.Controllers
         [HttpGet("DetailNotificationSended/{id}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> DetailNotificationSended([FromRoute] string id)
         {
             try
@@ -118,6 +108,14 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
                 var informativeViewModel = _mapper.Map<NotificationSendedListViewModel>(entity);
+
+                if (informativeViewModel.FamilyId != null && informativeViewModel.FamilyId.Count() > 0)
+                {
+                    var listFamily = await _familyRepository.FindIn("_id", informativeViewModel.FamilyId.Select(ObjectId.Parse).ToList());
+
+                    if (listFamily.Count() > 0)
+                        informativeViewModel.Family = _mapper.Map<List<FamilyHolderViewModel>>(listFamily.Select(x => x.Holder).ToList());
+                }
 
                 return Ok(Utilities.ReturnSuccess(data: informativeViewModel));
             }
@@ -140,7 +138,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAllNotification()
         {
             try
@@ -167,22 +164,42 @@ namespace Moralar.WebApi.Controllers
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
         [HttpGet("GetAllNotificationByFamily")]
+        [HttpGet("GetAllNotificationByFamily/{page}")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(NotificationListViewModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> GetAllNotificationByFamily()
+        public async Task<IActionResult> GetAllNotificationByFamily([FromRoute] int page, [FromQuery] bool archived, [FromQuery] bool setRead, [FromQuery] int limit = 15)
         {
+            IEnumerable<Notification> listNotification = null;
             try
             {
                 var familyId = Request.GetUserId();
-                var entity = await _notificationSendedRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
-                if (entity.Count() == 0)
+
+                if (page > 0)
+                {
+                    listNotification =
+                    archived
+                    ? await _notificationRepository.FindByAsync(x => x.Created <= DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds() && x.FamilyId == familyId, page, Builders<Notification>.Sort.Descending(x => x.Created), limit).ConfigureAwait(false)
+                    : await _notificationRepository.FindByAsync(x => x.FamilyId == familyId, page, Builders<Notification>.Sort.Descending(x => x.Created), limit).ConfigureAwait(false);
+                }
+                else
+                {
+                    listNotification = await _notificationRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+
+                }
+                if (listNotification.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-                var vieoViewModel = _mapper.Map<List<NotificationSendedListViewModel>>(entity);
+                if (setRead)
+                {
+                    var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                    _notificationRepository.UpdateMultiple(Query<Notification>.In(x => x._id, listNotification.Select(x => x._id).ToList()), new UpdateBuilder<Notification>().Set(x => x.DateViewed, now), UpdateFlags.Multi);
+                }
+
+                var vieoViewModel = _mapper.Map<List<NotificationListViewModel>>(listNotification);
 
                 return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
             }
@@ -223,98 +240,78 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Register([FromBody] NotificationViewModel model)
         {
             try
             {
                 model.TrimStringProperties();
-                //var ignoreValidation = new List<string>();
+                var ignoreValidation = new List<string>();
 
-                //var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
+                if (model.AllFamily)
+                    ignoreValidation.Add(nameof(model.FamilyId));
 
-                //if (isInvalidState != null)
-                //    return BadRequest(isInvalidState);  
+                var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
 
 
-                var entityFamily = new List<Family>();
+                var listFamily = new List<Family>();
                 if (model.AllFamily == true)
-                    entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+                {
+                    listFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+
+                    model.FamilyId = listFamily.Select(x => x._id.ToString()).ToList();
+                }
                 else
                 {
-                    entityFamily = await _familyRepository.FindIn("_id", model.FamilyId.Select(x => ObjectId.Parse(x)).ToList()) as List<Family>;
-                    if (model.FamilyId.Count() != entityFamily.Count())
+                    listFamily = await _familyRepository.FindIn("_id", model.FamilyId.Select(x => ObjectId.Parse(x)).ToList()) as List<Family>;
+                    if (model.FamilyId.Count() != listFamily.Count())
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
                 }
 
-                foreach (var item in entityFamily)
+                var entityNotification = new NotificationSended()
                 {
-                    var entityNotification = new Notification()
+                    Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
+                    FamilyId = model.FamilyId,
+                    Title = model.Title,
+                    Description = model.Description,
+                    Image = model.Image,
+                    AllFamily = model.AllFamily
+                };
+
+                var informativeId = await _notificationSendedRepository.CreateAsync(entityNotification).ConfigureAwait(false);
+
+                var listNotification = new List<Notification>();
+                for (int i = 0; i < model.FamilyId.Count(); i++)
+                {
+                    listNotification.Add(new Notification()
                     {
-                        Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                        FamilyId = item._id.ToString(),
                         Title = model.Title,
+                        FamilyId = model.FamilyId[i],
                         Description = model.Description,
-                        Image = model.Image.SetPathImage()
-                    };
-                    
-                    
-                    var informativeId = await _notificationRepository.CreateAsync(entityNotification).ConfigureAwait(false);
-
-                    await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
-
+                        Image = model.Image
+                    });
                 }
 
-                //var entity = _mapper.Map<Data.Entities.Notification>(model);
-                //var informativeId = await _notificationRepository.CreateAsync(entity).ConfigureAwait(false);
-                //  await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
-                return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
+                const int limit = 500;
+                var registred = 0;
+                var index = 0;
 
-            }
-            catch (Exception ex)
-            {
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar nova notificação", "", "", "", "", ex);
-                return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
-            }
-        }
-
-        /// <summary>
-        /// ENVIA UMA NOTIFICAÇÃO
-        /// </summary>
-        /// <remarks>
-        /// <response code="200">Returns success</response>
-        /// <response code="400">Custom Error</response>
-        /// <response code="401">Unauthorize Error</response>
-        /// <response code="500">Exception Error</response>
-        /// <returns></returns>
-        [HttpPost("Send/{notificationId}")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(ReturnViewModel), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> Send(string notificationId)
-        {
-            try
-            {
-
-                var entityNotification = await _notificationRepository.FindByIdAsync(notificationId).ConfigureAwait(false);
-                if (entityNotification == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InformativeNotFound));
-
-                var entityFamily = await _familyRepository.FindAllAsync().ConfigureAwait(false);
-                foreach (var item in entityFamily)
+                while (listNotification.Count() > registred)
                 {
-                    var notificationSended = new NotificationSended()
-                    {
-                        FamilyId = item._id.ToString(),
-                        NotificationId = notificationId
-                    };
-                    await _notificationSendedRepository.CreateAsync(notificationSended);
+                    var itensToRegister = listNotification.Skip(limit * index).Take(limit).ToList();
+
+                    if (itensToRegister.Count() > 0)
+                        await _notificationRepository.CreateAsync(itensToRegister);
+                    registred += limit;
+                    index++;
                 }
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadatrou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, "");
+
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
+
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Registred)));
+
             }
             catch (Exception ex)
             {
@@ -322,6 +319,7 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
             }
         }
+
         /// <summary>
         /// MODIFICA UMA NOTIFICAÇÃO DE APP PARA LIDO
         /// </summary>
@@ -342,13 +340,15 @@ namespace Moralar.WebApi.Controllers
             try
             {
 
-                var entityNotificationSended = await _notificationSendedRepository.FindByIdAsync(notificationId).ConfigureAwait(false);
-                if (entityNotificationSended == null)
+                var notificationEntity = await _notificationRepository.FindByIdAsync(notificationId).ConfigureAwait(false);
+                if (notificationEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.NotificationNotFound));
 
-                entityNotificationSended.DateViewed = Utilities.ToTimeStamp(DateTime.Now);
-                var entityFamily = await _notificationSendedRepository.UpdateOneAsync(entityNotificationSended).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Leu a notificação{Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, entityFamily);
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                notificationEntity.DateViewed = now;
+
+                await _notificationRepository.UpdateAsync(notificationEntity).ConfigureAwait(false);
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Leu a notificação{Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, notificationId);
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated));
             }
             catch (Exception ex)
@@ -402,13 +402,12 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("LoadDataNotification")]
+        [HttpPost("LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoadDataNotification([FromForm] DtParameters model)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate)
         {
             var response = new DtResult<NotificationViewModel>();
             try
@@ -417,6 +416,12 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Notification>>();
 
                 conditions.Add(builder.Where(x => x.Disabled == null));
+
+                if (startDate != null)
+                    conditions.Add(builder.Gte(x => x.Created, startDate));
+
+                if (endDate != null)
+                    conditions.Add(builder.Lte(x => x.Created, endDate));
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
@@ -458,27 +463,28 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("LoadDataInformativeSended")]
+        [HttpPost("InformativeSended/LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(NotificationSendedListViewModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
-        public async Task<IActionResult> LoadDataNotificationSended([FromForm] DtParameters model, [FromForm] string description, [FromForm] long startDate, [FromForm] long endDate)
+        public async Task<IActionResult> LoadDataNotificationSended([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate)
         {
-            var response = new DtResult<NotificationSendedViewModel>();
+            var response = new DtResult<NotificationSendedListViewModel>();
             try
             {
                 var builder = Builders<NotificationSended>.Filter;
                 var conditions = new List<FilterDefinition<NotificationSended>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
-                //if (!string.IsNullOrEmpty(number))
-                //    conditions.Add(builder.Where(x => x.Holder.Number == number));
-                //if (!string.IsNullOrEmpty(description))
-                //    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(description.ToUpper())));
-                //if (!string.IsNullOrEmpty(holderCpf))
-                //    conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
+
+                if (startDate != null)
+                    conditions.Add(builder.Gte(x => x.Created, startDate));
+
+                if (endDate != null)
+                    conditions.Add(builder.Lte(x => x.Created, endDate));
+
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = model.SortOrder;
@@ -495,7 +501,7 @@ namespace Moralar.WebApi.Controllers
                    ? (int)await _notificationSendedRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                    : totalRecords;
 
-                response.Data = _mapper.Map<List<NotificationSendedViewModel>>(retorno);
+                response.Data = _mapper.Map<List<NotificationSendedListViewModel>>(retorno);
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;
@@ -532,7 +538,7 @@ namespace Moralar.WebApi.Controllers
                 if (!await _notificationRepository.CheckByAsync(x => x._id == ObjectId.Parse(id)).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InformativeNotFound));
 
-                 await _notificationRepository.DeleteOneAsync(id).ConfigureAwait(false);
+                await _notificationRepository.DeleteOneAsync(id).ConfigureAwait(false);
                 await _utilService.RegisterLogAction(LocalAction.Notificacao, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Deletou uma notrificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, id);
                 return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Deleted)));
             }
@@ -550,10 +556,9 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [AllowAnonymous]
         [HttpPost("BlockUnblock")]
         [Produces("application/json")]
-        //[ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
@@ -574,7 +579,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var entityId = await _notificationRepository.UpdateOneAsync(entityVideo).ConfigureAwait(false);
-                await _utilService.RegisterLogAction(LocalAction.Notificacao, model.Block==true? TypeAction.Block:TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Bloqueou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, entityVideo._id.ToString());
+                await _utilService.RegisterLogAction(LocalAction.Notificacao, model.Block == true ? TypeAction.Block : TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Bloqueou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, entityVideo._id.ToString());
                 return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
             }
             catch (Exception ex)

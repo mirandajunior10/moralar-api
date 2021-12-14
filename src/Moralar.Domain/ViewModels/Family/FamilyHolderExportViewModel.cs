@@ -1,6 +1,6 @@
-﻿using Moralar.Data.Enum;
-using System.ComponentModel.DataAnnotations;
-using UtilityFramework.Application.Core.ViewModels;
+﻿using System.ComponentModel.DataAnnotations;
+
+using Moralar.Data.Enum;
 
 namespace Moralar.Domain.ViewModels.Family
 {

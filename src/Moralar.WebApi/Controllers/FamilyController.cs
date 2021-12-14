@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -20,12 +26,6 @@ using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
 using OfficeOpenXml;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -201,7 +201,7 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("TimeLineLoadData")]
+        [HttpPost("TimeLine/LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
@@ -287,7 +287,7 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("Export")]
+        [HttpPost("TimeLine/Export")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
@@ -298,10 +298,10 @@ namespace Moralar.WebApi.Controllers
 
             try
             {
-                var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
+                // var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
 
-                if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
+                // if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
+                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
 
                 var builder = Builders<Data.Entities.Family>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.Family>>();
@@ -606,21 +606,12 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> TimeLineProcessOptional([FromRoute] string familyId)
         {
             try
             {
-                bool course = true;
-                bool enquete = true;
-                bool video = true;
-                bool jogos = true;
-
-                if (!await _courseFamilyRepository.CheckByAsync(x => x.FamilyId == familyId).ConfigureAwait(false))
-                    course = false;
-
-                if (!await _quizFamilyRepository.CheckByAsync(x => x.FamilyId == familyId && x.TypeStatus == TypeStatus.Respondido).ConfigureAwait(false))
-                    enquete = false;
+                bool course = await _courseFamilyRepository.CheckByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                bool enquete = await _quizFamilyRepository.CheckByAsync(x => x.FamilyId == familyId && x.TypeStatus == TypeStatus.Respondido).ConfigureAwait(false);
 
                 var objReturn = new
                 {
@@ -658,7 +649,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
             try
@@ -975,7 +965,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> DisplacementMap([FromRoute] string familyId)
         {
             try
@@ -1037,7 +1026,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> DisplacementMapAllFamilies()
         {
             try
@@ -1108,7 +1096,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetFamilyByFilter(string number, string name, string cpf)
         {
             try
@@ -1152,7 +1139,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> GetAll()
         {
             try
@@ -1657,7 +1643,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> Edit([FromBody] FamilyEditViewModel model)
         {
             try
@@ -1820,7 +1805,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [AllowAnonymous]
         public async Task<IActionResult> RegisterMember([FromBody] FamilyRegisterMember model)
         {
             //var claim = Util.SetRole(TypeProfile.Profile);

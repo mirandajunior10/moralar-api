@@ -1025,7 +1025,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.NotificationController.GetAllNotificationByFamily">
+        <member name="M:Moralar.WebApi.Controllers.NotificationController.GetAllNotificationByFamily(System.Int32,System.Boolean,System.Boolean,System.Int32)">
             <summary>
             LISTA TODOS OS NOTIFICAÇÕES POR FAMÍLIA
             </summary>
@@ -1062,10 +1062,9 @@
              <response code="500">Exception Error</response>
              <returns></returns>
         </member>
-        <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.Send(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToRead(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToReadInfo(System.String)" -->
-        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadDataNotification(UtilityFramework.Application.Core.ViewModels.DtParameters)">
+        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.Nullable{System.Int64},System.Nullable{System.Int64})">
             <summary>
             METODO DE LISTAGEM COM DATATABLE
             </summary>
@@ -1075,7 +1074,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadDataNotificationSended(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.Int64,System.Int64)">
+        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadDataNotificationSended(UtilityFramework.Application.Core.ViewModels.DtParameters,System.Nullable{System.Int64},System.Nullable{System.Int64})">
             <summary>
             METODO DE LISTAGEM COM DATATABLE DAS NOTIFICAÇÕES ENVIADAS
             </summary>
@@ -1669,7 +1668,7 @@
             
                     POST
                         {
-                         "id": "string", // required
+                         "targetId": "string", // required
                          "block": true,
                          "reason": "" //motivo de bloquear o usuário
                         }

@@ -1,15 +1,13 @@
-﻿using Moralar.Data.Enum;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
+
+using Moralar.Data.Enum;
+
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Family
 {
     public class FamilyHolderListViewModel : BaseViewModel
     {
-        public string Id { get; set; }
         public long Created { get; set; }
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Número do cadastro")]
