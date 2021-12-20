@@ -1,8 +1,10 @@
-﻿using AutoMapper;
-using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text;
+using AutoMapper;
+using Moralar.Data.Enum;
+using Newtonsoft.Json;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Family
@@ -45,5 +47,11 @@ namespace Moralar.Domain.ViewModels.Family
 
         public TypeStatusResidencial TypeStatusResidencial { get; set; }
         public string FamiliIdResidencialChosen { get; set; }
+        /// <summary>
+        /// Total de pontos de prioridade
+        /// </summary>
+        [Display(Name = "Total de pontos de prioridade")]
+        [JsonProperty(NullValueHandling = NullValueHandling.Ignore)]
+        public int? TotalPoints { get; set; }
     }
 }

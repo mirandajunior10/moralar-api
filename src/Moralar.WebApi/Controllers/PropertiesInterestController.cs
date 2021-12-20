@@ -127,10 +127,15 @@ namespace Moralar.WebApi.Controllers
                     foreach (var p in families.ToList()[i].Priorization.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
                     {
                         var priorityRate = (PriorityRate)p.GetValue(families.ToList()[i].Priorization, null);
-                        vwFamilies.Find(x => x.Id == families.ToList()[i]._id.ToString()).Priorization.Add(_mapper.Map<PriorityRateViewModel>(priorityRate));
+                        var item = vwFamilies.Find(x => x.Id == families.ToList()[i]._id.ToString());
+                        if (item != null)
+                        {
+                            item.Priorization.Add(_mapper.Map<PriorityRateViewModel>(priorityRate));
+                            item.TotalPoints = item.Priorization.Where(x => x.Value == true).Sum(x => x.Rate);
+                        }
                     }
                 }
-                return Ok(Utilities.ReturnSuccess(data: vwFamilies));
+                return Ok(Utilities.ReturnSuccess(data: vwFamilies.OrderByDescending(x => x.TotalPoints)));
             }
             catch (Exception ex)
             {

@@ -11,6 +11,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using MongoDB.Bson;
 using MongoDB.Driver;
+using Moralar.Data.Entities;
 using Moralar.Data.Enum;
 using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
@@ -374,11 +375,21 @@ namespace Moralar.WebApi.Controllers
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd.GetValueOrDefault()));
 
                 var condition = builder.And(conditions);
-                var entity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
-                if (entity.Count() == 0)
+                var listEntity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
+                if (listEntity.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ResidencialPropertyViewModel>>(entity)));
+                var listInterest = await _propertiesInterestRepository.FindIn(nameof(PropertiesInterest.ResidencialPropertyId), listEntity.Select(x => x._id.ToString()).ToList());
+                var response = _mapper.Map<List<ResidencialProperty>, List<ResidencialPropertyViewModel>>(listEntity, opt => opt.AfterMap((src, dest) =>
+                {
+                    for (int i = 0; i < src.Count(); i++)
+                    {
+                        dest[i].InterestedFamilies = listInterest.LongCount(x => x.ResidencialPropertyId == dest[i].Id);
+                    }
+
+                }));
+
+                return Ok(Utilities.ReturnSuccess(data: response));
             }
             catch (Exception ex)
             {
@@ -521,13 +532,14 @@ namespace Moralar.WebApi.Controllers
                 entityResidencial.TypeStatusResidencialProperty = TypeStatusResidencial.Vendido;
                 await _residencialPropertyRepository.UpdateAsync(entityResidencial).ConfigureAwait(false);
 
-                var scheduleEntity = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == model.FamiliIdResidencialChosen).ConfigureAwait(false); ;
-                if (scheduleEntity == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
-                scheduleEntity.Date = Utilities.ToTimeStamp(DateTime.Now);
-                scheduleEntity.TypeSubject = TypeSubject.Mudanca;
-                scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
-                await _scheduleRepository.UpdateAsync(scheduleEntity).ConfigureAwait(false);
+                // var scheduleEntity = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == model.FamiliIdResidencialChosen).ConfigureAwait(false); ;
+                // if (scheduleEntity == null)
+                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+
+                // scheduleEntity.Date = DateTimeOffset.Now.ToUnixTimeSeconds();
+                // scheduleEntity.TypeSubject = TypeSubject.Mudanca;
+                // scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
+                // await _scheduleRepository.UpdateAsync(scheduleEntity).ConfigureAwait(false);
 
 
                 //var scheduleHistoryList = await _scheduleHistoryRepository.FindByAsync(x => x.TypeSubject == scheduleEntity.TypeSubject && x.FamilyId == model.FamilyId).ConfigureAwait(false) as List<ScheduleHistory>;

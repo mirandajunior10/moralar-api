@@ -517,6 +517,7 @@ namespace Moralar.WebApi.Controllers
         [HttpGet("GetQuizByFamily")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(QuizViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]

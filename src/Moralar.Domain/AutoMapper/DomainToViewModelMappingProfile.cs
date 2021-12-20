@@ -191,6 +191,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<Informative, InformativeListViewModel>()
               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
               .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
+              .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
               .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created))
               .ForMember(dest => dest.DatePublish, opt => opt.MapFrom(src => src.DatePublish != null ? src.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy") : null))
               ;

@@ -9,5 +9,6 @@ namespace Moralar.Domain.ViewModels.Informative
     {
         public string Created { get; set; }
         public bool Status { get; set; }
+        public bool Blocked { get; set; }
     }
 }
