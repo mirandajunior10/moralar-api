@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -570,8 +571,8 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null && x._id != null));
 
-                if (!string.IsNullOrEmpty(title))
-                    conditions.Add(builder.Where(x => x.Title.ToUpper() == title.ToUpper()));
+                if (string.IsNullOrEmpty(title) == false)
+                    conditions.Add(builder.Regex(x => x.Title, new Regex(title, RegexOptions.IgnoreCase)));
 
                 if (startDate != null)
                     conditions.Add(builder.Where(x => x.Created >= startDate));

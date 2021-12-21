@@ -1,4 +1,11 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -19,12 +26,6 @@ using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.QuizFamily;
 using Moralar.Repository.Interface;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -72,10 +73,11 @@ namespace Moralar.WebApi.Controllers
         /// <returns></returns>
         [HttpPost("LoadDataQuizAvailable")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(List<QuizFamilyListViewModel>), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> LoadDataQuizAvailable([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status)
+        public async Task<IActionResult> LoadDataQuizAvailable([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status, [FromForm] TypeQuiz? typeQuiz)
         {
 
             //
@@ -87,15 +89,22 @@ namespace Moralar.WebApi.Controllers
 
 
                 conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
-                if (!string.IsNullOrEmpty(number))
-                    conditions.Add(builder.Where(x => x.HolderNumber.ToUpper() == number.ToUpper()));
-                if (!string.IsNullOrEmpty(holderName))
-                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
-                if (!string.IsNullOrEmpty(holderCpf))
-                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
+
+                if (typeQuiz != null)
+                    conditions.Add(builder.Eq(x => x.TypeQuiz, typeQuiz));
+
+                if (string.IsNullOrEmpty(number) == false)
+                    conditions.Add(builder.Regex(x => x.HolderNumber, new BsonRegularExpression(new Regex(number, RegexOptions.IgnoreCase))));
+
+                if (string.IsNullOrEmpty(holderName) == false)
+                    conditions.Add(builder.Regex(x => x.HolderName, new BsonRegularExpression(new Regex(holderName, RegexOptions.IgnoreCase))));
+
+                if (string.IsNullOrEmpty(holderCpf) == false)
+                    conditions.Add(builder.Regex(x => x.HolderCpf, new BsonRegularExpression(new Regex(holderCpf.OnlyNumbers(), RegexOptions.IgnoreCase))));
+
 
                 if (status != null)
-                conditions.Add(builder.Where(x => x.TypeStatus == status));
+                    conditions.Add(builder.Where(x => x.TypeStatus == status));
 
 
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
@@ -113,15 +122,8 @@ namespace Moralar.WebApi.Controllers
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
                     ? (int)await _quizFamilyRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
-                var listOnlyQuiz = await _quizRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
-                var listQuizFamily = _mapper.Map<List<QuizFamilyListViewModel>>(retorno);
-                for (int i = 0; i < listQuizFamily.Count(); i++)
-                {
-                    listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId))?.Title;
-                    listQuizFamily[i].TypeQuiz = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId)).TypeQuiz;
-                }
-               
-                response.Data = listQuizFamily.Where(x => x.TypeQuiz == TypeQuiz.Quiz).ToList();
+
+                response.Data = _mapper.Map<List<QuizFamilyListViewModel>>(retorno);
                 response.Draw = model.Draw;
                 response.RecordsFiltered = response.Data.Count();   //totalrecordsFiltered;
                 response.RecordsTotal = response.Data.Count();  //totalRecords;
@@ -164,7 +166,7 @@ namespace Moralar.WebApi.Controllers
 
                 var _quizViewModel = _mapper.Map<List<QuizFamilyListViewModel>>(quizFamily);
 
-               
+
                 for (int i = 0; i < _quizViewModel.Count; i++)
                 {
                     var item = _quizViewModel[i];
@@ -243,9 +245,9 @@ namespace Moralar.WebApi.Controllers
                 var answers = await _questionAnswerRepository.FindAllAsync().ConfigureAwait(false) as List<QuestionAnswer>;
 
                 var response = new List<QuestionAnswerListViewModel>();
-                
+
                 for (int i = 0; i < question.Count; i++)
-                {                    
+                {
                     var item = question[i];
 
                     var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0);
@@ -258,8 +260,8 @@ namespace Moralar.WebApi.Controllers
                         FamilyHolderCpf = answers[i].FamilyHolderCpf,
                         Title = entityQuiz.Title,
                         Date = answers[i].Created.Value,
-                        Question = item.NameQuestion                        
-                    });                    
+                        Question = item.NameQuestion
+                    });
                 }
                 return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
             }
@@ -313,7 +315,7 @@ namespace Moralar.WebApi.Controllers
                 for (int i = 0; i < listQuizFamily.Count(); i++)
                 {
                     listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId))?.Title;
-                    
+
                 }
 
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");

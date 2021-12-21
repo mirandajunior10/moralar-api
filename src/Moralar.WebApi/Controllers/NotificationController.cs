@@ -407,7 +407,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] bool forGestor)
         {
             var response = new DtResult<NotificationViewModel>();
             try
@@ -416,6 +416,9 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Notification>>();
 
                 conditions.Add(builder.Where(x => x.Disabled == null));
+
+                if (forGestor)
+                    conditions.Add(builder.Eq(x => x.FamilyId, null));
 
                 if (startDate != null)
                     conditions.Add(builder.Gte(x => x.Created, startDate));

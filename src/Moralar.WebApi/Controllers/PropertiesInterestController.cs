@@ -39,8 +39,9 @@ namespace Moralar.WebApi.Controllers
         private readonly ISenderMailService _senderMailService;
         private readonly IUtilService _utilService;
         private readonly IProfileRepository _profileRepository;
+        private readonly INotificationRepository _notificationRepository;
 
-        public PropertiesInterestController(IMapper mapper, IFamilyRepository familyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, IUtilService utilService, ISenderMailService senderMailService, IProfileRepository profileRepository)
+        public PropertiesInterestController(IMapper mapper, IFamilyRepository familyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, IUtilService utilService, ISenderMailService senderMailService, IProfileRepository profileRepository, INotificationRepository notificationRepository)
         {
             _mapper = mapper;
             _familyRepository = familyRepository;
@@ -49,6 +50,7 @@ namespace Moralar.WebApi.Controllers
             _senderMailService = senderMailService;
             _utilService = utilService;
             _profileRepository = profileRepository;
+            _notificationRepository = notificationRepository;
         }
 
         /// <summary>
@@ -221,7 +223,7 @@ namespace Moralar.WebApi.Controllers
                     var dataBody = Util.GetTemplateVariables();
                     dataBody.Add("{{ title }}", "Interesse em Imóvel");
                     dataBody.Add("{{ message }}", $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
-                                                $"<p> Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} "
+                                                  $"<p> Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} "
                                                 );
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
@@ -237,25 +239,32 @@ namespace Moralar.WebApi.Controllers
                 var propertyChoice = await _propertiesInterestRepository.CountAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false);
                 if (propertyChoice == 3)
                 {
-
-
-                    var entityProfile = await _profileRepository.FindByAsync(x => x.TypeProfile == TypeUserProfile.Gestor || x.TypeProfile == TypeUserProfile.TTS && x.DataBlocked != null).ConfigureAwait(false);
-                    foreach (var item in entityProfile)
+                    var unused = Task.Run(async () =>
                     {
-                        var dataBody = Util.GetTemplateVariables();
-                        dataBody.Add("{{ title }}", "Processo de escolha de imóvel finalizado");
-                        dataBody.Add("{{ message }}", $"<p>Caro(a) {item.Name.GetFirstName()}</p>" +
-                                                    $"<p> A família {familyEntity.Holder.Name} completou o processo de escolha de imóvel."
-                                                    );
-
-                        var body = _senderMailService.GerateBody("custom", dataBody);
-
-                        var unused = Task.Run(async () =>
+                        var entityProfile = await _profileRepository.FindByAsync(x => x.TypeProfile == TypeUserProfile.Gestor || x.TypeProfile == TypeUserProfile.TTS && x.DataBlocked != null).ConfigureAwait(false);
+                        foreach (var item in entityProfile)
                         {
+                            var dataBody = Util.GetTemplateVariables();
+                            dataBody.Add("{{ title }}", "Processo de escolha de imóvel finalizado");
+                            dataBody.Add("{{ message }}", $"<p>Caro(a) {item.Name.GetFirstName()}</p>" +
+                                                        $"<p> A família {familyEntity.Holder.Name} completou o processo de escolha de imóvel."
+                                                        );
+
+                            var body = _senderMailService.GerateBody("custom", dataBody);
+
+
                             await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.Email, body, "Registro de interesse em imóvel").ConfigureAwait(false);
+
+
+                        }
+
+                        await _notificationRepository.CreateAsync(new Notification()
+                        {
+                            Title = "Processo de escolha de imóvel finalizado",
+                            Description = $"O processo de interesse no imóvel {residencialEntity.Code} foi concluído",
                         });
 
-                    }
+                    });
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));

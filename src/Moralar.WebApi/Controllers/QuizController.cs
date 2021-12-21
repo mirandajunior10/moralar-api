@@ -401,7 +401,9 @@ namespace Moralar.WebApi.Controllers
                             HolderName = item.Holder.Name,
                             HolderCpf = item.Holder.Cpf,
                             HolderNumber = item.Holder.Number,
-                            TypeStatus = TypeStatus.NaoRespondido
+                            TypeStatus = TypeStatus.NaoRespondido,
+                            TypeQuiz = quizEntity.TypeQuiz,
+                            Title = quizEntity.Title
                         });
                     }
                 }
@@ -453,9 +455,11 @@ namespace Moralar.WebApi.Controllers
 
             try
             {
-                var existQuiz = await _quizRepository.CheckByAsync(x => x._id == ObjectId.Parse(model.QuizId)).ConfigureAwait(false);
-                if (existQuiz == false)
+                var quizEntity = await _quizRepository.FindByIdAsync(model.QuizId).ConfigureAwait(false);
+                if (quizEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
+
+
 
                 var entityFamily = new List<Family>();
                 if (model.AllFamily == true)
@@ -477,8 +481,11 @@ namespace Moralar.WebApi.Controllers
                         HolderName = item.Holder.Name,
                         HolderCpf = item.Holder.Cpf,
                         HolderNumber = item.Holder.Number,
-                        TypeStatus = TypeStatus.NaoRespondido
+                        TypeStatus = TypeStatus.NaoRespondido,
+                        TypeQuiz = quizEntity.TypeQuiz,
+                        Title = quizEntity.Title
                     };
+
                     if (await _quizFamilyRepository.CheckByAsync(x => x.QuizId == model.QuizId && x.FamilyId == item._id.ToString()) == false)
                         await _quizFamilyRepository.CreateAsync(entityQuizFamily).ConfigureAwait(false);
 
@@ -486,8 +493,7 @@ namespace Moralar.WebApi.Controllers
                     await _notificationRepository.CreateAsync(new Notification
                     {
                         Title = "Novo questionário disponibilizado",
-                        Description = $"Olá { item.Holder.Name  }," +
-                                 $"Precisamos saber sua opinião sobre sua casa nova!",
+                        Description = $"Olá { item.Holder.Name  }, Precisamos saber sua opinião sobre sua casa nova!",
                         FamilyId = item._id.ToString(),
                     });
 

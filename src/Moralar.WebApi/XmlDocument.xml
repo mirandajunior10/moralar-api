@@ -1064,7 +1064,7 @@
         </member>
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToRead(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToReadInfo(System.String)" -->
-        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.Nullable{System.Int64},System.Nullable{System.Int64})">
+        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.Nullable{System.Int64},System.Nullable{System.Int64},System.Boolean)">
             <summary>
             METODO DE LISTAGEM COM DATATABLE
             </summary>
@@ -1502,7 +1502,7 @@
              <response code="500">Exception Error</response>
              <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuestionAnswerController.GetResponses(System.String)">
+        <member name="M:Moralar.WebApi.Controllers.QuestionAnswerController.GetResponses(System.String,System.String)">
             <summary>
             BUSCA AS RESPOSTAS
             </summary>
@@ -1799,7 +1799,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.LoadDataQuizAvailable(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus})">
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.LoadDataQuizAvailable(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus},System.Nullable{Moralar.Data.Enum.TypeQuiz})">
             <summary>
             LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
             </summary>

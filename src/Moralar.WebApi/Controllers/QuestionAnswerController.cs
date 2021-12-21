@@ -1,4 +1,10 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -18,12 +24,6 @@ using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -77,19 +77,19 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> GetResponses([FromQuery] string quizId)
+        public async Task<IActionResult> GetResponses([FromQuery] string quizId, [FromQuery] string familyId)
         {
             try
             {
-                var userId = Request.GetUserId();
+                var userId = familyId ?? Request.GetUserId();
 
                 List<QuestionAnswerListViewModel> listAnswers = new List<QuestionAnswerListViewModel>();
-               
+
                 var quiz = await _quizRepository.FindByIdAsync(quizId).ConfigureAwait(false);
 
                 var builderAnswer = Builders<QuestionAnswer>.Filter;
                 var conditionsAnswer = new List<FilterDefinition<QuestionAnswer>>();
-               
+
                 conditionsAnswer.Add(builderAnswer.Where(x => x.QuizId == quizId && x.FamilyId == userId));
 
                 var answers = await _questionAnswerRepository.GetCollectionAsync().FindSync(builderAnswer.And(conditionsAnswer)).ToListAsync();
@@ -107,24 +107,24 @@ namespace Moralar.WebApi.Controllers
 
 
                 //var questionsId = answers.SelectMany(x => x.Questions).Select(x => x.QuestionId).ToList();
-               //conditionsQuestionDescrip.Add(builderQuestionDescrip.In(x => x.QuestionId, questionsId));
-                
+                //conditionsQuestionDescrip.Add(builderQuestionDescrip.In(x => x.QuestionId, questionsId));
+
 
                 //var descriptionsId = answers.SelectMany(x => x.Questions).SelectMany(x => x.QuestionDescriptionId).Select(ObjectId.Parse).ToList();
-               // conditionsAnswer.Add(builderAnswer.In(x => x._id, descriptionsId));
+                // conditionsAnswer.Add(builderAnswer.In(x => x._id, descriptionsId));
 
-              
+
                 //var questionDescription = await _questionDescriptionRepository.GetCollectionAsync().FindSync(builderQuestionDescrip.And(conditionsQuestionDescrip)).ToListAsync();
 
                 var response = new List<QuestionAnswerListViewModel>();
 
                 for (int i = 0; i < question.Count; i++)
                 {
-                    var item = question[i];                   
+                    var item = question[i];
 
                     var itemAnswers = answers.Where(x => x.Questions.Count(c => c.QuestionId == item._id.ToString()) > 0).ToList();
 
-                    
+
                     if (itemAnswers.Count() > 0)
                     {
                         response.Add(new QuestionAnswerListViewModel()
@@ -134,7 +134,7 @@ namespace Moralar.WebApi.Controllers
                             Question = item.NameQuestion,
                             QuestionId = item._id.ToString(),
                             QuizId = item.QuizId,
-                            Answers = itemAnswers.Where(x => x.Questions.Count(y => y.QuestionId == item._id.ToString())>0).SelectMany(x => x.Questions).Where(y => y.QuestionId == item._id.ToString()).Select(x => x.AnswerDescription).Distinct().ToList(),
+                            Answers = itemAnswers.Where(x => x.Questions.Count(y => y.QuestionId == item._id.ToString()) > 0).SelectMany(x => x.Questions).Where(y => y.QuestionId == item._id.ToString()).Select(x => x.AnswerDescription).Distinct().ToList(),
                             TypeResponse = item.TypeResponse,
                             FamilyNumber = itemAnswers[0].FamilyNumber,
                             FamilyHolderName = itemAnswers[0].FamilyHolderName,
@@ -142,12 +142,12 @@ namespace Moralar.WebApi.Controllers
                         });
                     }
                 }
-               
+
                 return Ok(Utilities.ReturnSuccess(data: response));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ReturnErro(responseList:true));
+                return BadRequest(ex.ReturnErro(responseList: true));
             }
         }
 
@@ -176,7 +176,7 @@ namespace Moralar.WebApi.Controllers
 
                 var builderAnswer = Builders<QuestionAnswer>.Filter;
                 var conditionsAnswer = new List<FilterDefinition<QuestionAnswer>>();
-                
+
                 conditionsAnswer.Add(builderAnswer.Where(x => x.QuizId == quizId && x.FamilyId == familyId));
 
                 var answers = await _questionAnswerRepository.GetCollectionAsync().FindSync(builderAnswer.And(conditionsAnswer)).ToListAsync();
@@ -187,7 +187,7 @@ namespace Moralar.WebApi.Controllers
 
                 conditionsQuestion.Add(builderQuestion.Eq(x => x.QuizId, quizId));
 
-                var question = await _questionRepository.GetCollectionAsync().FindSync(builderQuestion.And(conditionsQuestion)).ToListAsync();                
+                var question = await _questionRepository.GetCollectionAsync().FindSync(builderQuestion.And(conditionsQuestion)).ToListAsync();
 
                 var response = new List<QuestionAnswerListViewModel>();
 
@@ -212,7 +212,7 @@ namespace Moralar.WebApi.Controllers
                             FamilyHolderName = itemAnswers[0].FamilyHolderName,
                             FamilyHolderCpf = itemAnswers[0].FamilyHolderCpf
                         });
-                    }                    
+                    }
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: response));
@@ -307,6 +307,6 @@ namespace Moralar.WebApi.Controllers
                 await _utilService.RegisterLogAction(LocalAction.Question, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Não foi possível cadastrar/atualizar novo questionário", "", "", "", "", ex);
                 return BadRequest(ex.ReturnErro());
             }
-        }        
+        }
     }
 }
