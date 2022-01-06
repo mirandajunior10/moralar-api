@@ -1,8 +1,8 @@
-﻿using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Moralar.Data.Enum;
 
 namespace Moralar.Domain.ViewModels.ResidencialProperty
 {
@@ -40,6 +40,8 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
         //[Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "É Adaptada ou permite adaptação para PCD?")]
         public bool? HasAdaptedToPcd { get; set; }
+        public double? Lat { get; set; }
+        public double? Lng { get; set; }
 
     }
 }

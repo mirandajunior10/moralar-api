@@ -1,4 +1,5 @@
-﻿using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
+﻿using System;
+using OfficeOpenXml.FormulaParsing.Excel.Functions.Text;
 
 namespace Moralar.Domain
 {
@@ -93,10 +94,10 @@ namespace Moralar.Domain
         public const string DeviceInUse = "Já existe um login em outro dispositivo";
         public const string InvalidDeviceID = "Você iniciou uma nova sessão em outro device";
         public const string OldVersion = "App versão antiga";
-        public static string Success = "Sucesso";
+        public const string Success = "Sucesso";
         public const string FileNotFound = "Nenhum arquivo encontrado";
         public const string FileNotAllowed = "Arquivo não permitido";
-
-        public static string AnyQuiz { get; set; }
+        public const string AnyQuiz = "Nenhum questionário encontrado";
+        public const string ZeroItems = "Nenhum item importado";
     }
 }

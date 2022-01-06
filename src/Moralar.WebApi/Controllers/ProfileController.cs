@@ -6,6 +6,7 @@ using System.Linq;
 using System.Net;
 using System.Reflection;
 using System.Security.Claims;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper;
@@ -13,7 +14,9 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MimeTypes.Core;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
@@ -98,6 +101,46 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
+        ///  METODO PARA BAIXAR ARQUIVO DE EXEMPLO PARA IMPORTAÇÃO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ExampleFile")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ProfileImportViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> ExampleFile()
+        {
+            try
+            {
+                var fileName = "example.xlsx";
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = new List<ProfileImportViewModel>();
+
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
         /// IMPORTAÇÃO DO GESTOR
         /// </summary>
         /// <response code="200">Returns success</response>
@@ -105,70 +148,89 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpGet("ImportGestor/{file}")]
+        [HttpPost("Gestor/FileImport")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ProfileImportViewModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> ImportGestor([FromRoute] string file)
+        [OnlyAdministrator]
+        public async Task<IActionResult> ImportGestor([FromForm] IFormFile file)
         {
             try
             {
-                var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
 
-                var exists = Directory.Exists(folder);
+                if (file == null || file.Length <= 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotFound));
 
-                if (!exists)
-                    Directory.CreateDirectory(folder);
+                var extension = MimeTypeMap.GetExtension(file.ContentType).ToLower();
 
-                var fi = new System.IO.FileInfo(folder + "\\" + file);
-                using (var package = new ExcelPackage(fi))
+                if (Util.AcceptedFiles.Count(x => x == extension) == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));
+
+                var listEntityViewModel = await Util.ReadAndValidationExcel<ProfileImportViewModel>(file);
+
+                if (listEntityViewModel.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ZeroItems));
+
+                var builder = Builders<Data.Entities.Profile>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Profile>>();
+
+                conditions.Add(builder.In(x => x.Cpf, listEntityViewModel.Select(x => x.Cpf.OnlyNumbers()).ToList()));
+
+                var exists = await _profileRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
+
+                if (exists.Count() > 0)
                 {
-                    ExcelWorksheet sheet = package.Workbook.Worksheets[1];
-
-                    for (int linha = 2; linha < 300; linha++)
-                    {
-                        if (package.Workbook.Worksheets[1].Cells[linha, 1].Value != null)
-                            break;
-                        Data.Entities.Profile profile = new Data.Entities.Profile();
-                        profile.Name = package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString();
-                        profile.JobPost = package.Workbook.Worksheets[1].Cells[linha, 2].Value.ToString();
-                        profile.Cpf = package.Workbook.Worksheets[1].Cells[linha, 3].Value.ToString();
-                        profile.Email = package.Workbook.Worksheets[1].Cells[linha, 4].Value.ToString();
-                        profile.Phone = package.Workbook.Worksheets[1].Cells[linha, 5].Value.ToString();
-                        profile.TypeProfile = TypeUserProfile.Gestor;
-                        profile.Cpf = profile.Cpf.OnlyNumbers();
-
-                        if (await _profileRepository.CheckByAsync(x => x.Cpf == profile.Cpf).ConfigureAwait(false))
-                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
-                        if (!profile.Cpf.ValidCpf())
-                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInvalid));
-
-                        profile.Password = Utilities.RandomInt(8);
-
-                        var entityId = await _profileRepository.CreateAsync(profile).ConfigureAwait(false);
-
-                        var dataBody = Util.GetTemplateVariables();
-                        dataBody.Add("{{ title }}", "Lembrete de senha");
-                        dataBody.Add("{{ message }}", $"<p>Caro(a) {profile.Name.GetFirstName()}</p>" +
-                                                    $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
-                                                    //$"<p><b>Login</b> : {profile.Login}</p>" +
-                                                    $"<p><b>Senha</b> :{profile.Password}</p>"
-                                                    );
-
-                        var body = _senderMailService.GerateBody("custom", dataBody);
-
-                        var unused = Task.Run(async () =>
-                        {
-                            await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, profile.Email, body, "Lembrete de senha").ConfigureAwait(false);
-                        });
-
-                    }
+                    var messageError = $"O(s) CPF's ({{cpfs}}) estão em uso na plataforma".Replace("{{cpfs}}", string.Join(",", exists.Select(x => x.Name).ToList()).TrimEnd(','));
+                    return BadRequest(Utilities.ReturnErro(messageError));
                 }
-                //package.Save();
 
-                return Ok(Utilities.ReturnSuccess());
+                var listEntity = _mapper.Map<List<Data.Entities.Profile>>(listEntityViewModel);
+
+
+                for (int i = 0; i < listEntity.Count(); i++)
+                {
+                    listEntity[i].TypeProfile = TypeUserProfile.Gestor;
+                    listEntity[i].Password = Utilities.RandomString(8);
+                }
+                const int limit = 250;
+                var registred = 0;
+                var index = 0;
+
+                while (listEntity.Count() > registred)
+                {
+                    var itensToRegister = listEntity.Skip(limit * index).Take(limit).ToList();
+
+                    if (itensToRegister.Count() > 0)
+                        await _profileRepository.CreateAsync(itensToRegister);
+                    registred += limit;
+                    index++;
+                }
+
+                for (int i = 0; i < listEntity.Count(); i++)
+                {
+                    const string title = "Lembrete de senha";
+                    var message = new StringBuilder();
+                    message.AppendLine($"<p>Caro(a) {listEntity[i].Name.GetFirstName()}</p>");
+                    message.AppendLine($"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>");
+                    message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Email}<br/>");
+                    message.AppendLine($"<strong>Senha</strong> :{listEntity[i].Password}</p>");
+
+                    var dataBody = Util.GetTemplateVariables();
+                    dataBody.Add("{{ title }}",title);
+                    dataBody.Add("{{ message }}", message.ToString());
+
+                    var body = _senderMailService.GerateBody("custom", dataBody);
+
+                    var _ = Task.Run(async () =>
+                    {
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, listEntity[i].Email, body, title).ConfigureAwait(false);
+                    });
+                }
+
+                return Ok(Utilities.ReturnSuccess($"Importação realizada com sucesso, total de {listEntity.Count()} gestor(es)"));
             }
             catch (Exception ex)
             {
@@ -184,75 +246,87 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpGet("ImportTTS/{file}")]
+        [HttpPost("TTS/FileImport")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ProfileImportViewModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> ImportTTS([FromRoute] string file)
+        public async Task<IActionResult> ImportTTS([FromForm] IFormFile file)
         {
             try
             {
-                var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
+                if (file == null || file.Length <= 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotFound));
 
-                var exists = Directory.Exists(folder);
+                var extension = MimeTypeMap.GetExtension(file.ContentType).ToLower();
 
-                if (!exists)
-                    Directory.CreateDirectory(folder);
+                if (Util.AcceptedFiles.Count(x => x == extension) == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));
 
-                var fi = new System.IO.FileInfo(folder + "\\" + file);
-                var listProfilies = new List<Data.Entities.Profile>();
-                using (var package = new ExcelPackage(fi))
+                var listEntityViewModel = await Util.ReadAndValidationExcel<ProfileImportViewModel>(file);
+
+                if (listEntityViewModel.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ZeroItems));
+
+                var builder = Builders<Data.Entities.Profile>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Profile>>();
+
+                conditions.Add(builder.In(x => x.Cpf, listEntityViewModel.Select(x => x.Cpf.OnlyNumbers()).ToList()));
+
+                var exists = await _profileRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
+
+                if (exists.Count() > 0)
                 {
-                    ExcelWorksheet sheet = package.Workbook.Worksheets[1];
-
-                    for (int linha = 2; linha < 300; linha++)
-                    {
-                        if (package.Workbook.Worksheets[1].Cells[linha, 1].Value != null)
-                            break;
-                        Data.Entities.Profile profile = new Data.Entities.Profile();
-                        profile.Name = package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString();
-                        profile.JobPost = package.Workbook.Worksheets[1].Cells[linha, 2].Value.ToString();
-                        profile.Cpf = package.Workbook.Worksheets[1].Cells[linha, 3].Value.ToString();
-                        profile.Email = package.Workbook.Worksheets[1].Cells[linha, 4].Value.ToString();
-                        profile.Phone = package.Workbook.Worksheets[1].Cells[linha, 5].Value.ToString();
-                        profile.TypeProfile = TypeUserProfile.TTS;
-                        profile.Cpf = profile.Cpf.OnlyNumbers();
-
-                        if (await _profileRepository.CheckByAsync(x => x.Cpf == profile.Cpf).ConfigureAwait(false))
-                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
-                        if (!profile.Cpf.ValidCpf())
-                            return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInvalid));
-
-                        profile.Password = Utilities.RandomInt(8);
-                        listProfilies.Add(profile);
-                    }
+                    var messageError = $"O(s) CPF's ({{cpfs}}) estão em uso na plataforma".Replace("{{cpfs}}", string.Join(",", exists.Select(x => x.Name).ToList()).TrimEnd(','));
+                    return BadRequest(Utilities.ReturnErro(messageError));
                 }
 
-                await _profileRepository.CreateAsync(listProfilies).ConfigureAwait(false);
-                foreach (var item in listProfilies)
+                var listEntity = _mapper.Map<List<Data.Entities.Profile>>(listEntityViewModel);
+
+
+                for (int i = 0; i < listEntity.Count(); i++)
                 {
+                    listEntity[i].TypeProfile = TypeUserProfile.TTS;
+                    listEntity[i].Password = Utilities.RandomString(8);
+                }
+                const int limit = 250;
+                var registred = 0;
+                var index = 0;
+
+                while (listEntity.Count() > registred)
+                {
+                    var itensToRegister = listEntity.Skip(limit * index).Take(limit).ToList();
+
+                    if (itensToRegister.Count() > 0)
+                        await _profileRepository.CreateAsync(itensToRegister);
+                    registred += limit;
+                    index++;
+                }
+
+                for (int i = 0; i < listEntity.Count(); i++)
+                {
+                    const string title = "Lembrete de senha";
+                    var message = new StringBuilder();
+                    message.AppendLine($"<p>Caro(a) {listEntity[i].Name.GetFirstName()}</p>");
+                    message.AppendLine($"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>");
+                    message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Email}<br/>");
+                    message.AppendLine($"<strong>Senha</strong> :{listEntity[i].Password}</p>");
+
                     var dataBody = Util.GetTemplateVariables();
-                    dataBody.Add("{{ title }}", "Lembrete de senha");
-                    dataBody.Add("{{ message }}", $"<p>Caro(a) {item.Name.GetFirstName()}</p>" +
-                                                $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
-                                                //$"<p><b>Login</b> : {profile.Login}</p>" +
-                                                $"<p><b>Senha</b> :{item.Password}</p>"
-                                                );
+                    dataBody.Add("{{ title }}", title);
+                    dataBody.Add("{{ message }}", message.ToString());
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
 
-                    var unused = Task.Run(async () =>
+                    var _ = Task.Run(async () =>
                     {
-                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.Email, body, "Lembrete de senha").ConfigureAwait(false);
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, listEntity[i].Email, body, title).ConfigureAwait(false);
                     });
                 }
 
-
-                //package.Save();
-
-                return Ok(Utilities.ReturnSuccess());
+                return Ok(Utilities.ReturnSuccess($"Importação realizada com sucesso, total de {listEntity.Count()} Profissional TTS"));
             }
             catch (Exception ex)
             {
@@ -747,7 +821,8 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("LoadData")]
+        [HttpPost("Gestor/LoadData")]
+        [HttpPost("TTS/LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(typeof(ProfileViewModel), 201)]
         [ProducesResponseType(400)]

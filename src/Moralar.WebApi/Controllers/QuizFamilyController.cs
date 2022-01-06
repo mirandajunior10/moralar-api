@@ -71,7 +71,7 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("LoadDataQuizAvailable")]
+        [HttpPost("Available/LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(typeof(List<QuizFamilyListViewModel>), 200)]
         [ProducesResponseType(400)]
@@ -279,7 +279,7 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("Export")]
+        [HttpPost("Available/Export")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]

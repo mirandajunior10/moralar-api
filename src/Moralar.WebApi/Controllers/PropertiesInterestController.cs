@@ -40,8 +40,9 @@ namespace Moralar.WebApi.Controllers
         private readonly IUtilService _utilService;
         private readonly IProfileRepository _profileRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly ISenderNotificationService _senderNotificationService;
 
-        public PropertiesInterestController(IMapper mapper, IFamilyRepository familyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, IUtilService utilService, ISenderMailService senderMailService, IProfileRepository profileRepository, INotificationRepository notificationRepository)
+        public PropertiesInterestController(IMapper mapper, IFamilyRepository familyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, IUtilService utilService, ISenderMailService senderMailService, IProfileRepository profileRepository, INotificationRepository notificationRepository, ISenderNotificationService senderNotificationService)
         {
             _mapper = mapper;
             _familyRepository = familyRepository;
@@ -51,6 +52,7 @@ namespace Moralar.WebApi.Controllers
             _utilService = utilService;
             _profileRepository = profileRepository;
             _notificationRepository = notificationRepository;
+            _senderNotificationService = senderNotificationService;
         }
 
         /// <summary>
@@ -72,21 +74,28 @@ namespace Moralar.WebApi.Controllers
             try
             {
 
-                var Entity = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
-                if (Entity.Count() == 0)
-                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
+                var listPropertiesInterestEntity = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                if (listPropertiesInterestEntity.Count() == 0)
+                    return Ok(Utilities.ReturnSuccess(data: new List<object>()));
 
-                var residencialProperties = await _residencialPropertyRepository.FindIn("_id", Entity.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
-                if (residencialProperties.Count() == 0)
-                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
+                var listEntity = await _residencialPropertyRepository.FindIn("_id", listPropertiesInterestEntity.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                if (listEntity.Count() == 0)
+                    return Ok(Utilities.ReturnSuccess(data: new List<object>()));
 
-                var vieoViewModel = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialProperties);
+                var listInterest = await _propertiesInterestRepository.FindIn(nameof(PropertiesInterest.ResidencialPropertyId), listEntity.Select(x => x._id.ToString()).ToList());
+                var response = _mapper.Map<List<ResidencialProperty>, List<ResidencialPropertyViewModel>>(listEntity, opt => opt.AfterMap((src, dest) =>
+                {
+                    for (int i = 0; i < src.Count(); i++)
+                    {
+                        dest[i].InterestedFamilies = listInterest.LongCount(x => x.ResidencialPropertyId == dest[i].Id);
+                    }
+                }));
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: response));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ReturnErro(nameof(DefaultMessages.MessageException)));
+                return BadRequest(ex.ReturnErro(DefaultMessages.MessageException, responseList: true));
             }
         }
         /// <summary>
@@ -137,7 +146,7 @@ namespace Moralar.WebApi.Controllers
                         }
                     }
                 }
-                return Ok(Utilities.ReturnSuccess(data: vwFamilies.OrderByDescending(x => x.TotalPoints)));
+                return Ok(Utilities.ReturnSuccess(data: vwFamilies.OrderBy(x => x.TotalPoints)));
             }
             catch (Exception ex)
             {
@@ -181,7 +190,6 @@ namespace Moralar.WebApi.Controllers
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-
                 if (await _propertiesInterestRepository.CheckByAsync(x => x.FamilyId == model.FamilyId && x.ResidencialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyInUse));
 
@@ -193,15 +201,13 @@ namespace Moralar.WebApi.Controllers
                 if (residencialEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-
-
                 /* Regra de escolha de imóvel tem que ser de no máximo 03  */
                 var propertyChoiceFamily = await _propertiesInterestRepository.CountAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false);
                 if (propertyChoiceFamily >= 3)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ChoiceLimitExceeded));
 
-
                 var entityProperty = _mapper.Map<PropertiesInterest>(model);
+
                 entityProperty.HolderName = familyEntity.Holder.Name;
                 entityProperty.HolderEmail = familyEntity.Holder.Email;
                 entityProperty.HolderCpf = familyEntity.Holder.Cpf;
@@ -215,15 +221,17 @@ namespace Moralar.WebApi.Controllers
                 if (entityResidencial == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
+                var title = "Interesse em Imóvel";
+                var content = $"Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress}";
 
-                var sendInformation = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false);
+                var sendInformation = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == model.ResidencialPropertyId && x.FamilyId != familyEntity._id.ToString()).ConfigureAwait(false);
                 foreach (var item in sendInformation)
                 {
 
                     var dataBody = Util.GetTemplateVariables();
-                    dataBody.Add("{{ title }}", "Interesse em Imóvel");
+                    dataBody.Add("{{ title }}", title);
                     dataBody.Add("{{ message }}", $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
-                                                  $"<p> Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} "
+                                                  $"<p>Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} "
                                                 );
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
@@ -234,6 +242,28 @@ namespace Moralar.WebApi.Controllers
                     });
                 }
 
+                var families = await _familyRepository.FindIn("_id", sendInformation.Select(x => ObjectId.Parse(x.FamilyId)).ToList()) as List<Family>;
+
+                var listNotification = new List<Notification>();
+                for (int i = 0; i < families.Count(); i++)
+                {
+                    var familyItem = families[i];
+
+                    listNotification.Add(new Notification()
+                    {
+                        For = ForType.Family,
+                        FamilyId = familyItem._id.ToString(),
+                        Title = title,
+                        Description = content
+                    });
+                }
+
+                await _notificationRepository.CreateAsync(listNotification);
+
+                dynamic payloadPush = Util.GetPayloadPush();
+                dynamic settingPush = Util.GetSettingsPush();
+
+                await _senderNotificationService.SendPushAsync(title, content, families.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
 
                 /* Informa os gestores sobre o término do processo de escolha de imóveis  */
                 var propertyChoice = await _propertiesInterestRepository.CountAsync(x => x.FamilyId == model.FamilyId).ConfigureAwait(false);
@@ -247,17 +277,13 @@ namespace Moralar.WebApi.Controllers
                             var dataBody = Util.GetTemplateVariables();
                             dataBody.Add("{{ title }}", "Processo de escolha de imóvel finalizado");
                             dataBody.Add("{{ message }}", $"<p>Caro(a) {item.Name.GetFirstName()}</p>" +
-                                                        $"<p> A família {familyEntity.Holder.Name} completou o processo de escolha de imóvel."
-                                                        );
+                                                          $"<p> A família {familyEntity.Holder.Name} completou o processo de escolha de imóvel.");
 
                             var body = _senderMailService.GerateBody("custom", dataBody);
 
-
                             await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.Email, body, "Registro de interesse em imóvel").ConfigureAwait(false);
 
-
                         }
-
                         await _notificationRepository.CreateAsync(new Notification()
                         {
                             Title = "Processo de escolha de imóvel finalizado",

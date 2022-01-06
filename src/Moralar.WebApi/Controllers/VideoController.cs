@@ -113,9 +113,9 @@ namespace Moralar.WebApi.Controllers
                 if (videoEntity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.VideoNotFound)));
 
-                var vieoViewModel = _mapper.Map<List<VideoViewModel>>(videoEntity);
+                var responseViewModel = _mapper.Map<List<VideoViewModel>>(videoEntity);
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: responseViewModel));
             }
             catch (Exception ex)
             {

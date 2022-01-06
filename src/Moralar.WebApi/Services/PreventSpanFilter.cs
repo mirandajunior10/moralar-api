@@ -16,7 +16,7 @@ namespace Moralar.WebApi.Services
     {
         public int DelayRequest { get; set; } = 1;
         public string ErrorMessage { get; set; } = null;
-        private List<string> ignoreEndPoints = new List<string>() { "trigger/changestatusgatway", "loaddata","searchtimeline" };
+        private List<string> ignoreEndPoints = new List<string>() { "trigger/changestatusgatway", "loaddata","searchtimeline","registerunregisterdeviceid" };
 
 
 

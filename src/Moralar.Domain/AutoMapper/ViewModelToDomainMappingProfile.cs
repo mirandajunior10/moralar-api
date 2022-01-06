@@ -100,9 +100,8 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<QuizViewModel, Quiz>();
             CreateMap<QuizUpdateViewModel, Quiz>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
-
+            CreateMap<ProfileImportViewModel, Profile>();
             CreateMap<QuestionAnswerAuxViewModel, QuestionAnswerAux>();
-
             CreateMap<QuestionAnswerRegisterViewModel, QuestionAnswer>();
 
 

@@ -84,9 +84,9 @@ namespace Moralar.WebApi.Controllers
                 if (Entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-                var vieoViewModel = _mapper.Map<InformativeViewModel>(Entity);
+                var responseViewModel = _mapper.Map<InformativeViewModel>(Entity);
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: responseViewModel));
             }
             catch (Exception ex)
             {
@@ -147,9 +147,9 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-                var vieoViewModel = _mapper.Map<List<InformativeViewModel>>(entity);
+                var responseViewModel = _mapper.Map<List<InformativeViewModel>>(entity);
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: responseViewModel));
             }
             catch (Exception ex)
             {
@@ -184,19 +184,19 @@ namespace Moralar.WebApi.Controllers
                 var entityInformative = await _informativeRepository.FindIn("_id", entity.Select(x => ObjectId.Parse(x.InformativeId)).ToList()) as List<Informative>;
 
 
-                var vieoViewModel = _mapper.Map<List<InformativeSendedViewModel>>(entity);
+                var responseViewModel = _mapper.Map<List<InformativeSendedViewModel>>(entity);
 
-                for (int i = 0; i < vieoViewModel.Count(); i++)
+                for (int i = 0; i < responseViewModel.Count(); i++)
                 {
-                    var informativeSended = entityInformative.Find(x => x._id.ToString() == vieoViewModel[i].InformativeId);
+                    var informativeSended = entityInformative.Find(x => x._id.ToString() == responseViewModel[i].InformativeId);
 
                     if (informativeSended != null)
-                        vieoViewModel[i].Description = informativeSended.Description;
-                    vieoViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
-                    vieoViewModel[i].Image = informativeSended.Image;
+                        responseViewModel[i].Description = informativeSended.Description;
+                    responseViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
+                    responseViewModel[i].Image = informativeSended.Image;
                 }
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: responseViewModel));
             }
             catch (Exception ex)
             {

@@ -1,9 +1,9 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using Moralar.Data.Entities.Auxiliar;
-using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
+using Moralar.Data.Entities.Auxiliar;
+using Moralar.Data.Enum;
 using UtilityFramework.Infra.Core.MongoDb.Data.Modelos;
 
 namespace Moralar.Data.Entities
@@ -16,10 +16,11 @@ namespace Moralar.Data.Entities
         public string Project { get; set; }
         public string Reason { get; set; }
         public ResidencialPropertyAdress ResidencialPropertyAdress { get; set; }
-       
+
         public ResidencialPropertyFeatures ResidencialPropertyFeatures { get; set; }
         public TypeStatusResidencial TypeStatusResidencialProperty { get; set; }
         public string FamiliIdResidencialChosen { get; set; }
+        public List<double> Position { get; set; } = new List<double>();
         public override string CollectionName => nameof(ResidencialProperty);
     }
 }

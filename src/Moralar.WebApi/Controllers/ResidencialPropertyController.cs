@@ -290,12 +290,10 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                //[FromRoute] long startDate, [FromQuery] bool onlyConfigured, [FromQuery] string cityId
-
-
                 var userId = Request.GetUserId();
                 if (!await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel).ConfigureAwait(false))
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty));
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty, responseList: true));
+
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
@@ -309,11 +307,9 @@ namespace Moralar.WebApi.Controllers
 
 
                 var condition = builder.And(conditions);
-                var entity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
-                if (entity == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
+                var listResidencialEntity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ResidencialPropertyViewModel>>(entity)));
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ResidencialPropertyViewModel>>(listResidencialEntity)));
             }
             catch (Exception ex)
             {
@@ -338,12 +334,23 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+                var userId = Request.GetUserId();
+
+                if (string.IsNullOrEmpty(userId))
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredentials));
+
+                var familyEntity = await _familyRepository.FindByIdAsync(userId);
+                if (familyEntity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
-                //if (model.TypeProperty == TypeProperty.Apartamento || model.TypeProperty == TypeProperty.Casa)
+                conditions.Add(builder.Gte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.PropertyValueForDemolished));
+                conditions.Add(builder.Lte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.MaximumPurchase));
+
                 if (model.TypeProperty != null)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
 
@@ -359,7 +366,7 @@ namespace Moralar.WebApi.Controllers
                 if (model.StartNumberOfBedrooms > 0 && model.EndNumberOfBedrooms > 0)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.NumberOfBedrooms >= model.StartNumberOfBedrooms && x.ResidencialPropertyFeatures.NumberOfBedrooms <= model.EndNumberOfBedrooms));
 
-                if (!string.IsNullOrEmpty(model.Neighborhood))
+                if (string.IsNullOrEmpty(model.Neighborhood) == false)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
 
                 if (model.HasGarage != null)
@@ -374,7 +381,11 @@ namespace Moralar.WebApi.Controllers
                 if (model.HasAdaptedToPcd != null)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd.GetValueOrDefault()));
 
+                if (model.Lat != null && model.Lng != null)
+                    conditions.Add(builder.Near(x => x.Position,model.Lat.GetValueOrDefault(),model.Lng.GetValueOrDefault()));
+
                 var condition = builder.And(conditions);
+
                 var listEntity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
                 if (listEntity.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
@@ -386,7 +397,6 @@ namespace Moralar.WebApi.Controllers
                     {
                         dest[i].InterestedFamilies = listInterest.LongCount(x => x.ResidencialPropertyId == dest[i].Id);
                     }
-
                 }));
 
                 return Ok(Utilities.ReturnSuccess(data: response));
@@ -482,6 +492,7 @@ namespace Moralar.WebApi.Controllers
                 model.Project = model.Project.SetPathImage();
                 var entity = _mapper.Map<Data.Entities.ResidencialProperty>(model);
                 entity.TypeStatusResidencialProperty = TypeStatusResidencial.AEscolher;
+                entity.Position = new List<double>() { model.ResidencialPropertyAdress.Latitude, model.ResidencialPropertyAdress.Longitude };
 
                 var entityId = await _residencialPropertyRepository.CreateAsync(entity).ConfigureAwait(false);
 

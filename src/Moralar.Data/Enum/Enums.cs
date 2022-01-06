@@ -9,6 +9,19 @@ namespace Moralar.Data.Enum
 
     }
 
+    public enum ForType
+    {
+        [EnumMember(Value = "Família")]
+        [Description("Família")]
+        Family = 0,
+        [EnumMember(Value = "TTS")]
+        [Description("TTS")]
+        TTS = 1,
+        [EnumMember(Value = "Gestor")]
+        [Description("Gestor")]
+        Gestor = 2
+    }
+
     public enum TypeProvider
     {
         [EnumMember(Value = "Senha")]
@@ -120,7 +133,7 @@ namespace Moralar.Data.Enum
         Gestor = 1,
         [EnumMember(Value = "Família")]
         [Description("Família")]
-        Familia = 2, 
+        Familia = 2,
         [EnumMember(Value = "Admin")]
         [Description("Admin")]
         Admin = 3
@@ -312,8 +325,8 @@ namespace Moralar.Data.Enum
     }
     public enum TypeStatus
     {
-        
-        [EnumMember(Value = "Não Respondido")] 
+
+        [EnumMember(Value = "Não Respondido")]
         [Description("Não Respondido")]
         NaoRespondido = 0,
         [EnumMember(Value = "Respondido")]

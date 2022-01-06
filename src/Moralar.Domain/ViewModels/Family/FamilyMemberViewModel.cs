@@ -15,7 +15,7 @@ namespace Moralar.Domain.ViewModels.Family
         public string Name { get; set; }
        
 
-        [Display(Name = " Data de nascimento")]
+        [Display(Name = "Data de nascimento")]
         [IsReadOnly]
         public long Birthday { get; set; }
 

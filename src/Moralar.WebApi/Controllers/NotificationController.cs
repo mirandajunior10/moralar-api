@@ -74,9 +74,9 @@ namespace Moralar.WebApi.Controllers
                 if (Entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-                var vieoViewModel = _mapper.Map<NotificationListViewModel>(Entity);
+                var responseViewModel = _mapper.Map<NotificationListViewModel>(Entity);
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: responseViewModel));
             }
             catch (Exception ex)
             {
@@ -174,6 +174,7 @@ namespace Moralar.WebApi.Controllers
         public async Task<IActionResult> GetAllNotificationByFamily([FromRoute] int page, [FromQuery] bool archived, [FromQuery] bool setRead, [FromQuery] int limit = 15)
         {
             IEnumerable<Notification> listNotification = null;
+            var viewViewModel = new List<NotificationListViewModel>();
             try
             {
                 var familyId = Request.GetUserId();
@@ -183,7 +184,7 @@ namespace Moralar.WebApi.Controllers
                     listNotification =
                     archived
                     ? await _notificationRepository.FindByAsync(x => x.Created <= DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds() && x.FamilyId == familyId, page, Builders<Notification>.Sort.Descending(x => x.Created), limit).ConfigureAwait(false)
-                    : await _notificationRepository.FindByAsync(x => x.FamilyId == familyId, page, Builders<Notification>.Sort.Descending(x => x.Created), limit).ConfigureAwait(false);
+                    : await _notificationRepository.FindByAsync(x => x.Created > DateTimeOffset.Now.AddDays(-30).ToUnixTimeSeconds() && x.FamilyId == familyId, page, Builders<Notification>.Sort.Descending(x => x.Created), limit).ConfigureAwait(false);
                 }
                 else
                 {
@@ -191,7 +192,7 @@ namespace Moralar.WebApi.Controllers
 
                 }
                 if (listNotification.Count() == 0)
-                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
+                    return Ok(Utilities.ReturnSuccess(data: viewViewModel));
 
                 if (setRead)
                 {
@@ -199,9 +200,9 @@ namespace Moralar.WebApi.Controllers
                     _notificationRepository.UpdateMultiple(Query<Notification>.In(x => x._id, listNotification.Select(x => x._id).ToList()), new UpdateBuilder<Notification>().Set(x => x.DateViewed, now), UpdateFlags.Multi);
                 }
 
-                var vieoViewModel = _mapper.Map<List<NotificationListViewModel>>(listNotification);
+                viewViewModel = _mapper.Map<List<NotificationListViewModel>>(listNotification);
 
-                return Ok(Utilities.ReturnSuccess(data: vieoViewModel));
+                return Ok(Utilities.ReturnSuccess(data: viewViewModel));
             }
             catch (Exception ex)
             {
@@ -407,7 +408,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] bool forGestor)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] bool forGestor, [FromForm] bool forTTS)
         {
             var response = new DtResult<NotificationViewModel>();
             try
@@ -418,7 +419,10 @@ namespace Moralar.WebApi.Controllers
                 conditions.Add(builder.Where(x => x.Disabled == null));
 
                 if (forGestor)
-                    conditions.Add(builder.Eq(x => x.FamilyId, null));
+                    conditions.Add(builder.Where(x => x.FamilyId == null && (x.For == null || x.For == ForType.Gestor)));
+
+                if (forTTS)
+                    conditions.Add(builder.Where(x => x.FamilyId == null && (x.For == null || x.For == ForType.TTS)));
 
                 if (startDate != null)
                     conditions.Add(builder.Gte(x => x.Created, startDate));

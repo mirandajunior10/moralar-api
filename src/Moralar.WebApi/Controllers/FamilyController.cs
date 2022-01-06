@@ -25,6 +25,7 @@ using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
+using Newtonsoft.Json;
 using OfficeOpenXml;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
@@ -526,7 +527,7 @@ namespace Moralar.WebApi.Controllers
         /// <returns></returns>
         [HttpGet("TimeLineExport")]
         [Produces("application/json")]
-        [ProducesResponseType(typeof(ReturnViewModel), 200)]       
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
@@ -554,7 +555,7 @@ namespace Moralar.WebApi.Controllers
                         builder.Regex(x => x.HolderNumber, new BsonRegularExpression(model.SearchTerm, "i")),
                         builder.Regex(x => x.HolderCpf, new BsonRegularExpression(model.SearchTerm, "i"))
                 )
-                );    
+                );
 
                 if (model.TypeSubject != null)
                     conditions.Add(builder.Where(x => x.TypeSubject == model.TypeSubject.GetValueOrDefault()));
@@ -706,7 +707,7 @@ namespace Moralar.WebApi.Controllers
                 var extension = MimeTypeMap.GetExtension(file.ContentType).ToLower();
 
                 if (_acceptedFiles.Count(x => x == extension) == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));           
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));
 
 
 
@@ -1647,7 +1648,7 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var validOnly = _httpContextAccessor.GetFieldsFromBodyCustom();               
+                var validOnly = _httpContextAccessor.GetFieldsFromBodyCustom();
 
                 model.TrimStringProperties();
 
@@ -1694,11 +1695,11 @@ namespace Moralar.WebApi.Controllers
                 }
 
                 if (validOnly.Count(x => x == nameof(Family.Priorization)) > 0)
-                {                   
+                {
                     entityFamily.Priorization = _mapper.Map<FamilyPriorization>(model.Priorization);
                 }
 
-                
+
                 //if (model.Financial.FamilyIncome > 0)
                 //    entityFamily.Financial.FamilyIncome = model.Financial.FamilyIncome;                    
 
@@ -2240,21 +2241,26 @@ namespace Moralar.WebApi.Controllers
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
         [HttpPost("ExampleFileImport")]
-        [ProducesResponseType(typeof(ReturnViewModel), 200)]        
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
+        [AllowAnonymous]
         public async Task<IActionResult> ExampleFileImport()
         {
             try
             {
                 var fileName = "Modelo Importar Familias.xlsx";
-                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content/Upload/");
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
                 if (Directory.Exists(path) == false)
                     Directory.CreateDirectory(path);
 
                 var fullPathFile = Path.Combine(path, fileName);
-                
+                var listViewModel = new List<FamilyImportViewModel>() { new FamilyImportViewModel() };
+                var listMemberViewModel = new List<FamilyMemberImportViewModel>() { new FamilyMemberImportViewModel() };
+
+
+                Util.ExportToExcelMultiWorksheet(path, new List<string>() { "Familia", "Membros" }, fileName: fileName.Split('.')[0]);
                 if (System.IO.File.Exists(fullPathFile) == false)
                     return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
 

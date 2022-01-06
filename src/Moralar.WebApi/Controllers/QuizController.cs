@@ -529,6 +529,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> GetQuizByFamily(TypeQuiz typeQuiz)
         {
+            var _quizViewModel = new List<QuizViewModel>();
             try
             {
                 var userId = Request.GetUserId();
@@ -536,21 +537,22 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidCredencials));
 
-
                 var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == userId).ConfigureAwait(false) as List<QuizFamily>;
 
-                var listQuiz = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz && x.DataBlocked == null, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
-                if (listQuiz.Count(x => x.TypeQuiz == typeQuiz) == 0)
-                    return Ok(Utilities.ReturnSuccess(DefaultMessages.AnyQuiz, new List<object>()));
-
-
-                var _quizViewModel = _mapper.Map<List<QuizViewModel>>(listQuiz);
-
-                for (int i = 0; i < _quizViewModel.Count(); i++)
+                if (quizFamilies.Count() > 0)
                 {
-                    var quizfamilyEntity = quizFamilies.Find(x => x.QuizId == _quizViewModel[i].Id.ToString());
-                    if (quizfamilyEntity != null)
-                        _quizViewModel[i].TypeStatus = quizfamilyEntity.TypeStatus;
+                    var listQuiz = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz && x.DataBlocked == null, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
+                    if (listQuiz.Count(x => x.TypeQuiz == typeQuiz) == 0)
+                        return Ok(Utilities.ReturnSuccess(DefaultMessages.AnyQuiz, new List<object>()));
+
+                    _quizViewModel = _mapper.Map<List<QuizViewModel>>(listQuiz);
+
+                    for (int i = 0; i < _quizViewModel.Count(); i++)
+                    {
+                        var quizfamilyEntity = quizFamilies.Find(x => x.QuizId == _quizViewModel[i].Id.ToString());
+                        if (quizfamilyEntity != null)
+                            _quizViewModel[i].TypeStatus = quizfamilyEntity.TypeStatus;
+                    }
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
