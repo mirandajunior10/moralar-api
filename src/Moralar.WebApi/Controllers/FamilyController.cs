@@ -205,8 +205,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        //[ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> TimeLineLoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject typeSubject)
+        public async Task<IActionResult> TimeLineLoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject? typeSubject)
         {
             var response = new DtResult<FamilyHolderListViewModel>();
 
@@ -231,7 +230,7 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(holderCpf) == false)
                     conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
 
-                var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == typeSubject).ConfigureAwait(false) as List<Schedule>;
+                var schedule = (typeSubject != null ?  await _scheduleRepository.FindByAsync(x => x.TypeSubject == typeSubject) : await _scheduleRepository.FindAllAsync()) as List<Schedule>;
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
@@ -261,7 +260,7 @@ namespace Moralar.WebApi.Controllers
                     }
                 }
 
-                response.Data = _vwFamiliHolder;
+                response.Data = typeSubject != null ? _vwFamiliHolder.Where(x => x.TypeSubject == typeSubject).ToList() : _vwFamiliHolder;
                 response.Draw = model.Draw;
                 response.RecordsFiltered = _vwFamiliHolder.Count(); //totalrecordsFiltered;
                 response.RecordsTotal = _vwFamiliHolder.Count(); //totalRecords;
