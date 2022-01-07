@@ -183,7 +183,8 @@ namespace Moralar.WebApi.Controllers
 
                 if (exists.Count() > 0)
                 {
-                    var messageError = $"O(s) CPF's ({{cpfs}}) estão em uso na plataforma".Replace("{{cpfs}}", string.Join(",", exists.Select(x => x.Name).ToList()).TrimEnd(','));
+                    var messageError = "O(s) CPF's _ estão em uso na plataforma";
+                    messageError = messageError.Replace("_", string.Join(",", exists.Select(x => x.Cpf).ToList()).TrimEnd(','));
                     return BadRequest(Utilities.ReturnErro(messageError));
                 }
 
@@ -219,7 +220,7 @@ namespace Moralar.WebApi.Controllers
                     message.AppendLine($"<strong>Senha</strong> :{listEntity[i].Password}</p>");
 
                     var dataBody = Util.GetTemplateVariables();
-                    dataBody.Add("{{ title }}",title);
+                    dataBody.Add("{{ title }}", title);
                     dataBody.Add("{{ message }}", message.ToString());
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
@@ -279,7 +280,8 @@ namespace Moralar.WebApi.Controllers
 
                 if (exists.Count() > 0)
                 {
-                    var messageError = $"O(s) CPF's ({{cpfs}}) estão em uso na plataforma".Replace("{{cpfs}}", string.Join(",", exists.Select(x => x.Name).ToList()).TrimEnd(','));
+                    var messageError = "O(s) CPF's _ estão em uso na plataforma";
+                    messageError = messageError.Replace("_", string.Join(",", exists.Select(x => x.Cpf).ToList()).TrimEnd(','));
                     return BadRequest(Utilities.ReturnErro(messageError));
                 }
 

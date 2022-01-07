@@ -2,22 +2,31 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Drawing;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Reflection;
+using System.Runtime.Serialization;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
 using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.Localization;
+
 using Moralar.Data.Entities;
+using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
+
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
+
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -54,7 +63,43 @@ namespace Moralar.Domain
 
         }
 
-        public static async Task<List<TV>> ReadAndValidationExcel<TV>(IFormFile file) where TV : new()
+        public static long? ToUnixCustom(this string date)
+        {
+            try
+            {
+                var dateTime = date.TryParseAnyDate();
+
+                return new DateTimeOffset(dateTime).ToUnixTimeSeconds();
+
+            }
+            catch (Exception)
+            {
+                return (long?)null;
+            }
+        }
+
+        /// <summary>
+        ///  CONVERTER STRING EM ENUM
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="str"></param>
+        /// <returns></returns>
+        public static T ToEnumCustom<T>(this string str)
+        {
+            var enumType = typeof(T);
+            foreach (var name in Enum.GetNames(enumType))
+            {
+                var enumMemberAttribute =
+                    ((EnumMemberAttribute[])enumType.GetField(name)
+                        .GetCustomAttributes(typeof(EnumMemberAttribute), true)).Single();
+                if (enumMemberAttribute.Value == str) return (T)Enum.Parse(enumType, name);
+            }
+
+            //throw exception or whatever handling you want or
+            return default;
+        }
+
+        public static async Task<List<TV>> ReadAndValidationExcel<TV>(IFormFile file, int sheetIndex = 1) where TV : new()
         {
             var response = new List<TV>();
             try
@@ -62,7 +107,7 @@ namespace Moralar.Domain
                 using (ExcelPackage package = new ExcelPackage(file.OpenReadStream()))
                 {
                     //get the first sheet from the excel file
-                    ExcelWorksheet sheet = package.Workbook.Worksheets[1];
+                    ExcelWorksheet sheet = package.Workbook.Worksheets[sheetIndex];
 
                     var listEntityViewModel = sheet.ConvertSheetToObjects<TV>();
 
@@ -85,10 +130,134 @@ namespace Moralar.Domain
             return response;
         }
 
+        public static FamilyHolder SetHolder(this FamilyImportViewModel model)
+        {
+            var response = new FamilyHolder();
+
+            try
+            {
+                response.Scholarity = model.Escolaridade.ToEnumCustom<TypeScholarity>();
+                response.Birthday = model.Data_de_Nascimento.ToUnixCustom();
+                response.Cpf = model.Cpf_do_titular.OnlyNumbers();
+                response.Email = model.E_mail.ToLower();
+                response.Genre = model.Genero.ToEnumCustom<TypeGenre>();
+                response.Name = model.Nome_do_titular;
+                response.Phone = model.Telefone.OnlyNumbers();
+                response.Number = model.Numero_do_cadastro;
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return response;
+        }
+        public static FamilySpouse SetSpouse(this FamilyImportViewModel model)
+        {
+            var response = new FamilySpouse();
+
+            try
+            {
+                response.Birthday = model.Data_de_Nascimento_do_Conjuge.ToUnixCustom();
+                response.Genre = model.Genero_Conjuge.ToEnumCustom<TypeGenre>();
+                response.SpouseScholarity = model.Escolaridade_Conjuge.ToEnumCustom<TypeScholarity>();
+                response.Name = model.Nome_do_Conjuge;
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return response;
+        }
+        public static FamilyAddress SetAddress(this FamilyImportViewModel model)
+            => new FamilyAddress();
+
+        public static FamilyFinancial SetFinancial(this FamilyImportViewModel model)
+        {
+            var response = new FamilyFinancial();
+            try
+            {
+                response.FamilyIncome = (decimal)model.Renda_Familiar.ToDouble();
+                response.IncrementValue = (decimal)model.Valor_Incremento.ToDouble();
+                response.MaximumPurchase = (decimal)model.Valor_para_compra_de_imovel.ToDouble();
+                response.PropertyValueForDemolished = (decimal)model.Valor_imovel_demolido.ToDouble();
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return response;
+        }
+        public static FamilyPriorization SetPriorization(this FamilyImportViewModel model)
+        {
+            var response = new FamilyPriorization();
+
+            try
+            {
+                response.WorkFront = model.Frente_de_Obras.MapPriorityRate(1);
+                response.PermanentDisabled = model.Deficiencia_que_demande_imovel_acessivel.MapPriorityRate(2);
+                response.ElderlyOverEighty = model.Idoso_acima_de_80_anos.MapPriorityRate(3);
+                response.WomanServedByProtectiveMeasure = model.Mulher_atendida_por_medida_protetiva.MapPriorityRate(4);
+                response.FemaleBreadwinner = model.Mulher_chefe_de_familia.MapPriorityRate(5);
+                response.SingleParent = model.Monoparental.MapPriorityRate(6);
+                response.FamilyWithMoreThanFivePeople = model.Familia_com_mais_5_pessoas.MapPriorityRate(7);
+                response.ChildUnderEighteen = model.Filhos_menores_de_18_anos.MapPriorityRate(8);
+                response.HeadOfHouseholdWithoutIncome = model.Chefe_de_familia_sem_renda.MapPriorityRate(9);
+                response.BenefitOfContinuedProvision = model.Beneficio_de_prestacao_continuada.MapPriorityRate(10);
+                response.FamilyPurse = model.Bolsa_Familia.MapPriorityRate(11);
+                response.InvoluntaryCohabitation = model.Coabitacao_involuntaria.MapPriorityRate(12);
+                response.FamilyIncomeOfUpTwoMinimumWages = model.Renda_familiar_de_ate_dois_salarios_minimos.MapPriorityRate(13);
+                response.YearsInSextyAndSeventyNine = model.Idoso_60_ate_79_anos.MapPriorityRate(14);
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return response;
+        }
+
+        public static PriorityRate MapPriorityRate(this string value, int rate)
+        {
+            return new PriorityRate()
+            {
+                Rate = rate,
+                Value = value.ToBoolean()
+            };
+        }
+
+        public static bool ToBoolean(this string value)
+            => value?.ToLower() == "sim" ? true : false;
+
+
+        public static double ToDouble(this string balanceAvailableForWithdraw)
+        {
+            var value = 0D;
+            try
+            {
+                var pattern = @"(R\$|BRL)";
+
+                balanceAvailableForWithdraw = Regex.Replace(balanceAvailableForWithdraw, pattern, string.Empty).Trim();
+                balanceAvailableForWithdraw = balanceAvailableForWithdraw.Replace(',', '.');
+
+                double.TryParse(balanceAvailableForWithdraw, NumberStyles.Any, CultureInfo.InvariantCulture, out value);
+
+                return value;
+            }
+            catch (Exception)
+            {
+                return value;
+            }
+        }
+
+
+
         /// <summary>
         ///  EXPORT LIST ENTITY TO TABLE IN EXCEL FILE
         /// </summary>
-        /// <typeparam name="T"></typeparam>
         /// <param name="entitys"></param>
         /// <param name="path"></param>
         /// <param name="workSheetName"></param>

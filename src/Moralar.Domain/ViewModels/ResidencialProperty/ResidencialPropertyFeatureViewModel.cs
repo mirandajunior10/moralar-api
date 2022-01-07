@@ -1,8 +1,8 @@
-﻿using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Moralar.Data.Enum;
 
 namespace Moralar.Domain.ViewModels.Property
 {
@@ -114,5 +114,10 @@ namespace Moralar.Domain.ViewModels.Property
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tipo de instalação de gás")]
         public TypePropertyGasInstallation TypeGasInstallation { get; set; }
+        /// <summary>
+        /// Beira de rua?
+        /// </summary>
+        [Display(Name = "Beira de rua?")]
+        public bool StreetEdge { get; set; }
     }
 }

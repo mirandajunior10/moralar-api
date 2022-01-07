@@ -1,4 +1,11 @@
-﻿using AutoMapper;
+﻿using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.Linq;
+using System.Security.Claims;
+using System.Threading.Tasks;
+using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
@@ -20,13 +27,6 @@ using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.ScheduleHistory;
 using Moralar.Repository.Interface;
-using System;
-using System.Collections.Generic;
-using System.Globalization;
-using System.IO;
-using System.Linq;
-using System.Security.Claims;
-using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -99,7 +99,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleHistoryViewModel>>(entity.OrderBy(x => x.TypeSubject).ThenBy(x=> x.Created).ToList())));
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleHistoryViewModel>>(entity.OrderBy(x => x.TypeSubject).ThenBy(x => x.Created).ToList())));
             }
             catch (Exception ex)
             {
@@ -345,7 +345,7 @@ namespace Moralar.WebApi.Controllers
                 else
                 {
                     dataBody.Add("{{ title }}", $"Olá {family.Holder.Name.GetFirstName()}!");
-                    dataBody.Add("{{ message }}", $"<p>Sua agenda { Utilities.ToEnum<TypeSubject>(model.TypeSubject.ToString())} foi marcada</p>" +
+                    dataBody.Add("{{ message }}", $"<p>Sua agenda {model.TypeSubject.GetEnumMemberValue()} foi marcada</p>" +
                                                 $"<p>Dia { Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("dd/MM/yyyy")}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("HH:mm")} , endereço {model.Place}</p>" +
                                                 $"Aguardamos você!"
                                                 );
@@ -473,7 +473,7 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
                 var interest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<PropertiesInterest>;
-                if (interest.Count() >0)
+                if (interest.Count() > 0)
                 {
                     var residencialPropertyInterest = await _residencialPropertyRepository.FindIn("_id", interest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
                     vwScheduleDetailTimeLineChoosePropertyViewModel.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialPropertyInterest);
@@ -863,44 +863,52 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
 
 
-        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus? status, [FromForm] TypeSubject typeSubject)
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus? status, [FromForm] TypeSubject? type)
         {
             var response = new DtResult<ScheduleExportViewModel>();
             try
             {
-                var conditions = new List<FilterDefinition<Data.Entities.Schedule>>();
                 var builder = Builders<Data.Entities.Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Schedule>>();
 
-                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+                conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
 
-                if (string.IsNullOrEmpty(number) == false)
+                if (!string.IsNullOrEmpty(number))
                     conditions.Add(builder.Where(x => x.HolderNumber == number));
-
-                if (string.IsNullOrEmpty(name) == false)
-                    conditions.Add(builder.Regex(x => x.HolderName,new BsonRegularExpression(name,"i")));
-
-                if (string.IsNullOrEmpty(cpf) == false)
+                if (!string.IsNullOrEmpty(name))
+                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(name.ToUpper())));
+                if (!string.IsNullOrEmpty(cpf))
                     conditions.Add(builder.Where(x => x.HolderCpf == cpf.OnlyNumbers()));
-
                 if (startDate.HasValue)
                     conditions.Add(builder.Where(x => x.Date >= startDate));
-
                 if (endDate.HasValue)
                     conditions.Add(builder.Where(x => x.Date <= endDate));
-
-                if (string.IsNullOrEmpty(place) == false)
+                if (!string.IsNullOrEmpty(place))
                     conditions.Add(builder.Where(x => x.Place.ToUpper().Contains(place.ToUpper())));
-
-                if (string.IsNullOrEmpty(description) == false)
+                if (!string.IsNullOrEmpty(description))
                     conditions.Add(builder.Where(x => x.Description.ToUpper().Contains(description.ToUpper())));
 
                 if (status != null)
                     conditions.Add(builder.Where(x => x.TypeScheduleStatus == status));
 
+                if (type != null)
+                    conditions.Add(builder.Where(x => x.TypeSubject == type));
+
+
+                var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
+
+                var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
+                var totalRecords = (int)await _scheduleRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                    ? Builders<Data.Entities.Schedule>.Sort.Descending(sortColumn)
+                    : Builders<Data.Entities.Schedule>.Sort.Ascending(sortColumn);
+
+                var allData = await _scheduleRepository
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, totalRecords, conditions, columns);
 
                 var condition = builder.And(conditions);
                 var fileName = "Agendamentos_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
-                var allData = await _scheduleRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Schedule>() { }).ToListAsync();
 
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
                 if (Directory.Exists(path) == false)
@@ -920,5 +928,5 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(Utilities.ReturnErro(ex.Message));
             }
         }
-    } 
+    }
 }

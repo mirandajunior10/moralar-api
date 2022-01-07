@@ -35,7 +35,7 @@ namespace Moralar.Data.Entities
         /// <summary>
         /// Dados do membro da Família
         /// </summary>
-        public List<FamilyMember> Members { get; set; }
+        public List<FamilyMember> Members { get; set; } = new List<FamilyMember>();
 
         /// <summary>
         /// Dados Financeiros

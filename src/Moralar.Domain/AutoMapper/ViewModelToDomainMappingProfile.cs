@@ -2,6 +2,7 @@
 
 using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
+using Moralar.Data.Enum;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Admin;
 using Moralar.Domain.ViewModels.Course;
@@ -18,7 +19,7 @@ using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Video;
 using Moralar.Domain.ViewModels.VideoViewed;
-
+using UtilityFramework.Application.Core;
 using AutoMapperProfile = AutoMapper.Profile;
 
 namespace Moralar.Domain.AutoMapper
@@ -36,7 +37,10 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<ProfileUpdateViewModel, Profile>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
-
+            CreateMap<ProfileImportViewModel, Profile>()
+                 .ForMember(dest => dest.Email, opt => opt.MapFrom(src => src.Email.ToLower()))
+                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Phone.OnlyNumbers()))
+                 .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Cpf.OnlyNumbers()));
             CreateMap<ProfileViewModel, Profile>()
               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             #region Family
@@ -60,6 +64,21 @@ namespace Moralar.Domain.AutoMapper
 
             CreateMap<FamilyHolderExportViewModel, Family>()
                 .ForMember(dest => dest._id, opt => opt.Ignore());
+
+            CreateMap<FamilyImportViewModel, Family>()
+                .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.SetHolder()))
+                .ForMember(dest => dest.Spouse, opt => opt.MapFrom(src => src.SetSpouse()))
+                .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.SetPriorization()))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.SetAddress()))
+                .ForMember(dest => dest.Financial, opt => opt.MapFrom(src => src.SetFinancial()));
+
+
+            CreateMap<FamilyMemberImportViewModel, FamilyMember>()
+                .ForMember(dest => dest.Genre, opt => opt.MapFrom(src => src.Genre.ToEnumCustom<TypeGenre>()))
+                .ForMember(dest => dest.Scholarity, opt => opt.MapFrom(src => src.Scholarity.ToEnumCustom<TypeScholarity>()))
+                .ForMember(dest => dest.KinShip, opt => opt.MapFrom(src => src.KinShip.ToEnumCustom<TypeKingShip>()))
+                .ForMember(dest => dest.Birthday, opt => opt.MapFrom(src => src.Birthday.ToUnixCustom()));
+
 
 
             //            Error mapping types.
@@ -100,11 +119,8 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<QuizViewModel, Quiz>();
             CreateMap<QuizUpdateViewModel, Quiz>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
-            CreateMap<ProfileImportViewModel, Profile>();
             CreateMap<QuestionAnswerAuxViewModel, QuestionAnswerAux>();
             CreateMap<QuestionAnswerRegisterViewModel, QuestionAnswer>();
-
-
 
             #endregion
             #region Course

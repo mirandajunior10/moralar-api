@@ -25,13 +25,11 @@ using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
-using Newtonsoft.Json;
 using OfficeOpenXml;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Core.Interface;
-
 
 namespace Moralar.WebApi.Controllers
 {
@@ -666,256 +664,6 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
-        /// <summary>
-        /// IMPORTAÇÃO DA FAMÍLIA
-        /// </summary>
-        /// <remarks>
-        ///  OBJ DE ENVIO
-        /// 
-        ///         GET
-        ///             {
-        ///              "file": "", // Arquivo a ser importado
-        ///             }
-        /// </remarks>
-        /// <response code="200">Returns success</response>
-        /// <response code="400">Custom Error</response>
-        /// <response code="401">Unauthorize Error</response>
-        /// <response code="500">Exception Error</response>
-        /// <returns></returns>
-        [HttpPost("Import")]
-        [Produces("application/json")]
-        [ProducesResponseType(typeof(ReturnViewModel), 200)]
-        [ProducesResponseType(400)]
-        [ProducesResponseType(401)]
-        [ProducesResponseType(500)]
-        public async Task<IActionResult> Import([FromForm] IFormFile file) //[FromRoute] string file
-        {
-            try
-            {
-                //var folder = $"{_env.ContentRootPath}\\content\\upload\\".Trim();
-
-                //var exists = Directory.Exists(folder);
-
-                //if (!exists)
-                //    Directory.CreateDirectory(folder);
-
-                //var fi = new System.IO.FileInfo(folder + "\\" + file);
-
-                if (file == null || file.Length <= 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotFound));
-
-                var extension = MimeTypeMap.GetExtension(file.ContentType).ToLower();
-
-                if (_acceptedFiles.Count(x => x == extension) == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));
-
-
-
-
-                using (var package = new ExcelPackage(file.OpenReadStream()))
-                {
-                    ExcelWorksheet sheet = package.Workbook.Worksheets[1];
-
-
-                    for (int linha = 2; linha < 300; linha++)
-                    {
-                        if (string.IsNullOrEmpty(package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString()))
-                            break;
-
-                        var vw = new FamilyCompleteViewModel();
-                        vw.Holder = new FamilyHolderViewModel();
-                        vw.Spouse = new FamilySpouseViewModel();
-                        vw.Financial = new FamilyFinancialViewModel();
-                        vw.Priorization = new FamilyPriorizationViewModel();
-                        vw.Members = new List<FamilyMemberViewModel>();
-
-                        vw.Holder.Number = package.Workbook.Worksheets[1].Cells[linha, 1].Value.ToString();
-                        vw.Holder.Name = package.Workbook.Worksheets[1].Cells[linha, 2].Value.ToString();
-                        vw.Holder.Cpf = package.Workbook.Worksheets[1].Cells[linha, 3].Value.ToString();
-                        vw.Holder.Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 4].Value.ToString()));
-                        vw.Holder.Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 5].Value.ToString());
-                        vw.Holder.Email = package.Workbook.Worksheets[1].Cells[linha, 6].Value.ToString();
-                        vw.Holder.Phone = package.Workbook.Worksheets[1].Cells[linha, 7].Value.ToString();
-                        vw.Holder.Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 8].Value.ToString()); ;
-
-                        //conjuge
-                        vw.Spouse.Name = package.Workbook.Worksheets[1].Cells[linha, 9].Value.ToString();
-                        vw.Spouse.Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 10].Value.ToString()));
-                        vw.Spouse.Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 11].Value.ToString());
-                        vw.Spouse.SpouseScholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 12].Value.ToString());
-
-                        //membro 1
-                        if (package.Workbook.Worksheets[1].Cells[linha, 13].Value != null)
-                        {
-                            vw.Members.Add(new FamilyMemberViewModel()
-                            {
-                                Name = package.Workbook.Worksheets[1].Cells[linha, 13].Value.ToString(),
-                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 14].Value.ToString())),
-                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 15].Value.ToString()),
-                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 16].Value.ToString()),
-                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 17].Value.ToString())
-                            });
-                        }
-
-                        //membro 2
-                        if (package.Workbook.Worksheets[1].Cells[linha, 18].Value != null)
-                        {
-                            vw.Members.Add(new FamilyMemberViewModel()
-                            {
-                                Name = package.Workbook.Worksheets[1].Cells[linha, 18].Value.ToString(),
-                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 19].Value.ToString())),
-                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 20].Value.ToString()),
-                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 21].Value.ToString()),
-                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 22].Value.ToString())
-                            });
-                        }
-
-                        //membro 3
-                        if (package.Workbook.Worksheets[1].Cells[linha, 23].Value != null)
-                        {
-                            vw.Members.Add(new FamilyMemberViewModel()
-                            {
-                                Name = package.Workbook.Worksheets[1].Cells[linha, 23].Value.ToString(),
-                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 24].Value.ToString())),
-                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 25].Value.ToString()),
-                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 26].Value.ToString()),
-                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 27].Value.ToString())
-                            });
-                        }
-
-
-                        //membro 4
-                        if (package.Workbook.Worksheets[1].Cells[linha, 28].Value != null)
-                        {
-                            vw.Members.Add(new FamilyMemberViewModel()
-                            {
-                                Name = package.Workbook.Worksheets[1].Cells[linha, 28].Value.ToString(),
-                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 29].Value.ToString())),
-                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 30].Value.ToString()),
-                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 31].Value.ToString()),
-                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 32].Value.ToString())
-                            });
-                        }
-
-                        //membro 5
-                        if (package.Workbook.Worksheets[1].Cells[linha, 33].Value != null)
-                        {
-                            vw.Members.Add(new FamilyMemberViewModel()
-                            {
-                                Name = package.Workbook.Worksheets[1].Cells[linha, 33].Value.ToString(),
-                                Birthday = Utilities.ToTimeStamp(DateTime.Parse(package.Workbook.Worksheets[1].Cells[linha, 34].Value.ToString())),
-                                Genre = (TypeGenre)Enum.Parse(typeof(TypeGenre), package.Workbook.Worksheets[1].Cells[linha, 35].Value.ToString()),
-                                KinShip = Utilities.ToEnum<TypeKingShip>(package.Workbook.Worksheets[1].Cells[linha, 36].Value.ToString()),
-                                Scholarity = Utilities.ToEnum<TypeScholarity>(package.Workbook.Worksheets[1].Cells[linha, 37].Value.ToString())
-                            });
-                        }
-
-                        //Financeiro
-                        vw.Financial.FamilyIncome = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 38].Value.ToString());
-                        vw.Financial.PropertyValueForDemolished = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 39].Value.ToString());
-                        vw.Financial.MaximumPurchase = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 40].Value.ToString());
-                        vw.Financial.IncrementValue = decimal.Parse(package.Workbook.Worksheets[1].Cells[linha, 41].Value.ToString());
-
-                        //Priorização
-                        vw.Priorization.WorkFront = new PriorityRateViewModel()
-                        {
-                            Rate = 1,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 42].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.PermanentDisabled = new PriorityRateViewModel()
-                        {
-                            Rate = 2,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 43].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.ElderlyOverEighty = new PriorityRateViewModel()
-                        {
-                            Rate = 3,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 44].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.WomanServedByProtectiveMeasure = new PriorityRateViewModel()
-                        {
-                            Rate = 4,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 46].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.FemaleBreadWinner = new PriorityRateViewModel()
-                        {
-                            Rate = 5,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 48].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.SingleParent = new PriorityRateViewModel()
-                        {
-                            Rate = 6,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 47].Value.ToString() == "Sim" ? true : false
-                        };
-
-                        vw.Priorization.FamilyWithMoreThanFivePeople = new PriorityRateViewModel()
-                        {
-                            Rate = 7,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 49].Value.ToString() == "Sim" ? true : false
-                        };
-
-                        vw.Priorization.ChildUnderEighteen = new PriorityRateViewModel()
-                        {
-                            Rate = 8,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 50].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.HeadOfHouseholdWithoutIncome = new PriorityRateViewModel()
-                        {
-                            Rate = 9,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 51].Value.ToString() == "Sim" ? true : false
-                        };
-
-                        vw.Priorization.BenefitOfContinuedProvision = new PriorityRateViewModel()
-                        {
-                            Rate = 10,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 52].Value.ToString() == "Sim" ? true : false
-                        };
-
-                        vw.Priorization.FamilyPurse = new PriorityRateViewModel()
-                        {
-                            Rate = 11,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 53].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.InvoluntaryCohabitation = new PriorityRateViewModel()
-                        {
-                            Rate = 12,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 54].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.FamilyIncomeOfUpTwoMinimumWages = new PriorityRateViewModel()
-                        {
-                            Rate = 13,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 55].Value.ToString() == "Sim" ? true : false
-                        };
-                        vw.Priorization.YearsInSextyAndSeventyNine = new PriorityRateViewModel()
-                        {
-                            Rate = 14,
-                            Value = package.Workbook.Worksheets[1].Cells[linha, 45].Value.ToString() == "Sim" ? true : false
-                        };
-
-                        var family = _mapper.Map<Data.Entities.Family>(vw);
-                        if (vw.Holder.Birthday.HasValue)
-                        {
-                            var dateBir = Utilities.TimeStampToDateTime(vw.Holder.Birthday.Value);
-                            var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
-                            family.Holder.Birthday = dateUnix;
-                        }
-                        family.Holder.Cpf = vw.Holder.Cpf.OnlyNumbers();
-
-                        var entityId = await _familyRepository.CreateAsync(family).ConfigureAwait(false);
-                    }
-                }
-                //package.Save();
-                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.ImportFamily, TypeResposible.UserAdminstratorGestor, $"Importou as famílias {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, "");
-
-                return Ok(Utilities.ReturnSuccess());
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.ReturnErro());
-            }
-        }
-
-
 
         /// <summary>
         /// BUSCA OS DADOS DO USUÁRIO LOGADO
@@ -2229,6 +1977,88 @@ namespace Moralar.WebApi.Controllers
             catch (Exception ex)
             {
                 return BadRequest(Utilities.ReturnErro(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// METODO PARA IMPORTAR FAMILIAS
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("FileImport")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> FileImport([FromForm] IFormFile file)
+        {
+            try
+            {
+
+                if (file == null || file.Length <= 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotFound));
+
+                var extension = MimeTypeMap.GetExtension(file.ContentType).ToLower();
+
+                if (Util.AcceptedFiles.Count(x => x == extension) == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));
+
+                var listFamilyViewModel = await Util.ReadAndValidationExcel<FamilyImportViewModel>(file);
+
+                if (listFamilyViewModel.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ZeroItems));
+
+                var listMerberViewModel = await Util.ReadAndValidationExcel<FamilyMemberImportViewModel>(file, 2);
+
+                var builder = Builders<Family>.Filter;
+                var conditions = new List<FilterDefinition<Family>>();
+
+                conditions.Add(builder.In(x => x.Holder.Cpf, listFamilyViewModel.Select(x => x.Cpf_do_titular.OnlyNumbers()).ToList()));
+
+                var exists = await _familyRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
+
+                if (exists.Count() > 0)
+                {
+                    var messageError = "O(s) CPF's _ estão em uso na plataforma";
+                    messageError = messageError.Replace("_", string.Join(",", exists.Select(x => x.Holder.Cpf).ToList()).TrimEnd(','));
+                    return BadRequest(Utilities.ReturnErro(messageError));
+                }
+
+                var listEntity = _mapper.Map<List<Data.Entities.Family>>(listFamilyViewModel);
+
+                for (int i = 0; i < listEntity.Count(); i++)
+                {
+                    var members = listMerberViewModel.Where(x => x.HolderCpf.OnlyNumbers() == listEntity[i].Holder.Cpf).ToList();
+
+                    listEntity[i].Members = _mapper.Map<List<FamilyMember>>(members);
+
+                }
+
+                const int limit = 250;
+                var registred = 0;
+                var index = 0;
+
+                while (listEntity.Count() > registred)
+                {
+                    var itensToRegister = listEntity.Skip(limit * index).Take(limit).ToList();
+
+                    if (itensToRegister.Count() > 0)
+                        await _familyRepository.CreateAsync(itensToRegister);
+                    registred += limit;
+                    index++;
+                }
+
+
+                return Ok(Utilities.ReturnSuccess($"Importação realizada com sucesso, total de {listEntity.Count} familia(s) importada(s)"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
             }
         }
 

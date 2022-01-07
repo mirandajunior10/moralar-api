@@ -1,9 +1,5 @@
-using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
-using System.Linq;
-using System.Threading.Tasks;
-using Moralar.Data.Enum;
+
 using UtilityFramework.Application.Core;
 
 namespace Moralar.Domain.ViewModels.Family
@@ -33,6 +29,7 @@ namespace Moralar.Domain.ViewModels.Family
         [Display(Name = "Grau de parentesco")]
         [Column(5)]
         public string KinShip { get; set; }
+        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Escolaridade")]
         [Column(6)]
         public string Scholarity { get; set; }

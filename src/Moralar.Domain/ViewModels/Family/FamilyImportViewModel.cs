@@ -14,7 +14,7 @@ namespace Moralar.Domain.ViewModels.Family
         [Column(3)]
         public string Cpf_do_titular { get; set; }
         [Column(4)]
-        public string Data_de_nascimento { get; set; }
+        public string Data_de_Nascimento { get; set; }
         [Column(5)]
         public string Genero { get; set; }
         [Column(6)]
@@ -26,7 +26,7 @@ namespace Moralar.Domain.ViewModels.Family
         [Column(9)]
         public string Nome_do_Conjuge { get; set; }
         [Column(10)]
-        public string Data_de_Nascimento { get; set; }
+        public string Data_de_Nascimento_do_Conjuge { get; set; }
         [Column(11)]
         public string Genero_Conjuge { get; set; }
         [Column(12)]
@@ -38,7 +38,7 @@ namespace Moralar.Domain.ViewModels.Family
         [Column(15)]
         public string Valor_para_compra_de_imovel { get; set; }
         [Column(16)]
-        public string Valor_incremento { get; set; }
+        public string Valor_Incremento { get; set; }
         [Column(17)]
         public string Frente_de_Obras { get; set; }
         [Column(18)]
@@ -50,20 +50,22 @@ namespace Moralar.Domain.ViewModels.Family
         [Column(21)]
         public string Mulher_atendida_por_medida_protetiva { get; set; }
         [Column(22)]
-        public string Monoparental { get; set; }
+        public string Mulher_chefe_de_familia { get; set; }
         [Column(23)]
-        public string Familia_com_mais_5_pessoas { get; set; }
+        public string Monoparental { get; set; }
         [Column(24)]
-        public string Filhos_menores_de_18_anos { get; set; }
+        public string Familia_com_mais_5_pessoas { get; set; }
         [Column(25)]
-        public string Chefe_de_familia_sem_renda { get; set; }
+        public string Filhos_menores_de_18_anos { get; set; }
         [Column(26)]
-        public string Beneficio_de_prestacao_continuada { get; set; }
+        public string Chefe_de_familia_sem_renda { get; set; }
         [Column(27)]
-        public string Bolsa_Familia { get; set; }
+        public string Beneficio_de_prestacao_continuada { get; set; }
         [Column(28)]
-        public string Coabitacao_involuntaria { get; set; }
+        public string Bolsa_Familia { get; set; }
         [Column(29)]
+        public string Coabitacao_involuntaria { get; set; }
+        [Column(30)]
         public string Renda_familiar_de_ate_dois_salarios_minimos { get; set; }
     }
 }

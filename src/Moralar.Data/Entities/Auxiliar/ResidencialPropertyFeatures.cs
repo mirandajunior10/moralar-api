@@ -1,8 +1,4 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using Moralar.Data.Enum;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using Moralar.Data.Enum;
 
 namespace Moralar.Data.Entities.Auxiliar
 {
@@ -27,6 +23,7 @@ namespace Moralar.Data.Entities.Auxiliar
         public bool HasAccessLadder { get; set; }
         public bool HasAccessRamp { get; set; }
         public bool HasAdaptedToPcd { get; set; }
+        public bool StreetEdge { get; set; }
         public TypePropertyRegularization PropertyRegularization { get; set; }
         public TypePropertyGasInstallation TypeGasInstallation { get; set; }
 

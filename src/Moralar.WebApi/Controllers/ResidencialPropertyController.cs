@@ -702,30 +702,44 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        [OnlyAdministrator]
 
-        public async Task<IActionResult> Export([FromForm] string code, [FromForm] string status, [FromForm] int availableForSale)
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string code, [FromForm] string status, [FromForm] int availableForSale, [FromForm] TypeStatusResidencial? typeStatusResidencialProperty)
         {
             var response = new DtResult<ResidencialPropertyExportViewModel>();
             try
             {
-                var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
-                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+                conditions.Add(builder.Where(x => x.Created != null));
 
-                if (!string.IsNullOrEmpty(code))
+                if (typeStatusResidencialProperty != null)
+                    conditions.Add(builder.Eq(x => x.TypeStatusResidencialProperty, typeStatusResidencialProperty));
+
+                if (string.IsNullOrEmpty(code) == false)
                     conditions.Add(builder.Where(x => x.Code.ToUpper() == code.ToUpper()));
-                if (!string.IsNullOrEmpty(status))
+
+                if (string.IsNullOrEmpty(status) == false)
                     if (status == "0")
                         conditions.Add(builder.Where(x => x.DataBlocked == null));
                     else if (status == "1")
                         conditions.Add(builder.Where(x => x.DataBlocked != null));
+                //var condition = builder.And(conditions);
 
+                var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
+
+                var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
+                var totalRecords = (int)await _residencialPropertyRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                    ? Builders<Data.Entities.ResidencialProperty>.Sort.Descending(sortColumn)
+                    : Builders<Data.Entities.ResidencialProperty>.Sort.Ascending(sortColumn);
+
+                var allData = await _residencialPropertyRepository
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, totalRecords, conditions, columns);
 
                 var condition = builder.And(conditions);
                 var fileName = "Imoveis_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
-                var allData = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
 
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
                 if (Directory.Exists(path) == false)
@@ -737,7 +751,7 @@ namespace Moralar.WebApi.Controllers
                 if (System.IO.File.Exists(fullPathFile) == false)
                     return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
 
-                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
             catch (Exception ex)
