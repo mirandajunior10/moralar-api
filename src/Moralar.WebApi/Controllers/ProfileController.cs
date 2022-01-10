@@ -681,7 +681,7 @@ namespace Moralar.WebApi.Controllers
                     if (isInvalidState != null)
                         return BadRequest(isInvalidState);
 
-                    profileEntity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password).ConfigureAwait(false)
+                    profileEntity = !string.IsNullOrEmpty(model.Cpf) ? await _profileRepository.FindOneByAsync(x => x.Cpf == model.Cpf && x.Password == model.Password && x.TypeProfile == model.TypeUserProfile).ConfigureAwait(false)
                             : await _profileRepository.FindOneByAsync(x => x.Email == model.Email && x.Password == model.Password && x.TypeProfile == model.TypeUserProfile).ConfigureAwait(false);
 
 
@@ -722,7 +722,8 @@ namespace Moralar.WebApi.Controllers
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
-        [HttpPost("BlockUnBlock")]
+        [HttpPost("TTS/BlockUnBlock")]
+        [HttpPost("Gestor/BlockUnBlock")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
         [ProducesResponseType(400)]
