@@ -177,15 +177,24 @@ namespace Moralar.WebApi.Controllers
                 var builderAnswer = Builders<QuestionAnswer>.Filter;
                 var conditionsAnswer = new List<FilterDefinition<QuestionAnswer>>();
 
-                conditionsAnswer.Add(builderAnswer.Where(x => x.QuizId == quizId && x.FamilyId == familyId));
+                if (string.IsNullOrEmpty(familyId) == false)
+                    conditionsAnswer.Add(builderAnswer.Eq(x => x.FamilyId, familyId));
+                if (string.IsNullOrEmpty(quizId) == false)
+                    conditionsAnswer.Add(builderAnswer.Eq(x => x.QuizId, quizId));
+
+                if (conditionsAnswer.Count() == 0)
+                    conditionsAnswer.Add(builderAnswer.Empty);
 
                 var answers = await _questionAnswerRepository.GetCollectionAsync().FindSync(builderAnswer.And(conditionsAnswer)).ToListAsync();
-
 
                 var builderQuestion = Builders<Question>.Filter;
                 var conditionsQuestion = new List<FilterDefinition<Question>>();
 
-                conditionsQuestion.Add(builderQuestion.Eq(x => x.QuizId, quizId));
+                if (string.IsNullOrEmpty(quizId) == false)
+                    conditionsQuestion.Add(builderQuestion.Eq(x => x.QuizId, quizId));
+
+                if (conditionsQuestion.Count() == 0)
+                    conditionsQuestion.Add(builderQuestion.Empty);
 
                 var question = await _questionRepository.GetCollectionAsync().FindSync(builderQuestion.And(conditionsQuestion)).ToListAsync();
 

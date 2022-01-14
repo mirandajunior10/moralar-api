@@ -92,12 +92,26 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Phone, opt => opt.MapFrom(src => src.Holder.Phone))
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Schedule, FamilyHolderListViewModel>()
+                .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created))
+                .ForMember(dest => dest.ScheduleId, opt => opt.MapFrom(src => src._id.ToString()))
+                .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.HolderNumber))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.HolderName))
+                .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.HolderCpf))
+                .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.FamilyId));
+            
+            CreateMap<Schedule, FamilyHolderExportViewModel>()
+                .ForMember(dest => dest.TypeScheduleStatus, opt => opt.MapFrom(src => src.TypeScheduleStatus.GetEnumMemberValue()))
+                .ForMember(dest => dest.TypeSubject, opt => opt.MapFrom(src => src.TypeSubject.GetEnumMemberValue()))
+                .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.HolderNumber))
+                .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.HolderName))
+                .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.HolderCpf));
 
             CreateMap<Family, FamilyHolderExportViewModel>()
                 .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Holder.Number))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Holder.Name))
-                .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Holder.Cpf))
-                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+                .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.Holder.Cpf));
 
 
             CreateMap<Family, FamilyCompleteViewModel>()

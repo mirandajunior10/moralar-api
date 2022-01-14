@@ -1,15 +1,16 @@
-﻿using Moralar.Data.Enum;
-using Newtonsoft.Json;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
+using Moralar.Data.Enum;
+using Newtonsoft.Json;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Property
 {
     public class ResidencialPropertyViewModel : BaseViewModel
     {
+        public long? Created { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Código do imóvel")]
         public string Code { get; set; }

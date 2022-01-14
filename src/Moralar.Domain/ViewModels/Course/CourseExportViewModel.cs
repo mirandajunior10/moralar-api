@@ -28,7 +28,7 @@ namespace Moralar.Domain.ViewModels.Course
         /// Total de inscritos
         /// </summary>
         [Display(Name = "Total de inscritos")]
-        public int TotalSubscribers { get; set; }
+        public int TotalInscriptions { get; set; }
         /// <summary>
         /// Total aguardando lista de espera
         /// </summary>

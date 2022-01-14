@@ -1,8 +1,8 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using MongoDB.Bson.Serialization.Attributes;
+using Moralar.Data.Enum;
 using UtilityFramework.Infra.Core.MongoDb.Data.Modelos;
 
 namespace Moralar.Data.Entities
@@ -21,8 +21,8 @@ namespace Moralar.Data.Entities
         public string Description { get; set; }
         public int StartTargetAudienceAge { get; set; }
         public int EndTargetAudienceAge { get; set; }
-        public TypeGenre TypeGenre { get; set; }
-        public int NumberOfVacancies{get;set;}
+        public TypeGenre? TypeGenre { get; set; }
+        public int NumberOfVacancies { get; set; }
 
         public override string CollectionName => nameof(Course);
     }

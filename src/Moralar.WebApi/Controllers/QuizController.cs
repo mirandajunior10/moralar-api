@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -123,6 +124,7 @@ namespace Moralar.WebApi.Controllers
         [HttpGet("GetByName")]
         [Produces("application/json")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(QuizListViewModel), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
@@ -130,21 +132,38 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+                var userId = Request.GetUserId();
+
                 var conditions = new List<FilterDefinition<Data.Entities.Quiz>>();
                 var builder = Builders<Data.Entities.Quiz>.Filter;
                 conditions.Add(builder.Where(x => x.Created != null && x._id != null));
-                if (!string.IsNullOrEmpty(nameQuiz))
-                    conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(nameQuiz.ToUpper())));
+
+                if (string.IsNullOrEmpty(nameQuiz) == false)
+                    conditions.Add(builder.Regex(x => x.Title, new BsonRegularExpression(new Regex(nameQuiz, RegexOptions.IgnoreCase))));
 
                 conditions.Add(builder.Where(x => x.TypeQuiz == typeQuiz));
-                var condition = builder.And(conditions);
 
-
-                var entityQuiz = await _quizRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Quiz>() { }).ToListAsync();
-                if (entityQuiz.Count() == 0)
+                var listQuiz = await _quizRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Data.Entities.Quiz>() { }).ToListAsync();
+                if (listQuiz.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizListViewModel>>(entityQuiz)));
+                var listQuizFamilies = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == userId) as List<QuizFamily>;
+
+                var response = _mapper.Map<List<Quiz>, List<QuizListViewModel>>(listQuiz, opt => opt.AfterMap((src, dest) =>
+                {
+
+                    for (int i = 0; i < src.Count(); i++)
+                    {
+                        var quizfamilyEntity = listQuizFamilies.Find(x => x.QuizId == src[i]._id.ToString());
+                        if (quizfamilyEntity != null)
+                        {
+                            dest[i].TypeStatus = quizfamilyEntity.TypeStatus;
+                            dest[i].FamilyId = userId;
+                        }
+                    }
+                }));
+
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<QuizListViewModel>>(listQuiz)));
             }
             catch (Exception ex)
             {

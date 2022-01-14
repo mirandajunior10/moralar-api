@@ -459,6 +459,8 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> DetailTimeLineProcessChooseProperty([FromRoute] string familyId)
         {
+
+            /*TODO VERIFICAR REGRA SE NECESSARIO AGENDAMENTO DE ESCOLHA DE IMOVEL*/
             try
             {
                 var vwScheduleDetailTimeLineChoosePropertyViewModel = new ScheduleDetailTimeLineChoosePropertyViewModel();
@@ -468,9 +470,9 @@ namespace Moralar.WebApi.Controllers
 
                 vwScheduleDetailTimeLineChoosePropertyViewModel = _mapper.Map<ScheduleDetailTimeLineChoosePropertyViewModel>(family);
 
-                var schedule = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == familyId && x.TypeSubject == TypeSubject.EscolhaDoImovel);
-                if (schedule == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+                // var schedule = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == familyId && x.TypeSubject == TypeSubject.EscolhaDoImovel);
+                // if (schedule == null)
+                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
                 var interest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<PropertiesInterest>;
                 if (interest.Count() > 0)
@@ -478,10 +480,11 @@ namespace Moralar.WebApi.Controllers
                     var residencialPropertyInterest = await _residencialPropertyRepository.FindIn("_id", interest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
                     vwScheduleDetailTimeLineChoosePropertyViewModel.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialPropertyInterest);
 
-                    var scheduleHistory = _scheduleHistoryRepository.FindBy(x => x.FamilyId == familyId).OrderBy(x => x.TypeSubject).ThenBy(x => x.Created).ToList();
+                    var scheduleHistory = _scheduleHistoryRepository.FindBy(x => x.FamilyId == familyId).OrderBy(x => x.TypeSubject).ThenByDescending(x => x.Created).ToList();
                     vwScheduleDetailTimeLineChoosePropertyViewModel.Schedules = _mapper.Map<List<ScheduleHistoryViewModel>>(scheduleHistory);
                 }
-
+                vwScheduleDetailTimeLineChoosePropertyViewModel.InterestResidencialProperty = vwScheduleDetailTimeLineChoosePropertyViewModel.InterestResidencialProperty.OrderByDescending(x => x.Created).ToList();
+                vwScheduleDetailTimeLineChoosePropertyViewModel.Schedules = vwScheduleDetailTimeLineChoosePropertyViewModel.Schedules.OrderByDescending(x => x.Created).ToList();
 
                 var listQuizByFamily = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId, Builders<QuizFamily>.Sort.Descending(nameof(QuizFamily.Created))) as List<QuizFamily>;
                 var listQuiz = await _quizRepository.FindIn("_id", listQuizByFamily.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
@@ -492,6 +495,7 @@ namespace Moralar.WebApi.Controllers
                     {
                         vwScheduleDetailTimeLineChoosePropertyViewModel.DetailQuiz.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
                         {
+                            Created = listQuizByFamily[i].Created,
                             Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
                             Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
                             HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
@@ -503,6 +507,7 @@ namespace Moralar.WebApi.Controllers
                     {
                         vwScheduleDetailTimeLineChoosePropertyViewModel.DetailEnquete.Add(new ScheduleQuizDetailTimeLinePGMViewModel()
                         {
+                            Created = listQuizByFamily[i].Created,
                             Title = listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).Title,
                             Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
                             HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
@@ -518,12 +523,18 @@ namespace Moralar.WebApi.Controllers
                 {
                     vwScheduleDetailTimeLineChoosePropertyViewModel.Courses.Add(new ScheduleCourseViewModel()
                     {
+                        Created = courseFamily[i].Created,
                         Title = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).Title,
                         StartDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).StartDate,
                         EndDate = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId)).EndDate,
                         TypeStatusCourse = courseFamily[i].TypeStatusCourse
                     });
                 }
+
+                vwScheduleDetailTimeLineChoosePropertyViewModel.Courses = vwScheduleDetailTimeLineChoosePropertyViewModel.Courses.OrderByDescending(x => x.Created).ToList();
+                vwScheduleDetailTimeLineChoosePropertyViewModel.DetailQuiz = vwScheduleDetailTimeLineChoosePropertyViewModel.DetailQuiz.OrderByDescending(x => x.Created).ToList();
+                vwScheduleDetailTimeLineChoosePropertyViewModel.DetailEnquete = vwScheduleDetailTimeLineChoosePropertyViewModel.DetailEnquete.OrderByDescending(x => x.Created).ToList();
+
                 return Ok(Utilities.ReturnSuccess(data: vwScheduleDetailTimeLineChoosePropertyViewModel));
             }
             catch (Exception ex)

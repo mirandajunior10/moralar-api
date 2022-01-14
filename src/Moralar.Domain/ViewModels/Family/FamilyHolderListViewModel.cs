@@ -24,11 +24,11 @@ namespace Moralar.Domain.ViewModels.Family
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Data de nascimento")]
-        public long Birthday { get; set; }
+        public long? Birthday { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Gênero")]
-        public TypeGenre Genre { get; set; }
+        public TypeGenre? Genre { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "E-mail")]
@@ -40,10 +40,11 @@ namespace Moralar.Domain.ViewModels.Family
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Escolaridade")]
-        public TypeScholarity Scholarity { get; set; }
+        public TypeScholarity? Scholarity { get; set; }
 
         public TypeSubject TypeSubject { get; set; }
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
+        public string ScheduleId { get; set; }
 
         public bool Blocked { get; set; }
     }

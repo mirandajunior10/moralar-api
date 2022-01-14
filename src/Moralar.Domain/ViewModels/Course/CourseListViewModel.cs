@@ -1,19 +1,19 @@
-﻿using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Moralar.Data.Enum;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Course
 {
-    public class CourseListViewModel:BaseViewModel
+    public class CourseListViewModel : BaseViewModel
     {
-       
+        public long? Created { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
         public string Title { get; set; }
 
 
 
-      
+
         public string Img { get; set; }
 
 
@@ -25,7 +25,7 @@ namespace Moralar.Domain.ViewModels.Course
 
 
 
-     
+
         public string Schedule { get; set; }
 
 
@@ -40,23 +40,23 @@ namespace Moralar.Domain.ViewModels.Course
 
 
 
-      
+
         public string Description { get; set; }
 
 
 
-      
+
         public int StartTargetAudienceAge { get; set; }
 
 
-     
+
         public int EndTargetAudienceAge { get; set; }
 
-      
+
         public TypeGenre TypeGenre { get; set; }
 
 
-       
+
         public int NumberOfVacancies { get; set; }
 
         public int TotalInscriptions { get; set; }

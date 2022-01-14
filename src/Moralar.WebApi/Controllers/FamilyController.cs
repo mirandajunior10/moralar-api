@@ -208,62 +208,66 @@ namespace Moralar.WebApi.Controllers
         public async Task<IActionResult> TimeLineLoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject? typeSubject)
         {
             var response = new DtResult<FamilyHolderListViewModel>();
-
+            var listFamily = new List<Family>();
             try
             {
-                // var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
-
-                // if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
-                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
-
-                var builder = Builders<Data.Entities.Family>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+                var builder = Builders<Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Schedule>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
+
+                if (typeSubject != null)
+                    conditions.Add(builder.Eq(x => x.TypeSubject, typeSubject));
+
                 if (string.IsNullOrEmpty(number) == false)
-                    conditions.Add(builder.Where(x => x.Holder.Number == number));
+                    conditions.Add(builder.Where(x => x.HolderNumber == number));
 
                 if (string.IsNullOrEmpty(holderName) == false)
-                    conditions.Add(builder.Regex(x => x.Holder.Name, new BsonRegularExpression(holderName, "i")));
+                    conditions.Add(builder.Regex(x => x.HolderName, new BsonRegularExpression(holderName, "i")));
 
                 if (string.IsNullOrEmpty(holderCpf) == false)
-                    conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
+                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
 
-                var schedule = (typeSubject != null ?  await _scheduleRepository.FindByAsync(x => x.TypeSubject == typeSubject) : await _scheduleRepository.FindAllAsync()) as List<Schedule>;
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
-                var totalRecords = (int)await _familyRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+                var totalRecords = (int)await _scheduleRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
 
                 var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
-                    ? Builders<Data.Entities.Family>.Sort.Descending(sortColumn)
-                    : Builders<Data.Entities.Family>.Sort.Ascending(sortColumn);
+                    ? Builders<Schedule>.Sort.Descending(sortColumn)
+                    : Builders<Schedule>.Sort.Ascending(sortColumn);
 
-                var retorno = await _familyRepository
-                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Family>;
+                var retorno = await _scheduleRepository
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Schedule>;
 
-                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
-                    ? (int)await _familyRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
+                    ? (int)await _scheduleRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                var _vwFamiliHolder = _mapper.Map<List<FamilyHolderListViewModel>>(filterFamilyWithSchedule);
-                var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
+                if (retorno.Count() > 0)
+                    listFamily = await _familyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.FamilyId)).ToList()) as List<Family>;
 
-                for (int i = 0; i < _vwFamiliHolder.Count(); i++)
+                var _vwFamiliHolder = _mapper.Map<List<Schedule>, List<FamilyHolderListViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
                 {
-                    if (_schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id) != null)
+                    for (int i = 0; i < src.Count(); i++)
                     {
-                        _vwFamiliHolder[i].TypeScheduleStatus = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeScheduleStatus;
-                        _vwFamiliHolder[i].TypeSubject = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeSubject;
+                        var familyItem = listFamily.Find(x => x._id.ToString() == src[i].FamilyId);
+                        if (familyItem != null)
+                        {
+                            dest[i].Birthday = familyItem.Holder.Birthday.GetValueOrDefault();
+                            dest[i].Genre = familyItem.Holder.Genre;
+                            dest[i].Scholarity = familyItem.Holder.Scholarity;
+                            dest[i].Email = familyItem.Holder.Email;
+                            dest[i].Phone = familyItem.Holder.Phone;
+                        }
                     }
-                }
+                }));
 
-                response.Data = typeSubject != null ? _vwFamiliHolder.Where(x => x.TypeSubject == typeSubject).ToList() : _vwFamiliHolder;
+                response.Data = _vwFamiliHolder;
                 response.Draw = model.Draw;
-                response.RecordsFiltered = _vwFamiliHolder.Count(); //totalrecordsFiltered;
-                response.RecordsTotal = _vwFamiliHolder.Count(); //totalRecords;
+                response.RecordsFiltered = totalrecordsFiltered;
+                response.RecordsTotal = totalRecords;
 
                 return Ok(response);
 
@@ -290,53 +294,46 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> ExportTimeLine([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject typeSubject)
+        public async Task<IActionResult> ExportTimeLine([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject? typeSubject)
         {
             var response = new DtResult<FamilyHolderExportViewModel>();
-
+            var listFamily = new List<Family>();
             try
             {
-                // var listEnumsOfTimeLine = new List<int> { 2, 4, 7, 8 };//verificar se o parâmetro corresponde a um dos types
 
-                // if (!listEnumsOfTimeLine.Exists(x => x == (int)typeSubject))
-                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.EnumInvalid));
-
-                var builder = Builders<Data.Entities.Family>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.Family>>();
+                var builder = Builders<Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Schedule>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
-                if (!string.IsNullOrEmpty(number))
-                    conditions.Add(builder.Where(x => x.Holder.Number == number));
-                if (!string.IsNullOrEmpty(holderName))
-                    conditions.Add(builder.Where(x => x.Holder.Name.ToUpper().Contains(holderName.ToUpper())));
-                if (!string.IsNullOrEmpty(holderCpf))
-                    conditions.Add(builder.Where(x => x.Holder.Cpf == holderCpf.OnlyNumbers()));
 
-                var schedule = await _scheduleRepository.FindByAsync(x => x.TypeSubject == typeSubject).ConfigureAwait(false) as List<Schedule>;
+
+                if (typeSubject != null)
+                    conditions.Add(builder.Eq(x => x.TypeSubject, typeSubject));
+
+                if (string.IsNullOrEmpty(number) == false)
+                    conditions.Add(builder.Where(x => x.HolderNumber == number));
+
+                if (string.IsNullOrEmpty(holderName) == false)
+                    conditions.Add(builder.Regex(x => x.HolderName, new BsonRegularExpression(holderName, "i")));
+
+                if (string.IsNullOrEmpty(holderCpf) == false)
+                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
+
                 var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
                 var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
-                var totalRecords = (int)await _familyRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+                var totalRecords = (int)await _scheduleRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
 
                 var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
-                    ? Builders<Data.Entities.Family>.Sort.Descending(sortColumn)
-                    : Builders<Data.Entities.Family>.Sort.Ascending(sortColumn);
+                    ? Builders<Schedule>.Sort.Descending(sortColumn)
+                    : Builders<Schedule>.Sort.Ascending(sortColumn);
 
-                var retorno = await _familyRepository
-                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<Family>;
+                var retorno = await _scheduleRepository
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, totalRecords, conditions, columns) as List<Schedule>;
 
-                var filterFamilyWithSchedule = retorno.FindAll(x => schedule.Exists(c => c.FamilyId == x._id.ToString()));
-
-                var _vwFamiliHolder = _mapper.Map<List<FamilyHolderExportViewModel>>(filterFamilyWithSchedule);
-                var _schedules = await _scheduleRepository.FindIn("FamilyId", retorno.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<Schedule>;
-
-                for (int i = 0; i < _vwFamiliHolder.Count(); i++)
-                {
-                    if (_schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id) != null)
-                    {
-                        _vwFamiliHolder[i].TypeSubject = _schedules.Find(x => x.FamilyId == _vwFamiliHolder[i].Id).TypeSubject;
-                    }
-                }
+                var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
+                    ? (int)await _scheduleRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
+                    : totalRecords;
 
                 var fileName = "Linha do Tempo Familias_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");

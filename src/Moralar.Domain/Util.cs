@@ -535,14 +535,22 @@ namespace Moralar.Domain
             return dic;
         }
 
-        public static bool HasValidMemberBirthDay(Family entityFamily, int startTargetAudienceAge, int endTargetAudienceAge)
+        public static (bool Birthday, bool Gender) HasValidMember(Family entityFamily, int startTargetAudienceAge, int endTargetAudienceAge, TypeGenre? typeGender)
         {
             try
             {
                 var listAges = new List<int>();
+                var listTypeGender = new List<TypeGenre>();
 
                 if (entityFamily.Holder.Birthday != null)
+                {
                     listAges.Add(entityFamily.Holder.Birthday.Value.TimeStampToDateTime().CalculeAge());
+                }
+
+                if (entityFamily.Holder.Genre != null)
+                {
+                    listTypeGender.Add(entityFamily.Holder.Genre.GetValueOrDefault());
+                }
 
                 for (int i = 0; i < entityFamily.Members.Count(); i++)
                 {
@@ -550,7 +558,9 @@ namespace Moralar.Domain
                         listAges.Add(entityFamily.Members[i].Birthday.TimeStampToDateTime().CalculeAge());
                 }
 
-                return listAges.Count(age => age >= startTargetAudienceAge && age <= endTargetAudienceAge) > 0;
+                var validBirthday = listAges.Count(age => age >= startTargetAudienceAge && age <= endTargetAudienceAge) > 0;
+                var validGender = (typeGender == null || listTypeGender.Count(x => x == typeGender) > 0);
+                return (validBirthday, validGender);
 
             }
             catch (Exception)

@@ -48,14 +48,16 @@ namespace Moralar.WebApi.Controllers
         private readonly IProfileRepository _profileRepository;
         private readonly ISenderMailService _senderMailService;
         private readonly IUtilService _utilService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
 
-        public ProfileController(IHostingEnvironment env, IMapper mapper, IProfileRepository profileRepository, ISenderMailService senderMailService, IUtilService utilService)
+        public ProfileController(IHostingEnvironment env, IMapper mapper, IProfileRepository profileRepository, ISenderMailService senderMailService, IUtilService utilService, IHttpContextAccessor httpContextAccessor)
         {
             _env = env;
             _mapper = mapper;
             _profileRepository = profileRepository;
             _senderMailService = senderMailService;
             _utilService = utilService;
+            _httpContextAccessor = httpContextAccessor;
         }
 
 
@@ -503,6 +505,8 @@ namespace Moralar.WebApi.Controllers
             try
             {
 
+                var validOnly = _httpContextAccessor.GetFieldsFromBody();
+
                 if (string.IsNullOrEmpty(model.Id))
                     return BadRequest(Utilities.ReturnErro());
 
@@ -517,10 +521,9 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ProfileNotFound));
 
-                entity = _mapper.Map<Data.Entities.Profile>(model);
+                entity.SetIfDifferent(model, validOnly);
 
-
-                _profileRepository.Update(entity);
+                await _profileRepository.UpdateAsync(entity);
 
                 return Ok(Utilities.ReturnSuccess("Alterada com sucesso."));
             }

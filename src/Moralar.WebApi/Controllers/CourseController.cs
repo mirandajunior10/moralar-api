@@ -122,21 +122,23 @@ namespace Moralar.WebApi.Controllers
         /// <returns></returns>
         [HttpPost("LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(List<CourseListViewModel>), 200)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        //[ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string title, [FromForm] long? startDate, [FromForm] long? endDate)
         {
             var response = new DtResult<CourseListViewModel>();
+            var listCourseFamily = new List<CourseFamily>();
             try
             {
                 var builder = Builders<Data.Entities.Course>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.Course>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
-                if (!string.IsNullOrEmpty(title))
-                    conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(title.ToUpper())));
+
+                if (string.IsNullOrEmpty(title) == false)
+                    conditions.Add(builder.Regex(x => x.Title, new BsonRegularExpression(new Regex(title, RegexOptions.IgnoreCase))));
 
                 if (startDate != null)
                     conditions.Add(builder.Where(x => x.Created >= startDate));
@@ -160,19 +162,18 @@ namespace Moralar.WebApi.Controllers
                     ? (int)await _courseRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                var viewModelData = _mapper.Map<List<CourseListViewModel>>(retorno);
+                if (retorno.Count() > 0)
+                    listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
 
-                /*TOTAL DE INSCRITOS NO CURSO*/
-                for (int i = 0; i < retorno.Count(); i++)
+                var viewModelData = _mapper.Map<List<Course>, List<CourseListViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
                 {
-                    var item = retorno[i];
+                    for (int i = 0; i < src.Count(); i++)
+                    {
+                        dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito);
+                        dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera);
+                    }
 
-                    var totalInscriptions = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.Inscrito).ConfigureAwait(false);
-                    var totalWaitingList = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.ListaEspera).ConfigureAwait(false);
-
-                    viewModelData[i].TotalInscriptions = totalInscriptions;
-                    viewModelData[i].TotalWaitingList = totalWaitingList;
-                }
+                }));
 
                 response.Data = viewModelData;
                 response.Draw = model.Draw;
@@ -435,10 +436,13 @@ namespace Moralar.WebApi.Controllers
                 if (entityCourse == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
 
-                var canRegister = Util.HasValidMemberBirthDay(entityFamily, entityCourse.StartTargetAudienceAge, entityCourse.EndTargetAudienceAge);
+                var canRegister = Util.HasValidMember(entityFamily, entityCourse.StartTargetAudienceAge, entityCourse.EndTargetAudienceAge, entityCourse.TypeGenre);
 
-                if (canRegister == false)
+                if (canRegister.Birthday == false)
                     return BadRequest(Utilities.ReturnErro("Não é possível realizar a inscrição neste curso, por não condizer com o público a que é destinado"));
+
+                if (canRegister.Gender == false)
+                    return BadRequest(Utilities.ReturnErro("Não é possível realizar a inscrição neste curso, por não condizer com o gênero que é destinado"));
 
                 var qtdCourse = await _courseFamilyRepository.FindByAsync(x => x.CourseId == model.CourseId).ConfigureAwait(false) as List<CourseFamily>;
                 if (qtdCourse.Count() >= entityCourse.NumberOfVacancies && model.WaitInTheQueue == false)
@@ -563,18 +567,18 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
 
 
-        public async Task<IActionResult> Export([FromForm] string title, [FromForm] long? startDate, [FromForm] long? endDate)
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string title, [FromForm] long? startDate, [FromForm] long? endDate)
         {
-            var response = new DtResult<CourseExportViewModel>();
+            var listCourseFamily = new List<CourseFamily>();
             try
             {
-                var conditions = new List<FilterDefinition<Data.Entities.Course>>();
                 var builder = Builders<Data.Entities.Course>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.Course>>();
 
-                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+                conditions.Add(builder.Where(x => x.Created != null));
 
                 if (string.IsNullOrEmpty(title) == false)
-                    conditions.Add(builder.Regex(x => x.Title, new Regex(title, RegexOptions.IgnoreCase)));
+                    conditions.Add(builder.Regex(x => x.Title, new BsonRegularExpression(new Regex(title, RegexOptions.IgnoreCase))));
 
                 if (startDate != null)
                     conditions.Add(builder.Where(x => x.Created >= startDate));
@@ -582,36 +586,42 @@ namespace Moralar.WebApi.Controllers
                 if (endDate != null)
                     conditions.Add(builder.Where(x => x.Created <= endDate));
 
+                var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
 
-                var condition = builder.And(conditions);
-                var fileName = "Cursos_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
-                var allData = await _courseRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Course>() { }).ToListAsync();
+                var sortColumn = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
+                var totalRecords = (int)await _courseRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
 
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                    ? Builders<Data.Entities.Course>.Sort.Descending(sortColumn)
+                    : Builders<Data.Entities.Course>.Sort.Ascending(sortColumn);
+
+                var retorno = await _courseRepository
+                    .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, totalRecords, conditions, columns) as List<Course>;
+
+                if (retorno.Count() > 0)
+                    listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
+
+                var listViewModel = _mapper.Map<List<Course>, List<CourseExportViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
+                {
+                    for (int i = 0; i < src.Count(); i++)
+                    {
+                        dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito);
+                        dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera);
+                    }
+                }));
+
+                var fileName = "Cursos.xlsx";
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
                 if (Directory.Exists(path) == false)
                     Directory.CreateDirectory(path);
 
                 var fullPathFile = Path.Combine(path, fileName);
-                var listViewModel = _mapper.Map<List<CourseExportViewModel>>(allData);
-
-
-                /*TOTAL DE INSCRITOS NO CURSO*/
-                for (int i = 0; i < allData.Count(); i++)
-                {
-                    var item = allData[i];
-
-                    var totalInscriptions = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.Inscrito).ConfigureAwait(false);
-                    var totalWaitingList = await _courseFamilyRepository.CountAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.ListaEspera).ConfigureAwait(false);
-
-                    listViewModel[i].TotalSubscribers = totalInscriptions;
-                    listViewModel[i].TotalWaitingList = totalWaitingList;
-                }
 
                 Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
                 if (System.IO.File.Exists(fullPathFile) == false)
                     return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
 
-                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
             }
             catch (Exception ex)

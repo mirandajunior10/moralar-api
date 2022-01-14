@@ -1,7 +1,7 @@
-﻿using Moralar.Data.Enum;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using Moralar.Data.Enum;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.ScheduleHistory
@@ -12,6 +12,7 @@ namespace Moralar.Domain.ViewModels.ScheduleHistory
         {
             Children = new List<ScheduleHistoryViewModel>();
         }
+        public long? Created { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
         public long Date { get; set; }
         public string ParentId { get; set; }
         public string ScheduleId { get; set; }

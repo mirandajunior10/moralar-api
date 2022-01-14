@@ -1,9 +1,7 @@
-﻿using Moralar.Data.Enum;
-using Moralar.Domain.ViewModels.Question;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
+
+using Moralar.Data.Enum;
+
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Quiz
@@ -14,6 +12,8 @@ namespace Moralar.Domain.ViewModels.Quiz
         [Display(Name = "Título")]
         public string Title { get; set; }
         public TypeQuiz TypeQuiz { get; set; }
+        public TypeStatus TypeStatus { get; set; }
+        public string FamilyId { get; set; }
         public long Created { get; set; }
     }
 }

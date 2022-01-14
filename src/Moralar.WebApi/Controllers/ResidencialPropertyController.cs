@@ -382,13 +382,13 @@ namespace Moralar.WebApi.Controllers
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd.GetValueOrDefault()));
 
                 if (model.Lat != null && model.Lng != null)
-                    conditions.Add(builder.Near(x => x.Position,model.Lat.GetValueOrDefault(),model.Lng.GetValueOrDefault()));
+                    conditions.Add(builder.Near(x => x.Position, model.Lat.GetValueOrDefault(), model.Lng.GetValueOrDefault()));
 
                 var condition = builder.And(conditions);
 
                 var listEntity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
                 if (listEntity.Count() == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.AnyResidencialProperty));
 
                 var listInterest = await _propertiesInterestRepository.FindIn(nameof(PropertiesInterest.ResidencialPropertyId), listEntity.Select(x => x._id.ToString()).ToList());
                 var response = _mapper.Map<List<ResidencialProperty>, List<ResidencialPropertyViewModel>>(listEntity, opt => opt.AfterMap((src, dest) =>

@@ -62,6 +62,66 @@ namespace Moralar.WebApi.Controllers
             _utilService = utilService;
         }
 
+        /// <summary>
+        /// LISTAR QUESTIONARIOS DISPONIBILIZADOS PARA AS FAMILIAS 
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("Available/{page}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(List<QuizFamilyListViewModel>), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> Available([FromRoute] int page, [FromQuery] string number, [FromQuery] string holderName, [FromQuery] string holderCpf, [FromQuery] TypeStatus? status, [FromQuery] TypeQuiz? typeQuiz, [FromQuery] int limit = 30)
+        {
+            try
+            {
+                var builder = Builders<Data.Entities.QuizFamily>.Filter;
+                var conditions = new List<FilterDefinition<Data.Entities.QuizFamily>>();
+
+
+                conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
+
+                if (typeQuiz != null)
+                    conditions.Add(builder.Eq(x => x.TypeQuiz, typeQuiz));
+
+                if (string.IsNullOrEmpty(number) == false)
+                    conditions.Add(builder.Regex(x => x.HolderNumber, new BsonRegularExpression(new Regex(number, RegexOptions.IgnoreCase))));
+
+                if (string.IsNullOrEmpty(holderName) == false)
+                    conditions.Add(builder.Regex(x => x.HolderName, new BsonRegularExpression(new Regex(holderName, RegexOptions.IgnoreCase))));
+
+                if (string.IsNullOrEmpty(holderCpf) == false)
+                    conditions.Add(builder.Regex(x => x.HolderCpf, new BsonRegularExpression(new Regex(holderCpf.OnlyNumbers(), RegexOptions.IgnoreCase))));
+
+
+                if (status != null)
+                    conditions.Add(builder.Where(x => x.TypeStatus == status));
+
+
+                var listQuizFamily = await _quizFamilyRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<QuizFamily>()
+                {
+                    Sort = Builders<QuizFamily>.Sort.Descending(x => x.Created),
+                    Skip = (page - 1) * limit,
+                    Limit = limit,
+                    Collation = new Collation("en", strength: CollationStrength.Primary)
+                }).ToListAsync();
+
+                var response = _mapper.Map<List<QuizFamilyListViewModel>>(listQuizFamily);
+
+                return Ok(Utilities.ReturnSuccess(data: response));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
+            }
+        }
+
 
         /// <summary>
         /// LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
@@ -73,7 +133,7 @@ namespace Moralar.WebApi.Controllers
         /// <returns></returns>
         [HttpPost("Available/LoadData")]
         [ProducesResponseType(typeof(ReturnViewModel), 200)]
-        [ProducesResponseType(typeof(List<QuizFamilyListViewModel>), 200)]
+        [ProducesResponseType(typeof(List<QuizFamilyListViewModel>), 201)]
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
@@ -125,8 +185,8 @@ namespace Moralar.WebApi.Controllers
 
                 response.Data = _mapper.Map<List<QuizFamilyListViewModel>>(retorno);
                 response.Draw = model.Draw;
-                response.RecordsFiltered = response.Data.Count();   //totalrecordsFiltered;
-                response.RecordsTotal = response.Data.Count();  //totalRecords;
+                response.RecordsFiltered = totalrecordsFiltered;
+                response.RecordsTotal = totalRecords;
 
                 return Ok(response);
 
@@ -285,7 +345,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status)
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status, [FromForm] TypeQuiz? typeQuiz)
         {
             var response = new DtResult<QuizFamilyExportViewModel>();
             try
@@ -293,18 +353,22 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.QuizFamily>>();
                 var builder = Builders<Data.Entities.QuizFamily>.Filter;
 
-                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
+                conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
 
-                if (!string.IsNullOrEmpty(number))
-                    conditions.Add(builder.Where(x => x.HolderNumber.ToUpper() == number.ToUpper()));
-                if (!string.IsNullOrEmpty(holderName))
-                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
-                if (!string.IsNullOrEmpty(holderCpf))
-                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
+                if (typeQuiz != null)
+                    conditions.Add(builder.Eq(x => x.TypeQuiz, typeQuiz));
+
+                if (string.IsNullOrEmpty(number) == false)
+                    conditions.Add(builder.Regex(x => x.HolderNumber, new BsonRegularExpression(new Regex(number, RegexOptions.IgnoreCase))));
+
+                if (string.IsNullOrEmpty(holderName) == false)
+                    conditions.Add(builder.Regex(x => x.HolderName, new BsonRegularExpression(new Regex(holderName, RegexOptions.IgnoreCase))));
+
+                if (string.IsNullOrEmpty(holderCpf) == false)
+                    conditions.Add(builder.Regex(x => x.HolderCpf, new BsonRegularExpression(new Regex(holderCpf.OnlyNumbers(), RegexOptions.IgnoreCase))));
 
                 if (status != null)
                     conditions.Add(builder.Where(x => x.TypeStatus == status));
-
 
                 var condition = builder.And(conditions);
                 var fileName = "Questionarios disponibilizados_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
@@ -315,7 +379,6 @@ namespace Moralar.WebApi.Controllers
                 for (int i = 0; i < listQuizFamily.Count(); i++)
                 {
                     listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId))?.Title;
-
                 }
 
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");

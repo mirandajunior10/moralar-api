@@ -1,6 +1,6 @@
-﻿using Moralar.Data.Enum;
+﻿using System.ComponentModel.DataAnnotations;
+using Moralar.Data.Enum;
 using Newtonsoft.Json;
-using System.ComponentModel.DataAnnotations;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 
@@ -34,7 +34,9 @@ namespace Moralar.Domain.ViewModels
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Tipo do Perfil do Usuário")]
+        [IsReadOnly]
         public TypeUserProfile TypeProfile { get; set; }
+        [IsReadOnly]
         public bool Blocked { get; set; }
         //public string Password { get; set; }
     }
