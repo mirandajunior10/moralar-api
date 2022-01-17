@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using MimeTypes.Core;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Moralar.Data.Entities;
@@ -123,7 +124,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        //[ApiExplorerSettings(IgnoreApi = true)]
         public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string code, [FromForm] string status, [FromForm] int availableForSale, [FromForm] TypeStatusResidencial? typeStatusResidencialProperty)
         {
             var response = new DtResult<ResidencialPropertyViewModel>();
@@ -342,6 +342,9 @@ namespace Moralar.WebApi.Controllers
                 var familyEntity = await _familyRepository.FindByIdAsync(userId);
                 if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                // if (await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel) == false)
+                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty, responseList: true));
 
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
@@ -759,5 +762,112 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(Utilities.ReturnErro(ex.Message));
             }
         }
+
+        /// <summary>
+        /// DOWNLOAD DE ARQUIVO DE EXEMPLO DE IMPORTAÇÃO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ExampleFileImport")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        public async Task<IActionResult> ExampleFileImport()
+        {
+            try
+            {
+                var fileName = "Modelo Importar Imoveis.xlsx";
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+                var listViewModel = new List<ResidencialPropertyImportViewModel>();
+
+
+                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
+        /// IMPORTAR IMOVEIS
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("FileImport")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        [AllowAnonymous]
+        //[OnlyAdministrator]
+        public async Task<IActionResult> FileImport([FromForm] IFormFile file)
+        {
+            try
+            {
+
+                if (file == null || file.Length <= 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotFound));
+
+                var extension = MimeTypeMap.GetExtension(file.ContentType).ToLower();
+
+                if (Util.AcceptedFiles.Count(x => x == extension) == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FileNotAllowed));
+
+                var listEntityViewModel = await Util.ReadAndValidationExcel<ResidencialPropertyImportViewModel>(file);
+
+                if (listEntityViewModel.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ZeroItems));
+
+
+                var listEntity = _mapper.Map<List<ResidencialProperty>>(listEntityViewModel);
+
+
+                for (int i = 0; i < listEntity.Count(); i++)
+                {
+                    listEntity[i].TypeStatusResidencialProperty = TypeStatusResidencial.AEscolher;
+                    listEntity[i].Position = new List<double> { listEntity[i].ResidencialPropertyAdress.Latitude, listEntity[i].ResidencialPropertyAdress.Longitude };
+                }
+
+                const int limit = 250;
+                var registred = 0;
+                var index = 0;
+
+                while (listEntity.Count() > registred)
+                {
+                    var itensToRegister = listEntity.Skip(limit * index).Take(limit).ToList();
+
+                    if (itensToRegister.Count() > 0)
+                        await _residencialPropertyRepository.CreateAsync(itensToRegister);
+                    registred += limit;
+                    index++;
+                }
+
+                return Ok(Utilities.ReturnSuccess($"Importação realizada com sucesso, total de {listEntity.Count()} imóvel(is)"));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
     }
 }
