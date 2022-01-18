@@ -36,10 +36,6 @@ namespace Moralar.Domain.ViewModels.QuizFamily
         /// </summary>
         [Display(Name = "Status")]
         public string Status { get; set; }
-        /// <summary>
-        /// Id Quiz
-        /// </summary>
-        [IsReadOnly]
-        public string QuizId { get; set; }
+
     }
 }

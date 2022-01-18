@@ -202,8 +202,7 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Created, opt => opt.MapFrom(src => src.Created.MapUnixTime("dd/MM/yyyy", "-")))
                 .ForMember(dest => dest.Status, opt => opt.MapFrom(src => src.TypeStatus == 0 ? "Não respondido" : "Respondido"));
 
-            CreateMap<Quiz, QuizFamilyExportViewModel>()
-            .ForMember(dest => dest.QuizId, opt => opt.Ignore());
+            CreateMap<Quiz, QuizFamilyExportViewModel>();
 
             CreateMap<QuestionAnswerAux, QuestionAnswerAuxViewModel>();
 

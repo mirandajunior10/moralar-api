@@ -45,7 +45,6 @@ namespace Moralar.Domain.ViewModels.Profile
         public string Email { get; set; }
 
         [Display(Name = "Telefone (ex: +55 (00) 0 0000-0000)")]
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [JsonConverter(typeof(OnlyNumber))]
         [Column(5)]
         public string Phone { get; set; }

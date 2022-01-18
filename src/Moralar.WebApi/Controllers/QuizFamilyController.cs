@@ -378,7 +378,7 @@ namespace Moralar.WebApi.Controllers
                 var listQuizFamily = _mapper.Map<List<QuizFamilyExportViewModel>>(allData);
                 for (int i = 0; i < listQuizFamily.Count(); i++)
                 {
-                    listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(listQuizFamily[i].QuizId))?.Title;
+                    listQuizFamily[i].Title = listOnlyQuiz.Find(x => x._id == ObjectId.Parse(allData[i].QuizId))?.Title;
                 }
 
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
