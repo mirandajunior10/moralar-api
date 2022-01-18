@@ -587,7 +587,7 @@ namespace Moralar.WebApi.Controllers
 
                 var entityId = await _notificationRepository.UpdateOneAsync(entityVideo).ConfigureAwait(false);
                 await _utilService.RegisterLogAction(LocalAction.Notificacao, model.Block == true ? TypeAction.Block : TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Bloqueou uma notificação {Request.GetUserName()}", Request.GetUserId(), Request.GetUserName()?.Value, entityVideo._id.ToString());
-                return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
+                return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {

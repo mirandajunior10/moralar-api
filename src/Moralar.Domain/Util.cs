@@ -5,6 +5,7 @@ using System.Drawing;
 using System.Globalization;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Reflection;
 using System.Runtime.Serialization;
 using System.Security.Claims;
@@ -20,13 +21,13 @@ using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
-
+using Moralar.Domain.ViewModels.ResidencialProperty;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using OfficeOpenXml;
 using OfficeOpenXml.Style;
-
+using RestSharp;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -227,6 +228,144 @@ namespace Moralar.Domain
                 Rate = rate,
                 Value = value.ToBoolean()
             };
+        }
+
+        public static ResidencialPropertyFeatures MapFetures(this ResidencialPropertyImportViewModel model)
+        {
+            var response = new ResidencialPropertyFeatures();
+            try
+            {
+
+                response.TypeProperty = model.TypeProperty.ToEnum<TypeProperty>();
+                response.HasAccessLadder = model.HasAccessLadder.ToBoolean();
+                response.CondominiumValue = model.CondominiumValue.ToDouble();
+                response.FloorLocation = model.FloorLocation.ToInt();
+                response.TypeGasInstallation = model.TypeGasInstallation.ToEnum<TypePropertyGasInstallation>();
+                response.StreetEdge = model.StreetEdge.ToBoolean();
+                response.HasAccessRamp = model.HasAccessRamp.ToBoolean();
+                response.SquareFootage = model.SquareFootage.ToDouble();
+                response.HasAdaptedToPcd = model.HasAdaptedToPcd.ToBoolean();
+                response.HasCistern = model.HasCistern.ToBoolean();
+                response.HasElavator = model.HasElavator.ToBoolean();
+                response.PropertyValue = model.PropertyValue.ToDouble();
+                response.PropertyRegularization = model.PropertyRegularization.ToEnum<TypePropertyRegularization>();
+                response.NumberOfBedrooms = model.NumberOfBedrooms.ToInt();
+                response.HasGarage = model.HasGarage.ToBoolean();
+                response.HasServiceArea = model.HasServiceArea.ToBoolean();
+                response.HasWall = model.HasWall.ToBoolean();
+                response.HasYard = model.HasYard.ToBoolean();
+                response.IptuValue = model.IptuValue.ToDouble();
+                response.Neighborhood = model.NeighborhoodLocalization;
+                response.NumberFloors = model.NumberFloors.ToInt();
+                response.NumberOfBathrooms = model.NumberOfBathrooms.ToInt();
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+            return response;
+        }
+
+        public static async Task<ResidencialPropertyAdress> MapAddress(this ResidencialPropertyImportViewModel model)
+        {
+
+            var response = new ResidencialPropertyAdress();
+
+            try
+            {
+                var infoAddressByZipCode = await GetInfoZipCode(model.CEP);
+
+                if (infoAddressByZipCode == null)
+                    throw new Exception("Cep não encontrado");
+
+                var infoLocation = Utilities.GetInfoFromAdressLocation($"{infoAddressByZipCode.StreetAddress}, {model.Number} - {infoAddressByZipCode.Neighborhood}, {infoAddressByZipCode.CityName} - {infoAddressByZipCode.StateUf}");
+
+                response.CEP = model.CEP.OnlyNumbers();
+                response.CityId = infoAddressByZipCode.CityId;
+                response.CityName = infoAddressByZipCode.CityName;
+                response.Neighborhood = infoAddressByZipCode.Neighborhood;
+                response.Complement = model.Complement;
+                response.Number = model.Number;
+                response.StateId = infoAddressByZipCode.StateId;
+                response.StateName = infoAddressByZipCode.StateName;
+                response.StreetAddress = infoAddressByZipCode.StreetAddress;
+                response.StateUf = infoAddressByZipCode.StateUf;
+
+                if (infoLocation.Erro == false)
+                {
+                    response.Latitude = infoLocation.Geometry.Location.Lng;
+                    response.Longitude = infoLocation.Geometry.Location.Lng;
+                }
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+
+            return response;
+        }
+
+        public static bool CheckHasField(string[] fields, string field)
+         => fields.Count(x => x.ToLower() == field.ToLower()) > 0;
+
+        public static async Task<InfoAddressViewModel> GetInfoZipCode(string zipCode)
+        {
+            try
+            {
+                var zipCodeFormat = zipCode?.OnlyNumbers().PadLeft(8, '0');
+
+                if (string.IsNullOrEmpty(zipCodeFormat))
+                    throw new Exception("Informe um CEP");
+
+                var client = new RestClient("https://api.megaleios.com");
+                var request = new RestRequest($"/api/v1/City/GetInfoFromZipCode/{zipCodeFormat}", Method.GET);
+
+
+                request.AddHeader("accept", "application/json");
+                request.AddHeader("content-type", "application/json");
+
+                var response = await client.Execute<ReturnViewModel>(request);
+
+                if (response.StatusCode != HttpStatusCode.BadRequest && response.StatusCode != HttpStatusCode.OK)
+                    throw new Exception($"Ocorreu um erro ao informações do CEP {zipCode}");
+
+                if (response.Data == null || response.Data.Erro)
+                    throw new Exception(response.Data?.Message ?? $"CEP {zipCode} não encontrado");
+
+                return JsonConvert.DeserializeObject<InfoAddressViewModel>(JsonConvert.SerializeObject(response.Data.Data));
+
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+        public static string ToReal(this decimal price, bool notAround = false)
+        {
+            return notAround
+                ? string.Format(new CultureInfo("pt-BR"), "{0:C}", price)
+                : string.Format(new CultureInfo("pt-BR"), "{0:C}", Math.Truncate(price * 100) / 100);
+        }
+
+        public static string ToReal(this double price, bool notAround = false) => notAround
+                ? string.Format(new CultureInfo("pt-BR"), "{0:C}", price)
+                : string.Format(new CultureInfo("pt-BR"), "{0:C}", Math.Truncate(price * 100) / 100);
+
+        public static string MapBoolean(this bool value)
+         => value == true ? "Sim" : "Não";
+        public static int ToInt(this string value)
+        {
+            var response = 0;
+            try
+            {
+                int.TryParse(value, out response);
+            }
+            catch (Exception) {/*UNUSED*/}
+
+            return response;
         }
 
         public static bool ToBoolean(this string value)
@@ -527,7 +666,7 @@ namespace Moralar.Domain
                     }
                 }
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 //ignored
             }

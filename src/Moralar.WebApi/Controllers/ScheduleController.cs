@@ -812,7 +812,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 var dateToSchedule = Utilities.TimeStampToDateTime(model.Date);
-                if (dateToSchedule < DateTime.Now)
+                if (dateToSchedule < DateTime.Today)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalidToSchedule));
 
                 var family = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
@@ -820,7 +820,11 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
 
-                var scheduleEntity = await _scheduleRepository.FindByIdAsync(model.Id).ConfigureAwait(false); ;
+                var scheduleEntity = await _scheduleRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
+
+                if (scheduleEntity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+
                 if (scheduleEntity.TypeScheduleStatus != TypeScheduleStatus.Finalizado)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ChangeSubject));
 

@@ -176,13 +176,11 @@ namespace Moralar.WebApi.Controllers
             {
                 var familyId = Request.GetUserId();
 
-                var entity = await _informativeSendedRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<InformativeSended>;
+                var entity = await _informativeSendedRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == familyId).ConfigureAwait(false) as List<InformativeSended>;
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
 
-
-                var entityInformative = await _informativeRepository.FindIn("_id", entity.Select(x => ObjectId.Parse(x.InformativeId)).ToList()) as List<Informative>;
-
+                var entityInformative = await _informativeRepository.FindIn(x => x.DataBlocked == null, "_id", entity.Select(x => ObjectId.Parse(x.InformativeId)).ToList(), Builders<Informative>.Sort.Descending(x => x.Created)) as List<Informative>;
 
                 var responseViewModel = _mapper.Map<List<InformativeSendedViewModel>>(entity);
 
@@ -191,9 +189,15 @@ namespace Moralar.WebApi.Controllers
                     var informativeSended = entityInformative.Find(x => x._id.ToString() == responseViewModel[i].InformativeId);
 
                     if (informativeSended != null)
+                    {
                         responseViewModel[i].Description = informativeSended.Description;
-                    responseViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
-                    responseViewModel[i].Image = informativeSended.Image;
+                        responseViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
+                        responseViewModel[i].Image = informativeSended.Image;
+                    }
+                    else
+                    {
+                        responseViewModel.RemoveAt(i);
+                    }
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: responseViewModel));
@@ -436,8 +440,8 @@ namespace Moralar.WebApi.Controllers
 
                 await _informativeRepository.DeleteOneAsync(id).ConfigureAwait(false);
 
-                return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Deleted)));
                 await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Delete, TypeResposible.UserAdminstratorGestor, $"Deletou o registro {Request.GetUserName()?.Value}", Request.GetUserId(), Request.GetUserName()?.Value, id);
+                return Ok(Utilities.ReturnSuccess(nameof(DefaultMessages.Deleted)));
             }
             catch (Exception ex)
             {
@@ -477,7 +481,7 @@ namespace Moralar.WebApi.Controllers
 
                 var entityId = await _informativeRepository.UpdateOneAsync(entityInformative).ConfigureAwait(false);
                 await _utilService.RegisterLogAction(LocalAction.Informativo, model.Block == true ? TypeAction.Block : TypeAction.UnBlock, TypeResposible.UserAdminstratorGestor, $"Cadastrou bloqueou o informativo {entityInformative.Description}", Request.GetUserId(), Request.GetUserName()?.Value, entityId, "");
-                return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
+                return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {

@@ -268,7 +268,6 @@ namespace Moralar.WebApi.Controllers
 
             try
             {
-                var typeRegister = TypeAction.Register;
                 var message = $"Registro de nova questão {Request.GetUserName()}";
 
                 var ignoreValidation = new List<string>();

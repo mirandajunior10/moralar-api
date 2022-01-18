@@ -157,7 +157,7 @@ namespace Moralar.Domain.Services
 
                 return  response;
             }
-            catch (Exception ex)
+            catch (Exception)
             {
                 return null;
             }

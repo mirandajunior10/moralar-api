@@ -4,6 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Moralar.Data.Enum;
 using Newtonsoft.Json;
+using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Property
@@ -18,16 +19,20 @@ namespace Moralar.Domain.ViewModels.Property
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Foto")]
-        //[Range(1, 15, ErrorMessage = "A foto deve ter no mínimo {1} e no máximo {2} imagens")]
-        public List<string> Photo { get; set; }//mínimo 1 e máximo 15
+        [LimitElements(1, 15, ErrorMessage = "Selecione no mínimo 1 e no máximo 15 imagens")]
+        [IsReadOnly]
+        public List<string> Photo { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Planta")]
+        [JsonConverter(typeof(RemovePathImage))]
         public string Project { get; set; }
         public bool Blocked { get; set; }
         public TypeStatusResidencial TypeStatusResidencialProperty { get; set; }
+        [IsReadOnly]
         public ResidencialPropertyAdressViewModel ResidencialPropertyAdress { get; set; }
+        [IsReadOnly]
         public ResidencialPropertyFeatureViewModel ResidencialPropertyFeatures { get; set; }
         /// <summary>
         /// Total de famílias interessadas

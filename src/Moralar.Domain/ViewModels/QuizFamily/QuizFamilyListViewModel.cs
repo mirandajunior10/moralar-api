@@ -1,13 +1,16 @@
-﻿using Moralar.Data.Enum;
+﻿using System;
+using Moralar.Data.Enum;
+using UtilityFramework.Application.Core;
 
 namespace Moralar.Domain.ViewModels.Quiz
 {
     public class QuizFamilyListViewModel
     {
         public string Id { get; set; }
+        [IsReadOnly]
+        public long? Created { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
         public string QuizId { get; set; }
         public string Title { get; set; }
-        public string Created { get; set; }
         public string FamilyId { get; set; }
         public string HolderName { get; set; }
         public string HolderCpf { get; set; }

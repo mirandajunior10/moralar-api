@@ -12,7 +12,6 @@ namespace Moralar.Domain.ViewModels.PropertiesInterest
             PriorityRates = new List<PriorityRate>();
         }
 
-        public string Id { get; set; }
         public string FamilyId { get; set; }
         public string ResidencialPropertyId { get; set; }
         public string HolderName { get; set; }

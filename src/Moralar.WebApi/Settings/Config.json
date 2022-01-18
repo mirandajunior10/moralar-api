@@ -32,7 +32,7 @@
   "allowAccess": [], //lista de IP liberado para visualizar dashborad hangfire caso ativo
   "googleMapsKey": "AIzaSyBdb-EN9Kd44xbvpsZGgjzxRFsQmbQtWOY",
   "suportEmail": [ "fabricio@megaleios.com" ],
-  "contactEmail": "contato@contato.com",
+  "contactEmail": "moralar@contato.com",
   "FirebaseSettings": {
     "urlDataBase": "", // URL DO BANCO DE DADOS
     "apiKey": "", //CHAVE DA CONTA DO FIREBASE

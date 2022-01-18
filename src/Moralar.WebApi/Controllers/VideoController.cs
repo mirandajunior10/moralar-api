@@ -416,10 +416,9 @@ namespace Moralar.WebApi.Controllers
 
                 entityVideo.DataBlocked = model.Block ? DateTimeOffset.Now.ToUnixTimeSeconds() : (long?)null;
 
-
                 var entityId = await _videoRepository.UpdateOneAsync(entityVideo).ConfigureAwait(false);
 
-                return Ok(Utilities.ReturnSuccess("Registrado com sucesso"));
+                return Ok(Utilities.ReturnSuccess(model.Block ? "Bloqueado com sucesso" : "Desbloqueado com sucesso"));
             }
             catch (Exception ex)
             {

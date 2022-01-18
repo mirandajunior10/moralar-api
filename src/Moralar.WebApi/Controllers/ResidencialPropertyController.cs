@@ -13,6 +13,7 @@ using MimeTypes.Core;
 using MongoDB.Bson;
 using MongoDB.Driver;
 using Moralar.Data.Entities;
+using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
@@ -512,6 +513,78 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
+        /// <summary>
+        /// ATUALIZAR IMÓVEL
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        /// 
+        ///         POST
+        ///             {
+        ///              "id":"string"
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPatch("{id}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> Update([FromRoute] string id, [FromBody] ResidencialPropertyViewModel model)
+        {
+            try
+            {
+                var validOnly = _httpContextAccessor.GetFieldsFromBody();
+
+                var isInvalidState = ModelState.ValidModelStateOnlyFields(validOnly);
+
+                if (isInvalidState != null)
+                    return BadRequest(isInvalidState);
+
+
+                var residencialPropertyEntity = await _residencialPropertyRepository.FindByIdAsync(id);
+
+                if (residencialPropertyEntity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
+
+                residencialPropertyEntity.SetIfDifferent(model, validOnly);
+
+                if (Util.CheckHasField(validOnly, nameof(model.ResidencialPropertyAdress)))
+                {
+                    residencialPropertyEntity.ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(model.ResidencialPropertyAdress);
+                }
+                if (Util.CheckHasField(validOnly, nameof(model.ResidencialPropertyAdress)))
+                {
+                    residencialPropertyEntity.ResidencialPropertyFeatures = _mapper.Map<ResidencialPropertyFeatures>(model.ResidencialPropertyFeatures);
+                }
+                if (Util.CheckHasField(validOnly, nameof(model.Photo)))
+                {
+                    residencialPropertyEntity.Photo = model.Photo.Select(x => x.RemovePathImage()).ToList();
+                }
+
+                residencialPropertyEntity = await _residencialPropertyRepository.UpdateAsync(residencialPropertyEntity);
+
+                var viewmodelData = _mapper.Map<ResidencialPropertyViewModel>(residencialPropertyEntity);
+
+                /* Quantidade de famílias interessadas */
+                viewmodelData.InterestedFamilies = await _propertiesInterestRepository.CountAsync(x => x.ResidencialPropertyId == id).ConfigureAwait(false);
+
+
+                return Ok(Utilities.ReturnSuccess(DefaultMessages.Updated, viewmodelData));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
         /// <summary>
         /// GESTOR REALIZA A VENDA PARA DETERMINADA PESSOA
         /// </summary>
@@ -818,7 +891,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        //[OnlyAdministrator]
+        
         public async Task<IActionResult> FileImport([FromForm] IFormFile file)
         {
             try

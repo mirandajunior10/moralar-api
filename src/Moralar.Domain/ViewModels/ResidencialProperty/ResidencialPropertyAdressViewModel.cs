@@ -1,8 +1,4 @@
-﻿using Moralar.Data.Enum;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
-using System.Text;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Moralar.Domain.ViewModels.Property
 {

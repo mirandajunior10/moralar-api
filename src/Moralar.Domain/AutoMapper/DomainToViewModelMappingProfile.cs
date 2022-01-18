@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
@@ -100,7 +101,7 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.HolderCpf))
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src.FamilyId));
-            
+
             CreateMap<Schedule, FamilyHolderExportViewModel>()
                 .ForMember(dest => dest.TypeScheduleStatus, opt => opt.MapFrom(src => src.TypeScheduleStatus.GetEnumMemberValue()))
                 .ForMember(dest => dest.TypeSubject, opt => opt.MapFrom(src => src.TypeSubject.GetEnumMemberValue()))
@@ -142,7 +143,37 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<ResidencialProperty, ResidencialPropertyAdress>();
             CreateMap<ResidencialProperty, ResidencialPropertyExportViewModel>()
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? "Inativo" : "Ativo"))
+                .ForMember(dest => dest.StreetAddress,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StreetAddress))
+                .ForMember(dest => dest.Number,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Number))
+                .ForMember(dest => dest.CityName,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.CityName))
+                .ForMember(dest => dest.StateName,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StateName))
+                .ForMember(dest => dest.StateUf,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StateUf))
+                .ForMember(dest => dest.Neighborhood,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Neighborhood))
+                .ForMember(dest => dest.NeighborhoodLocalization,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.Neighborhood))
+                .ForMember(dest => dest.Complement,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Complement))
+                .ForMember(dest => dest.CEP,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.CEP))
+                .ForMember(dest => dest.SquareFootage,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.SquareFootage.ToString()))
+                .ForMember(dest => dest.PropertyValue,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.PropertyValue.ToReal(true)))
+                .ForMember(dest => dest.CondominiumValue,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.CondominiumValue.ToReal(true)))
+                .ForMember(dest => dest.IptuValue,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.IptuValue.ToReal(true)))
+                .ForMember(dest => dest.NumberFloors,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberFloors.ToString()))
+                .ForMember(dest => dest.NumberOfBathrooms,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberOfBathrooms.ToString()))
+                .ForMember(dest => dest.NumberOfBedrooms,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberOfBedrooms.ToString()))
+                .ForMember(dest => dest.FloorLocation,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.FloorLocation.ToString()))
+                .ForMember(dest => dest.HasAccessLadder, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasAccessLadder.MapBoolean()))
+                .ForMember(dest => dest.HasAccessRamp, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasAccessRamp.MapBoolean()))
+                .ForMember(dest => dest.HasAdaptedToPcd, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasAdaptedToPcd.MapBoolean()))
+                .ForMember(dest => dest.HasCistern, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasCistern.MapBoolean()))
+                .ForMember(dest => dest.HasElavator, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasElavator.MapBoolean()))
+                .ForMember(dest => dest.HasGarage,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasGarage.MapBoolean()))
+                .ForMember(dest => dest.HasServiceArea,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasServiceArea.MapBoolean()))
+                .ForMember(dest => dest.HasWall, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasWall.MapBoolean()))
+                .ForMember(dest => dest.HasYard, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasYard.MapBoolean()))
                 .ForMember(dest => dest.TypeStatusResidencialProperty, opt => opt.MapFrom(src => src.TypeStatusResidencialProperty.GetEnumMemberValue()))
+                .ForMember(dest => dest.Project, opt => opt.MapFrom(src => src.Project.SetPathImage(null)))
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => string.Join(",", src.Photo.Select(x => x.SetPathImage(null)).ToList()).TrimEnd(',')))
+                .ForMember(dest => dest.PropertyRegularization, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.PropertyRegularization.GetEnumMemberValue()))
+                .ForMember(dest => dest.TypeGasInstallation, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.TypeGasInstallation.GetEnumMemberValue()))
                 .ForMember(dest => dest.TypeProperty, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.TypeProperty.GetEnumMemberValue()));
             #endregion
             #region Quiz

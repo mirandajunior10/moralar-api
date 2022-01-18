@@ -16,6 +16,7 @@ using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.Question;
 using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
+using Moralar.Domain.ViewModels.ResidencialProperty;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Video;
 using Moralar.Domain.ViewModels.VideoViewed;
@@ -192,6 +193,10 @@ namespace Moralar.Domain.AutoMapper
 
             CreateMap<NotificationSendedViewModel, NotificationSended>()
                 .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
+
+            CreateMap<ResidencialPropertyImportViewModel, ResidencialProperty>()
+                .ForMember(dest => dest.ResidencialPropertyFeatures, opt => opt.MapFrom(src => Util.MapFetures(src)))
+                .ForMember(dest => dest.ResidencialPropertyAdress, opt => opt.MapFrom(src => Util.MapAddress(src).Result));
 
 
 
