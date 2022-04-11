@@ -217,6 +217,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Detail([FromRoute] string id)
         {
+            var listFamily = new List<Family>();
             try
             {
                 var userId = Request.GetUserId();
@@ -228,11 +229,65 @@ namespace Moralar.WebApi.Controllers
 
                 var viewmodelData = _mapper.Map<CourseViewModel>(entity);
 
+                
+
+                var builder = Builders<CourseFamily>.Filter;
+                var conditions = new List<FilterDefinition<CourseFamily>>();
+
+
                 /* Verifica se a família já é inscrita no curso */
-                var entityCourseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == userId && x.CourseId == id).ConfigureAwait(false);
-                if (entityCourseFamily.Count() > 0)
+                viewmodelData.IsSubscribed = await _courseFamilyRepository.CheckByAsync(x => x.FamilyId == userId && x.CourseId == id);
+                
+                viewmodelData.TotalSubscribers = await _courseFamilyRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(builder.Eq("CourseId", id), builder.Eq(x => x.TypeStatusCourse, TypeStatusCourse.Inscrito)));
+                
+                viewmodelData.TotalWaitingList = await _courseFamilyRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(builder.Eq("CourseId", id), builder.Eq(x => x.TypeStatusCourse, TypeStatusCourse.ListaEspera)));
+
+               
+                conditions.Add(builder.Where(x => x.CourseId == id));
+
+                var listsubscribers = await _courseFamilyRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
+
+                var responseSubscibers = new List<FamilyCourseRegisteredViewModel>();
+                var responseWaiting = new List<FamilyCourseWaitingViewModel>();
+
+                var family = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
+
+                for (int i = 0; i < listsubscribers.Count; i++)
                 {
-                    viewmodelData.IsSubscribed = true;
+                    var item = listsubscribers[i];
+                   
+                    var itemFamily = family.Where(x => x._id == ObjectId.Parse(item.FamilyId));
+
+
+                    if (itemFamily != null)
+                    {
+                        if (item.TypeStatusCourse == TypeStatusCourse.Inscrito)
+                        {
+                            responseSubscibers.Add(new FamilyCourseRegisteredViewModel()
+                            {
+
+                                Number = family[i].Holder.Number,
+                                Name = family[i].Holder.Name,
+                                Cpf = family[i].Holder.Cpf,
+                                TypeStatusCourse = TypeStatusCourse.Inscrito
+
+                            });
+                            viewmodelData.ListSubscribers = responseSubscibers;
+                        }
+                        else
+                        {
+                            responseWaiting.Add(new FamilyCourseWaitingViewModel()
+                            {
+
+                                Number = family[i].Holder.Number,
+                                Name = family[i].Holder.Name,
+                                Cpf = family[i].Holder.Cpf,
+                                TypeStatusCourse = TypeStatusCourse.ListaEspera
+
+                            });
+                            viewmodelData.ListWaitingList = responseWaiting;
+                        }
+                    }
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: viewmodelData));
@@ -605,8 +660,8 @@ namespace Moralar.WebApi.Controllers
                 {
                     for (int i = 0; i < src.Count(); i++)
                     {
-                        dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito);
-                        dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera);
+                        dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito && x.CourseId == src[i]._id.ToString());
+                        dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera && x.CourseId == src[i]._id.ToString());
                     }
                 }));
 

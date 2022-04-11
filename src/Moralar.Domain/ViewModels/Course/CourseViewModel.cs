@@ -3,6 +3,8 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Moralar.Data.Enum;
+using Moralar.Domain.ViewModels.Family;
+using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Course
@@ -75,5 +77,21 @@ namespace Moralar.Domain.ViewModels.Course
 
         [Display(Name = "Família inscrita no curso?")]
         public bool IsSubscribed { get; set; }
+
+        [Display(Name = "Total de inscritos no curso")]
+        [IsReadOnly]
+        public long TotalSubscribers { get; set; }
+
+        [Display(Name = "Total de usuários aguardando na lista de espera")]
+        [IsReadOnly]
+        public long TotalWaitingList { get; set; }
+
+        [Display(Name = "Lista com os dados do(s) usuário(s) inscritos")]
+        [IsReadOnly]
+        public List<FamilyCourseRegisteredViewModel> ListSubscribers { get; set; } = new List<FamilyCourseRegisteredViewModel>();
+        
+        [Display(Name = "Lista com os dados do(s) usuário(s) aguardando na lista de espera")]
+        [IsReadOnly]
+        public List<FamilyCourseWaitingViewModel> ListWaitingList { get; set; } = new List<FamilyCourseWaitingViewModel>();
     }
 }
