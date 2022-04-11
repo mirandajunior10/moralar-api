@@ -1811,7 +1811,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.LoadDataQuizAvailable(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus},System.Nullable{Moralar.Data.Enum.TypeQuiz})">
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.LoadDataQuizAvailable(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus},System.Nullable{Moralar.Data.Enum.TypeQuiz})">
             <summary>
             LISTA OS QUESTIONÁRIOS DISPONÍVEIS PARA FAMÍLIA
             </summary>
@@ -1841,7 +1841,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus},System.Nullable{Moralar.Data.Enum.TypeQuiz})">
+        <member name="M:Moralar.WebApi.Controllers.QuizFamilyController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,System.String,System.String,System.String,System.Nullable{Moralar.Data.Enum.TypeStatus},System.Nullable{Moralar.Data.Enum.TypeQuiz})">
             <summary>
             EXPORTAR PARA EXCEL
             </summary>

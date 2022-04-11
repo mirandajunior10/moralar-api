@@ -137,7 +137,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> LoadDataQuizAvailable([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status, [FromForm] TypeQuiz? typeQuiz)
+        public async Task<IActionResult> LoadDataQuizAvailable([FromForm] DtParameters model, [FromForm] string number, [FromForm] string title, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status, [FromForm] TypeQuiz? typeQuiz)
         {
 
             //
@@ -147,8 +147,10 @@ namespace Moralar.WebApi.Controllers
                 var builder = Builders<Data.Entities.QuizFamily>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.QuizFamily>>();
 
-
                 conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
+
+                if (string.IsNullOrEmpty(title) == false)
+                    conditions.Add(builder.Regex(x => x.Title, new BsonRegularExpression(new Regex(title, RegexOptions.IgnoreCase))));
 
                 if (typeQuiz != null)
                     conditions.Add(builder.Eq(x => x.TypeQuiz, typeQuiz));
@@ -345,7 +347,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status, [FromForm] TypeQuiz? typeQuiz)
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string title, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeStatus? status, [FromForm] TypeQuiz? typeQuiz)
         {
             var response = new DtResult<QuizFamilyExportViewModel>();
             try
@@ -354,6 +356,9 @@ namespace Moralar.WebApi.Controllers
                 var builder = Builders<Data.Entities.QuizFamily>.Filter;
 
                 conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
+
+                if (string.IsNullOrEmpty(title) == false)
+                    conditions.Add(builder.Regex(x => x.Title, new BsonRegularExpression(new Regex(title, RegexOptions.IgnoreCase))));
 
                 if (typeQuiz != null)
                     conditions.Add(builder.Eq(x => x.TypeQuiz, typeQuiz));

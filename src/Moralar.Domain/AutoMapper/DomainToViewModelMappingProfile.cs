@@ -289,6 +289,7 @@ namespace Moralar.Domain.AutoMapper
 
             CreateMap<Course, CourseListViewModel>()
             .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
+            .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null))
             .ForMember(dest => dest.StartDate, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.StartDate)))
             .ForMember(dest => dest.EndDate, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.EndDate)));
 

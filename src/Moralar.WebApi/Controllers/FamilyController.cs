@@ -1645,12 +1645,17 @@ namespace Moralar.WebApi.Controllers
                 if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin, data: response));
 
+                if (familyEntity.DataBlocked != null)
+                    return BadRequest(Utilities.ReturnErro(string.Format(DefaultMessages.AccessBlockedWithReason,familyEntity.Reason.MapReason())));
+
                 /* VERIFICA SE EXISTE UM DISPOSITIVO LOGADO  */
                 if (familyEntity != null && string.IsNullOrEmpty(deviceId) == false && familyEntity.DeviceId != null && familyEntity.DeviceId.Count() > 0 && familyEntity.DeviceId[0] != deviceId && model.UseNewDevice == false)
                 {
                     response.HasAnotherSession = true;
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.DeviceInUse, data: response));
                 }
+
+                
 
                 if (claims.Count(x => x.Type == "UserName") == 0)
                     claims.Add(new Claim("UserName", familyEntity.Holder.Name));
@@ -1709,7 +1714,7 @@ namespace Moralar.WebApi.Controllers
 
 
 
-                Data.Entities.Family entity;
+                Data.Entities.Family familyEntity;
 
                 model.TrimStringProperties();
                 var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.HolderCpf), nameof(model.HolderBirthday));
@@ -1719,16 +1724,19 @@ namespace Moralar.WebApi.Controllers
 
                 var dateBir = Utilities.TimeStampToDateTime(model.HolderBirthday);
                 var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
-                entity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Holder.Birthday == dateUnix).ConfigureAwait(false);
-                if (entity == null)
+                familyEntity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Holder.Birthday == dateUnix).ConfigureAwait(false);
+                if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 
+                if (familyEntity.DataBlocked != null)
+                    return BadRequest(Utilities.ReturnErro(string.Format(DefaultMessages.AccessBlockedWithReason, familyEntity.Reason.MapReason())));
 
-                claims.Add(new Claim("UserName", entity.Holder.Name));
-                await _familyRepository.UpdateAsync(entity).ConfigureAwait(false);
+
+                claims.Add(new Claim("UserName", familyEntity.Holder.Name));
+                await _familyRepository.UpdateAsync(familyEntity).ConfigureAwait(false);
 
 
-                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(entity._id.ToString(), false, claims.ToArray())));
+                return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(familyEntity._id.ToString(), false, claims.ToArray())));
             }
             catch (Exception ex)
             {

@@ -15,7 +15,6 @@ namespace Moralar.Domain.ViewModels.Course
 
 
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
         [Display(Name = "Imagem")]
         public string Img { get; set; }
 

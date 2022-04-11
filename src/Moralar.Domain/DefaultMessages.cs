@@ -82,6 +82,7 @@ namespace Moralar.Domain
         public const string EmptyProviderId = "Informe o providerId";
         public const string AppleIdInUse = "AppleId em uso, tente fazer login.";
         public const string AccessBlocked = "Acesso bloqueado. entre em contato com suporte";
+        public const string AccessBlockedWithReason = "Acesso bloqueado. entre em contato com suporte, {0}";
         public const string OnlyAdministrator = "Você precisa ser administrador para realizar essa ação";
         public const string MessageException = "Ocorreu um erro, verifique e tente novamente";
         public const string LogActionNotFound = "Log de ação não encontrado.";

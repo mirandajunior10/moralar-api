@@ -167,9 +167,6 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
 
         public string TypeGasInstallation { get; set; }
 
-        [Display(Name = "Beira de rua?")]
-
-        public string StreetEdge { get; set; }
 
         /// <summary>
         /// Status

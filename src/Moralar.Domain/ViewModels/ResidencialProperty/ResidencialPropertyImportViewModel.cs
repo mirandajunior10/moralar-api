@@ -153,9 +153,5 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
         [Column(29)]
         public string TypeGasInstallation { get; set; }
 
-        [Display(Name = "Beira de rua?")]
-        [Column(30)]
-        public string StreetEdge { get; set; }
-
     }
 }

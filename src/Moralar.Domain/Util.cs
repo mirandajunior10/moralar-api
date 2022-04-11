@@ -230,6 +230,9 @@ namespace Moralar.Domain
             };
         }
 
+        public static string MapReason(this string reason)
+            => string.IsNullOrEmpty(reason) ? "" : $"Motivo: {reason}";
+
         public static ResidencialPropertyFeatures MapFetures(this ResidencialPropertyImportViewModel model)
         {
             var response = new ResidencialPropertyFeatures();
@@ -241,7 +244,6 @@ namespace Moralar.Domain
                 response.CondominiumValue = model.CondominiumValue.ToDouble();
                 response.FloorLocation = model.FloorLocation.ToInt();
                 response.TypeGasInstallation = model.TypeGasInstallation.ToEnum<TypePropertyGasInstallation>();
-                response.StreetEdge = model.StreetEdge.ToBoolean();
                 response.HasAccessRamp = model.HasAccessRamp.ToBoolean();
                 response.SquareFootage = model.SquareFootage.ToDouble();
                 response.HasAdaptedToPcd = model.HasAdaptedToPcd.ToBoolean();

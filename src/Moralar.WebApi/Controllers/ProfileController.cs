@@ -696,8 +696,8 @@ namespace Moralar.WebApi.Controllers
                 if (claims.Count(x => x.Type == "UserName") == 0)
                     claims.Add(new Claim("UserName", profileEntity.Name));
 
-                //if (entity.DataBlocked != null)
-                //    return BadRequest(Utilities.ReturnErro($"Usuário bloqueado : {entity.Reason}"));
+                if (profileEntity.DataBlocked != null)
+                    return BadRequest(Utilities.ReturnErro(string.Format(DefaultMessages.AccessBlockedWithReason, profileEntity.Reason.MapReason())));
 
                 return Ok(Utilities.ReturnSuccess(data: TokenProviderMiddleware.GenerateToken(profileEntity._id.ToString(), false, claims.ToArray())));
             }
