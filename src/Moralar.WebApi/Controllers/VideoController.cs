@@ -236,7 +236,7 @@ namespace Moralar.WebApi.Controllers
             }
         }
         /// <summary>
-        /// CADASTRAR UM VÍDEO
+        /// REGISTRAR A VISUALIZAÇÃO DE UM VÍDEO APP
         /// </summary>
         /// <remarks>
         /// OBJ DE ENVIO

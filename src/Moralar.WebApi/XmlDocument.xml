@@ -2397,7 +2397,7 @@
         </member>
         <member name="M:Moralar.WebApi.Controllers.VideoController.RegisterVideoViewed(Moralar.Domain.ViewModels.VideoViewed.VideoViewedViewModel)">
             <summary>
-            CADASTRAR UM VÍDEO
+            REGISTRAR A VISUALIZAÇÃO DE UM VÍDEO APP
             </summary>
             <remarks>
             OBJ DE ENVIO

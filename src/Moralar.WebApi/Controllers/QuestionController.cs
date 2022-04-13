@@ -46,8 +46,9 @@ namespace Moralar.WebApi.Controllers
         private readonly IQuizFamilyRepository _quizFamilyRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly IUtilService _utilService;
+        private readonly IHttpContextAccessor _httpContextAccessor;
         [DisplayName("QuestionController - Comandos para manipulação das questões")]
-        public QuestionController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, IUtilService utilService)
+        public QuestionController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, IUtilService utilService, IHttpContextAccessor httpContextAccessor)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
@@ -56,6 +57,7 @@ namespace Moralar.WebApi.Controllers
             _quizFamilyRepository = quizFamilyRepository;
             _familyRepository = familyRepository;
             _utilService = utilService;
+            _httpContextAccessor = httpContextAccessor;
         }
         /// <summary>
         /// BLOQUEAR / DESBLOQUEAR QUESTÃO
@@ -324,9 +326,13 @@ namespace Moralar.WebApi.Controllers
 
             try
             {
+               
                 //var typeRegister = string.IsNullOrEmpty(model.Id) ? TypeAction.Register : TypeAction.Change;
                 //var message = (typeRegister == TypeAction.Register) ? $"Cadastro de novo Questinário {Request.GetUserName()}" : $"Atualização do Questinário {Request.GetUserName()}";
                 var ignoreValidation = new List<string>();
+
+              
+
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
@@ -335,18 +341,28 @@ namespace Moralar.WebApi.Controllers
                 if (quizEntityId == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
+
+                
+
+
+
                 var quizToModify = _mapper.Map<Quiz>(model);
-                await _quizRepository.UpdateOneAsync(quizToModify).ConfigureAwait(false);
+
+                //quizEntityId.SetIfDifferent(model, validOnly);
+
+                await _quizRepository.UpdateAsync(quizToModify).ConfigureAwait(false);
 
 
                 var questionEntity = await _questionRepository.FindByAsync(x => x.QuizId == model.Id && x.Disabled == null).ConfigureAwait(false) as List<Question>;
                 if (questionEntity.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
+                
 
                 // remove as questões selecionadas
                 var excludeQuestion = questionEntity.Where(c => !model.QuestionRegister.Question.Where(x => x.Id != null).Any(g => c._id != null && c._id == ObjectId.Parse(g.Id)) && c.Disabled == null).ToList();
                 if (excludeQuestion.Count() > 0)
                 {
+                    
                     foreach (var item in excludeQuestion)
                         await _questionRepository.DisableOneAsync(item._id.ToString()).ConfigureAwait(false);
                 }
@@ -356,11 +372,11 @@ namespace Moralar.WebApi.Controllers
                 {
                     //remove os itens da pergunta
                     var questionDescription = await _questionDescriptionRepository.FindByAsync(x => x.QuestionId == item.Id && x.Disabled == null).ConfigureAwait(false) as List<QuestionDescription>;
-                    var itensToExclude = questionDescription.Where(gg => !item.Description.Any(p2 => p2.Id == gg._id.ToString() && gg.Disabled == null)).ToList();
+                    var itensToExclude = questionDescription.Where(gg => !item.Description.Any(p2 => p2.QuestionId == gg._id.ToString() && gg.Disabled == null)).ToList();
                     if (itensToExclude.Count() > 0 && item.Id != null)
                     {
                         foreach (var itemExclude in itensToExclude)
-                            await _questionDescriptionRepository.DisableOneAsync(itemExclude._id.ToString()).ConfigureAwait(false);
+                            await _questionDescriptionRepository.DisableOneAsync(itemExclude._id.ToString());
                     }
 
 
@@ -411,12 +427,14 @@ namespace Moralar.WebApi.Controllers
 
                         }
 
-
+                        
                     }
                     else
                     {
                         var entity = _mapper.Map<Question>(item);
                         entity.QuizId = model.Id;
+                       
+
                         var findToUpdateOrIncludeQuestion = questionEntity.Find(x => x._id == entity._id);
                         if (findToUpdateOrIncludeQuestion != null)
                         {

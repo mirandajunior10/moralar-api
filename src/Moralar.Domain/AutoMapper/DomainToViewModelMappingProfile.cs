@@ -137,7 +137,10 @@ namespace Moralar.Domain.AutoMapper
             #region ResidencialProperty
             CreateMap<ResidencialProperty, ResidencialPropertyViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
-                .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false));
+                .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo.Select(x => x.SetPathImage(null)).ToList()))
+                .ForMember(dest => dest.Project, opt => opt.MapFrom(src => src.Project.SetPathImage(null)));
+
             CreateMap<ResidencialPropertyAdress, ResidencialPropertyAdressViewModel>();
             CreateMap<ResidencialPropertyFeatures, ResidencialPropertyFeatureViewModel>();
             CreateMap<ResidencialProperty, ResidencialPropertyAdress>();

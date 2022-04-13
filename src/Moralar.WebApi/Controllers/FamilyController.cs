@@ -1458,7 +1458,12 @@ namespace Moralar.WebApi.Controllers
 
                 //}
 
+
                 await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
+
+                /*ATUALIZA AS INFORMAÇÕES NO AGENDAMENTO*/
+                _scheduleRepository.UpdateMultiple(Query<Schedule>.Where(x => x.FamilyId == entityFamily._id.ToString()),
+                    new UpdateBuilder<Schedule>().Set(x => x.HolderName, entityFamily.Holder.Name), UpdateFlags.Multi);
 
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
 

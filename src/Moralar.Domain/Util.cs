@@ -139,8 +139,8 @@ namespace Moralar.Domain
             {
                 response.Scholarity = model.Escolaridade.ToEnumCustom<TypeScholarity>();
                 response.Birthday = model.Data_de_Nascimento.ToUnixCustom();
-                response.Cpf = model.Cpf_do_titular.OnlyNumbers();
-                response.Email = model.E_mail.ToLower();
+                response.Cpf = model.Cpf_do_titular.OnlyNumbers();                
+                response.Email = string.IsNullOrEmpty(model.E_mail) ? null : model.E_mail.ToLower();
                 response.Genre = model.Genero.ToEnumCustom<TypeGenre>();
                 response.Name = model.Nome_do_titular;
                 response.Phone = model.Telefone.OnlyNumbers();

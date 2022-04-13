@@ -130,6 +130,7 @@ namespace Moralar.WebApi.Controllers
         {
             var response = new DtResult<CourseListViewModel>();
             var listCourseFamily = new List<CourseFamily>();
+            var listFamily = new List<Family>();
             try
             {
                 var builder = Builders<Data.Entities.Course>.Filter;
@@ -163,14 +164,21 @@ namespace Moralar.WebApi.Controllers
                     : totalRecords;
 
                 if (retorno.Count() > 0)
-                    listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
+                {
 
-                var viewModelData = _mapper.Map<List<Course>, List<CourseListViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
+                   listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
+                   
+                   listFamily = await _familyRepository.FindIn(nameof(Family.Holder._id), listCourseFamily.Select(x => x.FamilyId.ToString()).ToList()) as List<Family>;
+                }
+
+
+                var viewModelData = _mapper.Map<List<Course>, List<CourseListViewModel>>(retorno, opt => opt.AfterMap(async (src, dest) =>
                 {
                     for (int i = 0; i < src.Count(); i++)
                     {
-                        dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito);
-                        dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera);
+                        
+                        dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito && x.CourseId == src[i]._id.ToString());
+                        dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera && x.CourseId == src[i]._id.ToString());
                     }
 
                 }));

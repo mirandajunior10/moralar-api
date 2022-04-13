@@ -63,5 +63,6 @@ namespace Moralar.Domain.ViewModels.Course
 
         public int TotalWaitingList { get; set; }
         public bool Blocked { get; set; }
+        public string Name { get; set; }
     }
 }
