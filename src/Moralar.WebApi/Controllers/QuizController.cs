@@ -47,8 +47,9 @@ namespace Moralar.WebApi.Controllers
         private readonly IFamilyRepository _familyRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IUtilService _utilService;
+        private readonly ISenderNotificationService _senderNotificationService;
 
-        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, INotificationRepository notificationRepository, IUtilService utilService)
+        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, INotificationRepository notificationRepository, IUtilService utilService, ISenderNotificationService senderNotificationService)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
@@ -58,6 +59,7 @@ namespace Moralar.WebApi.Controllers
             _familyRepository = familyRepository;
             _notificationRepository = notificationRepository;
             _utilService = utilService;
+            _senderNotificationService = senderNotificationService;
         }
 
         /// <summary>
@@ -387,7 +389,7 @@ namespace Moralar.WebApi.Controllers
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
-                var families = await _familyRepository.FindByAsync(x => x.DataBlocked == null).ConfigureAwait(false);
+                var families = await _familyRepository.FindByAsync(x => x.DataBlocked == null).ConfigureAwait(false) as List<Family>;
                 var quizEntity = _mapper.Map<Quiz>(model);
                 var quizEntityId = await _quizRepository.CreateAsync(quizEntity).ConfigureAwait(false);
 
@@ -425,6 +427,36 @@ namespace Moralar.WebApi.Controllers
                             Title = quizEntity.Title
                         });
                     }
+
+
+                   //// var families = new List<Family>();
+
+                   // entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+
+                    var title = "Nova enquete";
+                    var content = "Uma nova enquete foi disponibilizada";
+
+                    var listNotification = new List<Notification>();
+                    for (int i = 0; i < families.Count(); i++)
+                    {
+                        var familyItem = families[i];
+
+                        listNotification.Add(new Notification()
+                        {
+                            For = ForType.Family,
+                            FamilyId = familyItem._id.ToString(),
+                            Title = title,
+                            Description = content
+                        });
+                    }
+
+                    await _notificationRepository.CreateAsync(listNotification);
+
+                    dynamic payloadPush = Util.GetPayloadPush();
+                    dynamic settingPush = Util.GetSettingsPush();
+
+                    await _senderNotificationService.SendPushAsync(title, content, families.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
+
                 }
                 //await _utilService.RegisterLogAction(LocalAction.Question, typeRegister, TypeResposible.UserAdminstratorGestor, message, Request.GetUserId(), Request.GetUserName()?.Value, string.Join(";", itensAdded.ToArray()), "");
 

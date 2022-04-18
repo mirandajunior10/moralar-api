@@ -967,7 +967,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.InformativeController.Export">
+        <member name="M:Moralar.WebApi.Controllers.InformativeController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters)">
             <summary>
             EXPORTAR PARA EXCEL
             </summary>

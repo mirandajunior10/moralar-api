@@ -245,9 +245,8 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<InformativeSended, InformativeSendedDetailViewModel>()
              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
-            CreateMap<Informative, InformativeExportViewModel>()
-             .ForMember(dest => dest.Date, opt => opt.MapFrom(src => Utilities.TimeStampToDateTime(src.Created.Value).ToString("dd/MM/yyyy")))
-             .ForMember(dest => dest.DatePublishDate, opt => opt.MapFrom(src => src.DatePublish != null ? src.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy") : null));
+            CreateMap<InformativeSended, InformativeExportViewModel>()             
+             .ForMember(dest => dest.Read, opt => opt.MapFrom(src => src.DateViewed != null ? "Sim" : "Não"));
 
             CreateMap<Informative, InformativeViewModel>()
              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))

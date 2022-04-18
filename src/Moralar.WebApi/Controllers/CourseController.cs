@@ -48,8 +48,9 @@ namespace Moralar.WebApi.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
+        private readonly ISenderNotificationService _senderNotificationService;
 
-        public CourseController(IMapper mapper, ICourseRepository courseRepository, INotificationRepository notificationRepository, INotificationSendedRepository notificationSendedRepository, IFamilyRepository familyRepository, ICourseFamilyRepository courseFamilyRepository, IHttpContextAccessor httpContextAccessor, IUtilService utilService, ISenderMailService senderMailService)
+        public CourseController(IMapper mapper, ICourseRepository courseRepository, INotificationRepository notificationRepository, INotificationSendedRepository notificationSendedRepository, IFamilyRepository familyRepository, ICourseFamilyRepository courseFamilyRepository, IHttpContextAccessor httpContextAccessor, IUtilService utilService, ISenderMailService senderMailService, ISenderNotificationService senderNotificationService)
         {
             _mapper = mapper;
             _courseRepository = courseRepository;
@@ -60,6 +61,7 @@ namespace Moralar.WebApi.Controllers
             _httpContextAccessor = httpContextAccessor;
             _utilService = utilService;
             _senderMailService = senderMailService;
+            _senderNotificationService = senderNotificationService;
         }
         /// <summary>
         /// BLOQUEAR / DESBLOQUEAR CURSO 
@@ -163,15 +165,9 @@ namespace Moralar.WebApi.Controllers
                     ? (int)await _courseRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                if (retorno.Count() > 0)
-                {
-
+                if (retorno.Count() > 0)  
                    listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
-                   
-                   listFamily = await _familyRepository.FindIn(nameof(Family.Holder._id), listCourseFamily.Select(x => x.FamilyId.ToString()).ToList()) as List<Family>;
-                }
-
-
+               
                 var viewModelData = _mapper.Map<List<Course>, List<CourseListViewModel>>(retorno, opt => opt.AfterMap(async (src, dest) =>
                 {
                     for (int i = 0; i < src.Count(); i++)
@@ -451,7 +447,36 @@ namespace Moralar.WebApi.Controllers
 
                 await _utilService.RegisterLogAction(LocalAction.Curso, TypeAction.Register, TypeResposible.UserAdminstratorGestor, $"Cadastrou novo curso {model.Title}", Request.GetUserId(), Request.GetUserName()?.Value, entityId, "");
 
+               var entityFamily = new List<Family>();
+                
+               entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+
+                var title = "Novo curso";
+                var content = "Um novo curso foi disponibilizado para inscrição";
+
+                var listNotification = new List<Notification>();
+                for (int i = 0; i < entityFamily.Count(); i++)
+                {
+                    var familyItem = entityFamily[i];
+
+                    listNotification.Add(new Notification()
+                    {
+                        For = ForType.Family,
+                        FamilyId = familyItem._id.ToString(),
+                        Title = title,
+                        Description = content
+                    });
+                }
+
+                await _notificationRepository.CreateAsync(listNotification);
+
+                dynamic payloadPush = Util.GetPayloadPush();
+                dynamic settingPush = Util.GetSettingsPush();
+
+                await _senderNotificationService.SendPushAsync(title, content, entityFamily.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
+
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+
             }
             catch (Exception ex)
             {
@@ -664,13 +689,28 @@ namespace Moralar.WebApi.Controllers
                 if (retorno.Count() > 0)
                     listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
 
+
+                var family = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
+
                 var listViewModel = _mapper.Map<List<Course>, List<CourseExportViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
                 {
+
                     for (int i = 0; i < src.Count(); i++)
                     {
-                        dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito && x.CourseId == src[i]._id.ToString());
-                        dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera && x.CourseId == src[i]._id.ToString());
+                        //string.Join(',', listRegistration.Select(x => x.CourseName).ToList()).TrimEnd(',');
+                        //for (int f = 0; f < listCourseFamily.Count(); f++)
+                        //{
+                        //    var item = listCourseFamily[f];
+
+                        //    var familyCouse = family.Find(x => x._id == ObjectId.Parse(item.FamilyId));
+
+
+                           // dest[i].FamilyName = familyCouse.Holder.Name;
+                            dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito && x.CourseId == src[i]._id.ToString());
+                            dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera && x.CourseId == src[i]._id.ToString());
+                        ////}
                     }
+                    
                 }));
 
                 var fileName = "Cursos.xlsx";

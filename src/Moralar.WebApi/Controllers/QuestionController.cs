@@ -330,8 +330,7 @@ namespace Moralar.WebApi.Controllers
                 //var typeRegister = string.IsNullOrEmpty(model.Id) ? TypeAction.Register : TypeAction.Change;
                 //var message = (typeRegister == TypeAction.Register) ? $"Cadastro de novo Questinário {Request.GetUserName()}" : $"Atualização do Questinário {Request.GetUserName()}";
                 var ignoreValidation = new List<string>();
-
-              
+                               
 
                 var isInvalidState = ModelState.ValidModelState(ignoreValidation.ToArray());
                 if (isInvalidState != null)
@@ -341,22 +340,16 @@ namespace Moralar.WebApi.Controllers
                 if (quizEntityId == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.QuizNotFound));
 
-
-                
-
-
-
+               
                 var quizToModify = _mapper.Map<Quiz>(model);
-
-                //quizEntityId.SetIfDifferent(model, validOnly);
 
                 await _quizRepository.UpdateAsync(quizToModify).ConfigureAwait(false);
 
 
                 var questionEntity = await _questionRepository.FindByAsync(x => x.QuizId == model.Id && x.Disabled == null).ConfigureAwait(false) as List<Question>;
                 if (questionEntity.Count() == 0)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));
-                
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.QuestionNotFound));               
+
 
                 // remove as questões selecionadas
                 var excludeQuestion = questionEntity.Where(c => !model.QuestionRegister.Question.Where(x => x.Id != null).Any(g => c._id != null && c._id == ObjectId.Parse(g.Id)) && c.Disabled == null).ToList();
@@ -379,7 +372,7 @@ namespace Moralar.WebApi.Controllers
                             await _questionDescriptionRepository.DisableOneAsync(itemExclude._id.ToString());
                     }
 
-
+                    
 
                     if (item.Description.Count() > 0)
                     {
@@ -411,7 +404,14 @@ namespace Moralar.WebApi.Controllers
                                 {
                                     // Inclui uma nova questão e suas alternativas
                                     var questao = _mapper.Map<Question>(item);
+                                    
                                     questao.QuizId = model.Id;
+                                    questao.NameQuestion = item.NameQuestion;
+                                    questao.TypeResponse = item.TypeResponse;
+
+
+
+
                                     var includeQuestion = _questionRepository.Create(questao);
                                     foreach (var alternativas in item.Description)
                                     {
@@ -422,9 +422,10 @@ namespace Moralar.WebApi.Controllers
                                     break;
                                     //}
 
+                                    
+
                                 }
                             }
-
                         }
 
                         
@@ -432,8 +433,8 @@ namespace Moralar.WebApi.Controllers
                     else
                     {
                         var entity = _mapper.Map<Question>(item);
-                        entity.QuizId = model.Id;
-                       
+                        entity.QuizId = model.Id;                       
+                        
 
                         var findToUpdateOrIncludeQuestion = questionEntity.Find(x => x._id == entity._id);
                         if (findToUpdateOrIncludeQuestion != null)

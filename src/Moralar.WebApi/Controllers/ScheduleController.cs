@@ -55,8 +55,10 @@ namespace Moralar.WebApi.Controllers
         private readonly IPropertiesInterestRepository _propertiesInterestRepository;
         private readonly IResidencialPropertyRepository _residencialPropertyRepository;
         private readonly INotificationSendedRepository _notificationSendedRepository;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly ISenderNotificationService _senderNotificationService;
 
-        public ScheduleController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, IUtilService utilService, ISenderMailService senderMailService, IQuizRepository quizRepository, IQuizFamilyRepository quizFamilyRepository, ICourseFamilyRepository courseFamilyRepository, ICourseRepository courseRepository, IPropertiesInterestRepository propertiesInterestRepository, IResidencialPropertyRepository residencialPropertyRepository, INotificationSendedRepository notificationSendedRepository)
+        public ScheduleController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, IUtilService utilService, ISenderMailService senderMailService, IQuizRepository quizRepository, IQuizFamilyRepository quizFamilyRepository, ICourseFamilyRepository courseFamilyRepository, ICourseRepository courseRepository, IPropertiesInterestRepository propertiesInterestRepository, IResidencialPropertyRepository residencialPropertyRepository, INotificationSendedRepository notificationSendedRepository, INotificationRepository notificationRepository, ISenderNotificationService senderNotificationService)
         {
             _mapper = mapper;
             _familyRepository = familyRepository;
@@ -71,6 +73,8 @@ namespace Moralar.WebApi.Controllers
             _propertiesInterestRepository = propertiesInterestRepository;
             _residencialPropertyRepository = residencialPropertyRepository;
             _notificationSendedRepository = notificationSendedRepository;
+            _notificationRepository = notificationRepository;
+            _senderNotificationService = senderNotificationService;
         }
 
 
@@ -356,6 +360,32 @@ namespace Moralar.WebApi.Controllers
                 {
                     await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, family.Holder.Email, body, "Cadastro de Agendamento").ConfigureAwait(false);
                 });
+
+
+                /*ENVIA NOTIFICAÇÃO*/
+
+                var title = "Novo agendamento";
+                var content = "Você tem um novo agendamento";
+
+                var listNotification = new List<Notification>();
+               
+                    listNotification.Add(new Notification()
+                    {
+                        For = ForType.Family,
+                        FamilyId = family.Holder._id.ToString(),
+                        Title = title,
+                        Description = content
+                    });
+                
+
+                await _notificationRepository.CreateAsync(listNotification);
+
+                dynamic payloadPush = Util.GetPayloadPush();
+                dynamic settingPush = Util.GetSettingsPush();
+
+                await _senderNotificationService.SendPushAsync(title, content, family.DeviceId, data: payloadPush, settings: settingPush, priority: 10);
+
+
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)

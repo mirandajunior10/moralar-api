@@ -1,4 +1,5 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 
 namespace Moralar.Domain.ViewModels.Course
 {
@@ -33,11 +34,20 @@ namespace Moralar.Domain.ViewModels.Course
         /// Total aguardando lista de espera
         /// </summary>
         [Display(Name = "Total aguardando lista de espera")]
-        public int TotalWaitingList { get; set; }
+        public int TotalWaitingList { get; set; }        
         /// <summary>
         /// Situação
         /// </summary>
         [Display(Name = "Situação")]
         public string Blocked { get; set; }
+        /// <summary>
+        /// Nome
+        /// </summary>
+        [Display(Name = "Nome")]
+        public string FamilyName { get; set; }
+
+
+
+
     }
 }

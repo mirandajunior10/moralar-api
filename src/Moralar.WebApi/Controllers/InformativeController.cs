@@ -45,10 +45,12 @@ namespace Moralar.WebApi.Controllers
         private readonly IInformativeRepository _informativeRepository;
         private readonly IInformativeSendedRepository _informativeSendedRepository;
         private readonly IFamilyRepository _familyRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly ISenderMailService _senderMailService;
         private readonly IUtilService _utilService;
+        private readonly ISenderNotificationService _senderNotificationService;
 
-        public InformativeController(IMapper mapper, IInformativeRepository informativeRepository, IInformativeSendedRepository informativeSendedRepository, IFamilyRepository familyRepository, ISenderMailService senderMailService, IUtilService utilService)
+        public InformativeController(IMapper mapper, IInformativeRepository informativeRepository, IInformativeSendedRepository informativeSendedRepository, IFamilyRepository familyRepository, ISenderMailService senderMailService, IUtilService utilService, INotificationRepository notificationRepository, ISenderNotificationService senderNotificationService)
         {
             _mapper = mapper;
             _informativeRepository = informativeRepository;
@@ -56,6 +58,8 @@ namespace Moralar.WebApi.Controllers
             _familyRepository = familyRepository;
             _senderMailService = senderMailService;
             _utilService = utilService;
+            _notificationRepository = notificationRepository;
+            _senderNotificationService = senderNotificationService;
         }
 
 
@@ -209,7 +213,7 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
-        /// CADASTRAR UM INFORMATIVE
+        /// CADASTRAR UM INFORMATIVO
         /// </summary>
         /// <remarks>
         /// <response code="200">Returns success</response>
@@ -242,7 +246,38 @@ namespace Moralar.WebApi.Controllers
                     };
                     await _informativeSendedRepository.CreateAsync(informationSended);
                 }
+
+
+                var notificationFamily = new List<Family>();
+
+                notificationFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+
+                var title = "Novo informativo";
+                var content = "Um novo informativo foi disponibilizado";
+
+                var listNotification = new List<Notification>();
+                for (int i = 0; i < notificationFamily.Count(); i++)
+                {
+                    var familyItem = notificationFamily[i];
+
+                    listNotification.Add(new Notification()
+                    {
+                        For = ForType.Family,
+                        FamilyId = familyItem._id.ToString(),
+                        Title = title,
+                        Description = content
+                    });
+                }
+
+                await _notificationRepository.CreateAsync(listNotification);
+
+                dynamic payloadPush = Util.GetPayloadPush();
+                dynamic settingPush = Util.GetSettingsPush();
+
+                await _senderNotificationService.SendPushAsync(title, content, entityFamily.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
+
                 await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName()?.Value}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
+                
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Registred));
 
             }
@@ -505,23 +540,61 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
 
-        public async Task<IActionResult> Export()
+        public async Task<IActionResult> Export([FromForm] DtParameters model)
         {
             try
             {
-                var allData = await _informativeRepository.FindAllAsync().ConfigureAwait(false);
+                
+                var builder = Builders<InformativeSended>.Filter;
+                var conditions = new List<FilterDefinition<InformativeSended>>();
+
+                //conditions.Add(builder.Where(x => x.Created != null));
+                conditions.Add(builder.Where(x => x.DataBlocked == null));
+
+                var columns = model.Columns.Where(x => x.Searchable && !string.IsNullOrEmpty(x.Name)).Select(x => x.Name).ToArray();
+
+                var sortColumn = model.SortOrder;
+                var totalRecords = (int)await _informativeSendedRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                   ? Builders<InformativeSended>.Sort.Descending(sortColumn)
+                   : Builders<InformativeSended>.Sort.Ascending(sortColumn);
+
+                var retorno = await _informativeSendedRepository
+                 .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, fields: columns) as List<InformativeSended>;
+
+                var family = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
+
+                var informativeEntity = await _informativeRepository.FindAllAsync().ConfigureAwait(false) as List<Informative>;
+
+                var listViewModel = _mapper.Map<List<InformativeSended>, List<InformativeExportViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
+                {
+                    for (int i = 0; i < src.Count(); i++)
+                    {
+                        var familyInformative = family.Find(x => x._id == ObjectId.Parse(src[i].FamilyId));
+                        var informative = informativeEntity.Find(x => x._id == ObjectId.Parse(src[i].InformativeId));
+
+                        dest[i].Description = informative.Description;
+                        dest[i].Name = familyInformative.Holder.Name;
+                       
+                    }
+                }));
+
                 var fileName = $"informative.xlsx";
-                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
                 if (Directory.Exists(path) == false)
                     Directory.CreateDirectory(path);
+
                 var fullPathFile = Path.Combine(path, fileName);
-                var listViewModel = _mapper.Map<List<InformativeExportViewModel>>(allData);
+
                 Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
                 if (System.IO.File.Exists(fullPathFile) == false)
                     return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
 
                 var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+              
             }
             catch (Exception ex)
             {
