@@ -16,6 +16,10 @@ namespace Moralar.Domain.ViewModels.Family
         public string AddressPropertyOrigin { get; set; }
         public string AddressPropertyDestination { get; set; }
         public double AddressPropertyDistanceMeters { get; set; }
-        public double AddressPropertyDistanceKilometers { get; set; }
+        public double AddressPropertyDistanceKilometers { get; set; }       
+        public double OriginLatitude { get; set; }       
+        public double OriginLongitude { get; set; }
+        public double DestinationLatitude { get; set; }
+        public double DestinationLongitude { get; set; }
     }
 }

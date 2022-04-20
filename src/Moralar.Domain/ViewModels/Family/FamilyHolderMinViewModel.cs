@@ -17,12 +17,12 @@ namespace Moralar.Domain.ViewModels.Family
         [IsReadOnly]
         public string Name { get; set; }
 
-        public TypeGenre Genre { get; set; }
+        public TypeGenre? Genre { get; set; } = null;
 
         public string Email { get; set; }
 
         public string Phone { get; set; }
 
-        public TypeScholarity Scholarity { get; set; }
+        public TypeScholarity? Scholarity { get; set; } = null;
     }
 }

@@ -254,7 +254,10 @@ namespace Moralar.Data.Enum
         Masculino = 1,
         [EnumMember(Value = "Outro")]
         [Description("Outro")]
-        Outro = 2
+        Outro = 2,
+        [EnumMember(Value = "Todos")]
+        [Description("Todos")]
+        Todos = 3
     }
     public enum LocalAction
     {

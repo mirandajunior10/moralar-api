@@ -728,11 +728,16 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.LocationNotFound));
 
 
-
                 var propertyInterest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                
+                if(propertyInterest == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertyNotChosen));
+
                 var residencialDestination = await _residencialPropertyRepository.FindIn(c => c.TypeStatusResidencialProperty == TypeStatusResidencial.Vendido, "_id", propertyInterest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList(), Builders<ResidencialProperty>.Sort.Ascending(nameof(ResidencialProperty.LastUpdate))) as List<ResidencialProperty>;
+                
                 if (residencialDestination.FirstOrDefault() == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
+                
                 if (residencialDestination.Count() > 1)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialSaled));
 
@@ -749,6 +754,11 @@ namespace Moralar.WebApi.Controllers
                 familyVw.AddressPropertyDistanceKilometers = distanceK;
                 familyVw.AddressPropertyOrigin = residencialOrigin.FormatedAddress;
                 familyVw.AddressPropertyDestination = destination.FormatedAddress;
+                familyVw.OriginLatitude = residencialOrigin.Geometry.Location.Lat;
+                familyVw.OriginLongitude = residencialOrigin.Geometry.Location.Lng;
+                familyVw.DestinationLatitude = destination.Geometry.Location.Lat;
+                familyVw.DestinationLongitude = destination.Geometry.Location.Lng;
+
                 return Ok(Utilities.ReturnSuccess(data: familyVw));
             }
             catch (Exception ex)
@@ -1416,6 +1426,8 @@ namespace Moralar.WebApi.Controllers
                 if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
                 {
                     entityFamily.Holder.SetIfDifferentCustom(model.Holder);
+                    entityFamily.Holder.Genre = model.Holder.Genre;
+                    entityFamily.Holder.Scholarity = model.Holder.Scholarity;
                 }
 
                 if (validOnly.Count(x => x == nameof(Family.Address)) > 0)

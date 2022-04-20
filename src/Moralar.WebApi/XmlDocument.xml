@@ -1691,7 +1691,7 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
-        <member name="M:Moralar.WebApi.Controllers.QuizController.Export(System.String,Moralar.Data.Enum.TypeQuiz)">
+        <member name="M:Moralar.WebApi.Controllers.QuizController.Export(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String,Moralar.Data.Enum.TypeQuiz)">
             <summary>
             EXPORTAR PARA EXCEL
             </summary>

@@ -12,10 +12,10 @@ namespace Moralar.Data.Entities.Auxiliar
         public string Name { get; set; }
         public string Cpf { get; set; }
         public long? Birthday { get; set; }
-        public TypeGenre? Genre { get; set; }
+        public TypeGenre? Genre { get; set; } = null;
         public string Email { get; set; }
         public string Phone { get; set; }
-        public TypeScholarity? Scholarity { get; set; }
+        public TypeScholarity? Scholarity { get; set; } = null;
         
     }
 }

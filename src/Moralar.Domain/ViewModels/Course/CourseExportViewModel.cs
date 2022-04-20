@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.ComponentModel.DataAnnotations;
+﻿using System.ComponentModel.DataAnnotations;
 
 namespace Moralar.Domain.ViewModels.Course
 {
@@ -13,7 +12,7 @@ namespace Moralar.Domain.ViewModels.Course
         /// <summary>
         /// Data de Início
         /// </summary>
-        [Display(Name = "Data de Início")]
+        [Display(Name = "Data de início")]
         public string StartDate { get; set; }
         /// <summary>
         /// Data final
@@ -41,13 +40,15 @@ namespace Moralar.Domain.ViewModels.Course
         [Display(Name = "Situação")]
         public string Blocked { get; set; }
         /// <summary>
-        /// Nome
+        /// Famílias Inscritas
         /// </summary>
-        [Display(Name = "Nome")]
-        public string FamilyName { get; set; }
-
-
-
+        [Display(Name = "Famílias inscritas")]
+        public string FamilyNameInscriptions { get; set; }
+        /// <summary>
+        /// Famílias em espera
+        /// </summary>
+        [Display(Name = "Famílias em espera")]
+        public string FamilyNameWaiting { get; set; }
 
     }
 }

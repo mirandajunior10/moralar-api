@@ -261,3 +261,4 @@ __pycache__/
 *.pyc
 /Moralar/Documentos
 /src/Moralar.WebApi/ExportFiles
+/src/Moralar.WebApi/Content/ExportFiles

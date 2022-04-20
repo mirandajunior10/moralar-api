@@ -323,7 +323,7 @@ namespace Moralar.WebApi.Controllers
 
                 var now = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-                var entity = await _courseRepository.FindByAsync(x => x.EndDate > now).ConfigureAwait(false);
+                var entity = await _courseRepository.FindByAsync(x => x.EndDate > now, Builders<Course>.Sort.Descending(x => x.StartDate)).ConfigureAwait(false);
 
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
@@ -537,7 +537,10 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro("Deseja aguardar na fila de espera?"));
 
                 var entity = _mapper.Map<Data.Entities.CourseFamily>(model);
+                
                 entity.TypeStatusCourse = model.WaitInTheQueue == false ? TypeStatusCourse.Inscrito : TypeStatusCourse.ListaEspera;
+                entity.HolderName = entityFamily.Holder.Name;
+                
                 var entityId = await _courseFamilyRepository.CreateAsync(entity).ConfigureAwait(false);
 
 
@@ -660,8 +663,8 @@ namespace Moralar.WebApi.Controllers
             var listCourseFamily = new List<CourseFamily>();
             try
             {
-                var builder = Builders<Data.Entities.Course>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.Course>>();
+                var builder = Builders<Course>.Filter;
+                var conditions = new List<FilterDefinition<Course>>();
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
@@ -680,38 +683,42 @@ namespace Moralar.WebApi.Controllers
                 var totalRecords = (int)await _courseRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
 
                 var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
-                    ? Builders<Data.Entities.Course>.Sort.Descending(sortColumn)
-                    : Builders<Data.Entities.Course>.Sort.Ascending(sortColumn);
+                    ? Builders<Course>.Sort.Descending(sortColumn)
+                    : Builders<Course>.Sort.Ascending(sortColumn);
 
                 var retorno = await _courseRepository
                     .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, totalRecords, conditions, columns) as List<Course>;
 
+                //if (retorno.Count() > 0)
+                    //listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
+
+                var listViewModel = _mapper.Map<List<CourseExportViewModel>>(retorno);
+
                 if (retorno.Count() > 0)
-                    listCourseFamily = await _courseFamilyRepository.FindIn(nameof(CourseFamily.CourseId), retorno.Select(x => x._id.ToString()).ToList()) as List<CourseFamily>;
-
-
-                var family = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
-
-                var listViewModel = _mapper.Map<List<Course>, List<CourseExportViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
                 {
-
-                    for (int i = 0; i < src.Count(); i++)
+                    for (int i = 0; i < retorno.Count(); i++)
                     {
-                        //string.Join(',', listRegistration.Select(x => x.CourseName).ToList()).TrimEnd(',');
-                        //for (int f = 0; f < listCourseFamily.Count(); f++)
-                        //{
-                        //    var item = listCourseFamily[f];
+                        var item = retorno[i];
 
-                        //    var familyCouse = family.Find(x => x._id == ObjectId.Parse(item.FamilyId));
+                        var familyInscriptions = await _courseFamilyRepository
+                           .GetCollectionAsync()
+                           .Aggregate()
+                           .Match(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.Inscrito)
+                           .ToListAsync();
 
+                        var familyWaiting = await _courseFamilyRepository
+                           .GetCollectionAsync()
+                           .Aggregate()
+                           .Match(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.ListaEspera)
+                           .ToListAsync();
 
-                           // dest[i].FamilyName = familyCouse.Holder.Name;
-                            dest[i].TotalInscriptions = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.Inscrito && x.CourseId == src[i]._id.ToString());
-                            dest[i].TotalWaitingList = listCourseFamily.Count(x => x.TypeStatusCourse == TypeStatusCourse.ListaEspera && x.CourseId == src[i]._id.ToString());
-                        ////}
+                        listViewModel[i].TotalInscriptions = familyInscriptions.Count();
+                        listViewModel[i].TotalWaitingList = familyWaiting.Count(); 
+                        listViewModel[i].FamilyNameInscriptions = string.Join(", ", familyInscriptions.Select(x => x.HolderName).ToList()).TrimEnd(',');
+                        listViewModel[i].FamilyNameWaiting = string.Join(", ", familyWaiting.Select(x => x.HolderName).ToList()).TrimEnd(',');
+
                     }
-                    
-                }));
+                }        
 
                 var fileName = "Cursos.xlsx";
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");

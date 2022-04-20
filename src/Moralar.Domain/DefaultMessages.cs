@@ -101,5 +101,6 @@ namespace Moralar.Domain
         public const string FileNotAllowed = "Arquivo não permitido";
         public const string AnyQuiz = "Nenhum questionário encontrado";
         public const string ZeroItems = "Nenhum item importado";
+        public const string PropertyNotChosen = "Imóvel de interesse não escolhido";
     }
 }

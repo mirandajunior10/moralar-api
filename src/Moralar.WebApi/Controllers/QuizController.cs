@@ -186,37 +186,51 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> Export([FromForm] string nameQuiz, [FromForm] TypeQuiz typeQuiz)
+        public async Task<IActionResult> Export([FromForm] DtParameters model, [FromForm] string title, [FromForm] TypeQuiz typeQuiz)
         {
-
-
-
-            var response = new DtResult<QuizExportViewModel>();
             try
             {
+                var builder = Builders<Quiz>.Filter;
+                var conditions = new List<FilterDefinition<Quiz>>();
 
-                var conditions = new List<FilterDefinition<Data.Entities.Quiz>>();
-                var builder = Builders<Data.Entities.Quiz>.Filter;
-                conditions.Add(builder.Where(x => x.Created != null && x._id != null));
-                if (!string.IsNullOrEmpty(nameQuiz))
-                    conditions.Add(builder.Where(x => x.Title.ToUpper().Contains(nameQuiz.ToUpper())));
+                conditions.Add(builder.Where(x => x.Disabled == null));
+               
+
+                if (string.IsNullOrEmpty(title) == false)
+                    conditions.Add(builder.Regex(x => x.Title, new BsonRegularExpression(title, "i")));
+
                 conditions.Add(builder.Where(x => x.TypeQuiz == typeQuiz));
-                var condition = builder.And(conditions);
-                var fileName = "Questionario_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
-                var allData = await _quizRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Quiz>() { }).ToListAsync();
 
-                var path = Path.Combine($"{Directory.GetCurrentDirectory()}\\", @"ExportFiles");
+                var columns = model.Columns.Where(x => x.Searchable && string.IsNullOrEmpty(x.Name) == false).Select(x => x.Name).ToArray();
+
+                var sortColumn = model.SortOrder;
+                var totalRecords = (int)await _quizRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                   ? Builders<Quiz>.Sort.Descending(sortColumn)
+                   : Builders<Quiz>.Sort.Ascending(sortColumn);
+
+                var retorno = await _quizRepository
+                 .LoadDataTableAsync(model.Search.Value, sortBy, 0, 0, conditions, columns) as List<Quiz>;
+
+                var response = _mapper.Map<List<QuizExportViewModel>>(retorno);
+
+                var fileName = "Questionario_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
                 if (Directory.Exists(path) == false)
                     Directory.CreateDirectory(path);
 
                 var fullPathFile = Path.Combine(path, fileName);
-                var listViewModel = _mapper.Map<List<QuizExportViewModel>>(allData);
-                Utilities.ExportToExcel(listViewModel, path, fileName: fileName.Split('.')[0]);
+
+                Utilities.ExportToExcel(response, path, "Questionario", fileName.Split('.')[0]);
                 if (System.IO.File.Exists(fullPathFile) == false)
                     return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
 
-                var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+
+               
             }
             catch (Exception ex)
             {
@@ -249,6 +263,7 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.Quiz>>();
 
                 conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
+                
                 if (!string.IsNullOrEmpty(title))
                     conditions.Add(builder.Where(x => x.Title == title));
 

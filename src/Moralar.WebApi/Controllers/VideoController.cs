@@ -109,7 +109,7 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(userId))
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InvalidCredentials)));
 
-                var videoEntity = await _videoRepository.FindByAsync(x => x.DataBlocked == null).ConfigureAwait(false);
+                var videoEntity = await _videoRepository.FindByAsync(x => x.DataBlocked == null, Builders<Video>.Sort.Descending(x => x.Created)).ConfigureAwait(false);
                 if (videoEntity == null)
                     return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.VideoNotFound)));
 

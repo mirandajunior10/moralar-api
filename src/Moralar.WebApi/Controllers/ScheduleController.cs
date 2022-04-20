@@ -56,9 +56,10 @@ namespace Moralar.WebApi.Controllers
         private readonly IResidencialPropertyRepository _residencialPropertyRepository;
         private readonly INotificationSendedRepository _notificationSendedRepository;
         private readonly INotificationRepository _notificationRepository;
+        private readonly IProfileRepository _profileRepository;
         private readonly ISenderNotificationService _senderNotificationService;
 
-        public ScheduleController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, IUtilService utilService, ISenderMailService senderMailService, IQuizRepository quizRepository, IQuizFamilyRepository quizFamilyRepository, ICourseFamilyRepository courseFamilyRepository, ICourseRepository courseRepository, IPropertiesInterestRepository propertiesInterestRepository, IResidencialPropertyRepository residencialPropertyRepository, INotificationSendedRepository notificationSendedRepository, INotificationRepository notificationRepository, ISenderNotificationService senderNotificationService)
+        public ScheduleController(IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, IUtilService utilService, ISenderMailService senderMailService, IQuizRepository quizRepository, IQuizFamilyRepository quizFamilyRepository, ICourseFamilyRepository courseFamilyRepository, ICourseRepository courseRepository, IPropertiesInterestRepository propertiesInterestRepository, IResidencialPropertyRepository residencialPropertyRepository, INotificationSendedRepository notificationSendedRepository, INotificationRepository notificationRepository, ISenderNotificationService senderNotificationService, IProfileRepository profileRepository)
         {
             _mapper = mapper;
             _familyRepository = familyRepository;
@@ -75,6 +76,7 @@ namespace Moralar.WebApi.Controllers
             _notificationSendedRepository = notificationSendedRepository;
             _notificationRepository = notificationRepository;
             _senderNotificationService = senderNotificationService;
+            _profileRepository = profileRepository;
         }
 
 
@@ -286,6 +288,7 @@ namespace Moralar.WebApi.Controllers
 
             try
             {
+                
 
                 var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.Date), nameof(model.Description), nameof(model.FamilyId), nameof(model.Place));
                 if (isInvalidState != null)
@@ -297,6 +300,7 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalidToSchedule));
 
                 var family = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
+
                 if (family == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
@@ -372,7 +376,7 @@ namespace Moralar.WebApi.Controllers
                     listNotification.Add(new Notification()
                     {
                         For = ForType.Family,
-                        FamilyId = family.Holder._id.ToString(),
+                        FamilyId = model.FamilyId,
                         Title = title,
                         Description = content
                     });
@@ -793,10 +797,38 @@ namespace Moralar.WebApi.Controllers
                 await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
 
 
+                if (model.TypeScheduleStatus == TypeScheduleStatus.AguardandoReagendamento)
+                {
+                    var gestorEntity = await _profileRepository.FindByAsync(x => x.Disabled == null && x.TypeProfile == TypeUserProfile.TTS).ConfigureAwait(false) as List<Data.Entities.Profile>;
+
+                    var title = "Solicitação de reagendamento";
+                    var content = $"A famíla de número { family.Holder.Number } solicitou um reagendamento";
+
+                    var listNotification = new List<Notification>();
+                    for (int i = 0; i < gestorEntity.Count(); i++)
+                    {
+                        var gestorItem = gestorEntity[i];
+
+                        listNotification.Add(new Notification()
+                        {
+                            For = ForType.TTS,
+                            FamilyId = null,
+                            Title = title,
+                            Description = content
+                           
+                        });
+                    }
+
+                    await _notificationRepository.CreateAsync(listNotification);
+
+                    dynamic payloadPush = Util.GetPayloadPush();
+                    dynamic settingPush = Util.GetSettingsPush();
+
+                    await _senderNotificationService.SendPushAsync(title, content, gestorEntity.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
+                }
 
 
-
-                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+                    return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
             catch (Exception ex)
             {

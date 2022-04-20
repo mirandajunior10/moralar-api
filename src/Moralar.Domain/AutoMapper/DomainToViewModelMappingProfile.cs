@@ -71,7 +71,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<FamilyHolder, FamilyHolderViewModel>();
             CreateMap<FamilyHolder, FamilyHolderListViewModel>()
                  .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
-            CreateMap<FamilyHolder, FamilyHolderMinViewModel>();
+            CreateMap<FamilyHolder, FamilyHolderMinViewModel>();           
             CreateMap<FamilySpouse, FamilySpouseViewModel>();
             CreateMap<FamilyMember, FamilyMemberViewModel>();
             CreateMap<FamilyFinancial, FamilyFinancialViewModel>();
