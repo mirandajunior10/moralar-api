@@ -78,7 +78,8 @@ namespace Moralar.WebApi.Controllers
                 if (listPropertiesInterestEntity.Count() == 0)
                     return Ok(Utilities.ReturnSuccess(data: new List<object>()));
 
-                var listEntity = await _residencialPropertyRepository.FindIn("_id", listPropertiesInterestEntity.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                var listEntity = await _residencialPropertyRepository.FindIn(c => c.TypeStatusResidencialProperty != TypeStatusResidencial.Vendido, "_id", listPropertiesInterestEntity.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList(), Builders<ResidencialProperty>.Sort.Descending(nameof(ResidencialProperty.Created))) as List<ResidencialProperty>;
+               
                 if (listEntity.Count() == 0)
                     return Ok(Utilities.ReturnSuccess(data: new List<object>()));
 

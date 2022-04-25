@@ -304,6 +304,11 @@ namespace Moralar.WebApi.Controllers
                 if (family == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
+                var schedule = await _scheduleRepository.CountAsync(x => x.FamilyId == model.FamilyId && x.TypeSubject == TypeSubject.ReuniaoPGM);
+
+                /*Checa se as etapas anteriores foram cumplidas*/
+                if (schedule < 3)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToSchedule));
 
                 var scheduleEntity = _mapper.Map<Schedule>(model);
                 scheduleEntity.HolderCpf = family.Holder.Cpf;
@@ -799,32 +804,27 @@ namespace Moralar.WebApi.Controllers
 
                 if (model.TypeScheduleStatus == TypeScheduleStatus.AguardandoReagendamento)
                 {
-                    var gestorEntity = await _profileRepository.FindByAsync(x => x.Disabled == null && x.TypeProfile == TypeUserProfile.TTS).ConfigureAwait(false) as List<Data.Entities.Profile>;
-
+                    
                     var title = "Solicitação de reagendamento";
                     var content = $"A famíla de número { family.Holder.Number } solicitou um reagendamento";
 
-                    var listNotification = new List<Notification>();
-                    for (int i = 0; i < gestorEntity.Count(); i++)
-                    {
-                        var gestorItem = gestorEntity[i];
+                    var listNotification = new List<Notification>();     
 
-                        listNotification.Add(new Notification()
-                        {
-                            For = ForType.TTS,
-                            FamilyId = null,
-                            Title = title,
-                            Description = content
+                    listNotification.Add(new Notification()
+                    {
+                        For = ForType.TTS,
+                        FamilyId = null,
+                        Title = title,
+                        Description = content
                            
-                        });
-                    }
+                    });                  
 
                     await _notificationRepository.CreateAsync(listNotification);
 
                     dynamic payloadPush = Util.GetPayloadPush();
                     dynamic settingPush = Util.GetSettingsPush();
 
-                    await _senderNotificationService.SendPushAsync(title, content, gestorEntity.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
+                    await _senderNotificationService.SendPushAsync(title, content, null, data: payloadPush, settings: settingPush, priority: 10);
                 }
 
 
@@ -999,6 +999,117 @@ namespace Moralar.WebApi.Controllers
 
                 var fileBytes = System.IO.File.ReadAllBytes(@fullPathFile);
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(Utilities.ReturnErro(ex.Message));
+            }
+        }
+
+        /// <summary>
+        /// EXPORTAR DADOS MAPA DE DESLOCAMENTO
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ExportMap")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+
+
+        public async Task<IActionResult> ExportMap([FromForm] DtParameters model, [FromForm] string number)
+        {
+            
+            try
+            {
+                var builder = Builders<Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Schedule>>();
+
+                conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null && x.TypeSubject == TypeSubject.Mudanca));
+
+                if (!string.IsNullOrEmpty(number))
+                    conditions.Add(builder.Where(x => x.HolderNumber == number));
+
+                var columns = model.Columns.Where(x => x.Searchable && string.IsNullOrEmpty(x.Name) == false).Select(x => x.Name).ToArray();
+
+                var sortColumn = model.SortOrder;
+                var totalRecords = (int)await _scheduleRepository.GetCollectionAsync().CountDocumentsAsync(builder.And(conditions));
+
+                var sortBy = model.Order[0].Dir.ToString().ToUpper().Equals("DESC")
+                   ? Builders<Schedule>.Sort.Descending(sortColumn)
+                   : Builders<Schedule>.Sort.Ascending(sortColumn);
+
+                var retorno = await _scheduleRepository
+                 .LoadDataTableAsync(model.Search.Value, sortBy, 0, 0, conditions, columns) as List<Schedule>;
+                               
+
+                var response = _mapper.Map<List<ScheduleMapExportViewModel>>(retorno);
+
+
+                for (int i = 0; i < retorno.Count(); i++)
+                {
+                    var item = retorno[i];
+
+                    var family = await _familyRepository.FindByIdAsync(item.FamilyId).ConfigureAwait(false);
+
+                    var infoOrigin = await _utilService.GetInfoFromZipCode(family.Address.CEP).ConfigureAwait(false);
+                    if (infoOrigin == null)
+                        return BadRequest(Utilities.ReturnErro("Cep não encontrado"));
+
+                    var residencialOrigin = Utilities.GetInfoFromAdressLocation(infoOrigin.StreetAddress + " " + infoOrigin.Complement + " " + infoOrigin.Neighborhood + " " + infoOrigin.CityName + " " + infoOrigin.StateUf);
+                    if (residencialOrigin.Erro == true)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.LocationNotFound));
+
+
+                    var propertyInterest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == item.FamilyId).ConfigureAwait(false);
+
+                    if (propertyInterest == null)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertyNotChosen));
+
+                    var residencialDestination = await _residencialPropertyRepository.FindIn(c => c.TypeStatusResidencialProperty == TypeStatusResidencial.Vendido, "_id", propertyInterest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList(), Builders<ResidencialProperty>.Sort.Ascending(nameof(ResidencialProperty.LastUpdate))) as List<ResidencialProperty>;
+
+                    if (residencialDestination.FirstOrDefault() == null)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
+
+                    if (residencialDestination.Count() > 1)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialSaled));
+
+                    var infoDestination = await _utilService.GetInfoFromZipCode(residencialDestination.FirstOrDefault().ResidencialPropertyAdress.CEP).ConfigureAwait(false);
+                    if (infoDestination == null)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
+
+                    var destination = Utilities.GetInfoFromAdressLocation(infoDestination.StreetAddress + " " + infoDestination.Complement + " " + infoDestination.Neighborhood + " " + infoDestination.CityName + " " + infoDestination.StateUf);
+                    var distanceM = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'M');
+                    var distanceK = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'K');
+
+                    response[i].AddressPropertyDistanceMeters = distanceM.ToString("F");
+                    response[i].AddressPropertyDistanceKilometers = distanceK.ToString("0.##");
+                    response[i].AddressPropertyOrigin = residencialOrigin.FormatedAddress;
+                    response[i].AddressPropertyDestination = destination.FormatedAddress;
+
+                }
+
+
+                var fileName = "Mapa de deslocamento.xlsx";
+                var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
+                if (Directory.Exists(path) == false)
+                    Directory.CreateDirectory(path);
+
+                var fullPathFile = Path.Combine(path, fileName);
+
+                Utilities.ExportToExcel(response, path, "Mapa", fileName.Split('.')[0]);
+                if (System.IO.File.Exists(fullPathFile) == false)
+                    return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
+                var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
+                return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
+
+
             }
             catch (Exception ex)
             {

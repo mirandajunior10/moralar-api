@@ -2231,6 +2231,16 @@
             <response code="500">Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.ExportMap(UtilityFramework.Application.Core.ViewModels.DtParameters,System.String)">
+            <summary>
+            EXPORTAR DADOS MAPA DE DESLOCAMENTO
+            </summary>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.UserAdministratorController.GetInfo">
             <summary>
             GET INFO 

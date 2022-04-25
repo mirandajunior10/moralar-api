@@ -109,6 +109,8 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.HolderName))
                 .ForMember(dest => dest.Cpf, opt => opt.MapFrom(src => src.HolderCpf));
 
+            CreateMap<Schedule, ScheduleMapExportViewModel>();
+
             CreateMap<Family, FamilyHolderExportViewModel>()
                 .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.Holder.Number))
                 .ForMember(dest => dest.Name, opt => opt.MapFrom(src => src.Holder.Name))

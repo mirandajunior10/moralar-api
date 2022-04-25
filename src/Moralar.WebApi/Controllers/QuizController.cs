@@ -331,7 +331,8 @@ namespace Moralar.WebApi.Controllers
                 {
                     Id = entity._id.ToString(),
                     Title = entity.Title,
-                    TypeQuiz = entity.TypeQuiz
+                    TypeQuiz = entity.TypeQuiz,
+                    Created = entity.Created
                 };
 
                 var questionDescription = await _questionDescriptionRepository.FindIn("QuestionId", question.Select(x => ObjectId.Parse(x._id.ToString())).ToList()) as List<QuestionDescription>;

@@ -15,5 +15,6 @@ namespace Moralar.Domain.ViewModels.Quiz
         public string Title { get; set; }
         public TypeQuiz TypeQuiz { get; set; }
         public List<QuestionViewModel> QuestionViewModel { get; set; }
+        public long? Created { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
     }
 }
