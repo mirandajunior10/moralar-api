@@ -28,7 +28,7 @@ namespace Moralar.Domain.ViewModels.Schedule
         /// <summary>
         /// Endereço de destino
         /// </summary>
-        [Display(Name = "Endereço de origem")]
+        [Display(Name = "Endereço de destino")]
         public string AddressPropertyDestination { get; set; }
         /// <summary>
         /// Distância em metros

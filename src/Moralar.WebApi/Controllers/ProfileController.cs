@@ -218,7 +218,7 @@ namespace Moralar.WebApi.Controllers
                     var message = new StringBuilder();
                     message.AppendLine($"<p>Caro(a) {listEntity[i].Name.GetFirstName()}</p>");
                     message.AppendLine($"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>");
-                    message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Email}<br/>");
+                    message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Cpf}<br/>");
                     message.AppendLine($"<strong>Senha</strong> :{listEntity[i].Password}</p>");
 
                     var dataBody = Util.GetTemplateVariables();
@@ -227,10 +227,13 @@ namespace Moralar.WebApi.Controllers
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
 
-                    var _ = Task.Run(async () =>
+                    var profileEmail = listEntity[i].Email;
+
+                    var unused = Task.Run(async () =>
                     {
-                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, listEntity[i].Email, body, title).ConfigureAwait(false);
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, profileEmail, body, title).ConfigureAwait(false);
                     });
+
                 }
 
                 return Ok(Utilities.ReturnSuccess($"Importação realizada com sucesso, total de {listEntity.Count()} gestor(es)"));
@@ -315,7 +318,7 @@ namespace Moralar.WebApi.Controllers
                     var message = new StringBuilder();
                     message.AppendLine($"<p>Caro(a) {listEntity[i].Name.GetFirstName()}</p>");
                     message.AppendLine($"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>");
-                    message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Email}<br/>");
+                    message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Cpf}<br/>");
                     message.AppendLine($"<strong>Senha</strong> :{listEntity[i].Password}</p>");
 
                     var dataBody = Util.GetTemplateVariables();
@@ -324,9 +327,11 @@ namespace Moralar.WebApi.Controllers
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
 
+                    var profileEmail = listEntity[i].Email;
+
                     var _ = Task.Run(async () =>
                     {
-                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, listEntity[i].Email, body, title).ConfigureAwait(false);
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, profileEmail, body, title).ConfigureAwait(false);
                     });
                 }
 

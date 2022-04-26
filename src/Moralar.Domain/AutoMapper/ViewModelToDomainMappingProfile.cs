@@ -81,7 +81,6 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Birthday, opt => opt.MapFrom(src => src.Birthday.ToUnixCustom()));
 
 
-
             //            Error mapping types.
 
             //Mapping types:

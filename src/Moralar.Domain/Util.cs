@@ -114,9 +114,11 @@ namespace Moralar.Domain
 
                     for (int i = 0; i < listEntityViewModel.Count(); i++)
                     {
+
                         var isInvalidState = listEntityViewModel[i].ModelIsValid(customStart: $"Erro na linha {i + 1}, verifique os dados informados");
                         if (isInvalidState != null)
                             throw new Exception(isInvalidState.Message);
+                       
                     }
 
                     response = listEntityViewModel.ToList();
@@ -129,6 +131,41 @@ namespace Moralar.Domain
             }
 
             return response;
+        }
+
+        public static IList<T> ConvertSheetToObjects<T>(this ExcelWorksheet worksheet) where T : new()
+        {
+            Func<CustomAttributeData, bool> func = (CustomAttributeData y) => y.AttributeType == typeof(Column);
+            List<ExportInfo> list = typeof(T).GetProperties().Select((PropertyInfo p, int i) => new ExportInfo
+            {
+                Property = p,
+                Column = (p.GetCustomAttributes<Column>().FirstOrDefault()?.ColumnIndex ?? (i + 1))
+            }).ToList();
+            IOrderedEnumerable<int> source = from x in worksheet.Cells.Select((ExcelRangeBase cell) => cell.Start.Row).Distinct()
+                                             orderby x
+                                             select x;
+            List<T> list2 = new List<T>();
+            for (int j = 2; j <= source.Count(); j++)
+            {
+                T val = new T();
+                bool flag = false;
+                for (int k = 0; k < list.Count(); k++)
+                {
+                    ExportInfo exportInfo = list[k];
+                    ExcelRange excelRange = worksheet.Cells[j, exportInfo.Column];
+                    if (!string.IsNullOrEmpty(excelRange.GetValue<string>()) && exportInfo.SetValueCustom(val, excelRange) && !flag)
+                    {
+                        flag = true;
+                    }
+                }
+
+                if (flag)
+                {
+                    list2.Add(val);
+                }
+            }
+
+            return list2;
         }
 
         public static FamilyHolder SetHolder(this FamilyImportViewModel model)
@@ -733,6 +770,6 @@ namespace Moralar.Domain
 
             return settings;
 
-        }
+        }        
     }
 }

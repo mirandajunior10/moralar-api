@@ -158,7 +158,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         //[ApiExplorerSettings(IgnoreApi = true)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string name, [FromForm] string cpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus? status, [FromForm] TypeSubject? type)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] string place, [FromForm] string description, [FromForm] TypeScheduleStatus? status, [FromForm] TypeSubject? type)
         {
             var response = new DtResult<ScheduleListViewModel>();
             try
@@ -170,10 +170,10 @@ namespace Moralar.WebApi.Controllers
 
                 if (!string.IsNullOrEmpty(number))
                     conditions.Add(builder.Where(x => x.HolderNumber == number));
-                if (!string.IsNullOrEmpty(name))
-                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(name.ToUpper())));
-                if (!string.IsNullOrEmpty(cpf))
-                    conditions.Add(builder.Where(x => x.HolderCpf == cpf.OnlyNumbers()));
+                if (!string.IsNullOrEmpty(holderName))
+                    conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
+                if (!string.IsNullOrEmpty(holderCpf))
+                    conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
                 if (startDate.HasValue)
                     conditions.Add(builder.Where(x => x.Date >= startDate));
                 if (endDate.HasValue)
@@ -1087,7 +1087,7 @@ namespace Moralar.WebApi.Controllers
                     var distanceM = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'M');
                     var distanceK = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'K');
 
-                    response[i].AddressPropertyDistanceMeters = distanceM.ToString("F");
+                    response[i].AddressPropertyDistanceMeters = distanceM.ToString("0.###");
                     response[i].AddressPropertyDistanceKilometers = distanceK.ToString("0.##");
                     response[i].AddressPropertyOrigin = residencialOrigin.FormatedAddress;
                     response[i].AddressPropertyDestination = destination.FormatedAddress;
