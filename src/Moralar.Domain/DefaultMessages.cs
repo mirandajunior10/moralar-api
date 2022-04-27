@@ -103,5 +103,6 @@ namespace Moralar.Domain
         public const string ZeroItems = "Nenhum item importado";
         public const string PropertyNotChosen = "Imóvel de interesse não escolhido";
         public const string StageInvalidToSchedule = "São necessárias 03 reuniões PGM antes de prosseguir";
+        public const string StageInvalidToPGM = "Todas as reuniões PGM foram agendadas";
     }
 }

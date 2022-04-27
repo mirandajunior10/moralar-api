@@ -46,7 +46,7 @@ namespace Moralar.Domain.ViewModels.Family
         [Column(7)]
         public string Telefone { get; set; }       
         [Column(8)]
-        //[DropDownExcel(Options = typeof(TypeScholarity))]
+        [DropDownExcel(Options = typeof(TypeScholarity))]
         public string Escolaridade { get; set; }
         
         [Display(Name = "CEP* Ex: #####-###")]

@@ -26,6 +26,8 @@ using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
 using OfficeOpenXml;
+using OfficeOpenXml.DataValidation;
+using OfficeOpenXml.DataValidation.Contracts;
 using OfficeOpenXml.Style;
 using RestSharp;
 using UtilityFramework.Application.Core;
@@ -500,7 +502,7 @@ namespace Moralar.Domain
                 var headings2 = t2.GetProperties();
                 for (var a = 0; a < headings2.Count(); a++)
                 {
-                    var name = headings2[a].GetCustomAttribute<DisplayAttribute>();
+                    var name = headings2[a].GetCustomAttribute<DisplayAttribute>();                    
                     worksheet2.Cells[1, a + 1].Value = name?.Name ?? headings2[a].Name;
                 }
 
@@ -717,6 +719,7 @@ namespace Moralar.Domain
         {
             try
             {
+                var validGender = false;
                 var listAges = new List<int>();
                 var listTypeGender = new List<TypeGenre>();
 
@@ -737,7 +740,16 @@ namespace Moralar.Domain
                 }
 
                 var validBirthday = listAges.Count(age => age >= startTargetAudienceAge && age <= endTargetAudienceAge) > 0;
-                var validGender = (typeGender == null || listTypeGender.Count(x => x == typeGender) > 0);
+                
+                if (typeGender == TypeGenre.Todos)
+                {
+                    validGender = true;
+                }
+                else
+                {
+                    validGender = (typeGender == null || listTypeGender.Count(x => x == typeGender) > 0);
+                }
+                
                 return (validBirthday, validGender);
 
             }
@@ -770,6 +782,21 @@ namespace Moralar.Domain
 
             return settings;
 
-        }        
+        } 
     }
 }
+    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Property)]
+    public class DropDownExcel : Attribute
+    {
+        public Type Options
+        {
+            get;
+            set;
+        }
+
+        public bool AllowBlank
+        {
+            get;
+            set;
+        }
+    }

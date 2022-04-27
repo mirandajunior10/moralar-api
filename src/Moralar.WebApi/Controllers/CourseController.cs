@@ -700,18 +700,10 @@ namespace Moralar.WebApi.Controllers
                     {
                         var item = retorno[i];
 
-                        var familyInscriptions = await _courseFamilyRepository
-                           .GetCollectionAsync()
-                           .Aggregate()
-                           .Match(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.Inscrito)
-                           .ToListAsync();
-
-                        var familyWaiting = await _courseFamilyRepository
-                           .GetCollectionAsync()
-                           .Aggregate()
-                           .Match(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.ListaEspera)
-                           .ToListAsync();
-
+                        var familyInscriptions = await _courseFamilyRepository.FindByAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.Inscrito);
+                       
+                        var familyWaiting = await _courseFamilyRepository.FindByAsync(x => x.CourseId == item._id.ToString() && x.TypeStatusCourse == TypeStatusCourse.ListaEspera);
+                        
                         listViewModel[i].TotalInscriptions = familyInscriptions.Count();
                         listViewModel[i].TotalWaitingList = familyWaiting.Count(); 
                         listViewModel[i].FamilyNameInscriptions = string.Join(", ", familyInscriptions.Select(x => x.HolderName).ToList()).TrimEnd(',');

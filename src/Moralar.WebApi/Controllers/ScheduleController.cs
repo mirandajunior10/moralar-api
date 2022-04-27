@@ -306,9 +306,21 @@ namespace Moralar.WebApi.Controllers
 
                 var schedule = await _scheduleRepository.CountAsync(x => x.FamilyId == model.FamilyId && x.TypeSubject == TypeSubject.ReuniaoPGM);
 
-                /*Checa se as etapas anteriores foram cumplidas*/
-                if (schedule < 3)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToSchedule));
+                if (model.TypeSubject != TypeSubject.ReuniaoPGM)
+                {
+                    /*Checa se as etapas anteriores foram cumplidas*/
+                    if (schedule < 3)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToSchedule));
+                }
+
+                if (model.TypeSubject == TypeSubject.ReuniaoPGM)
+                {
+                    /*Checa se as etapas foram cumplidas*/
+                    if (schedule == 3)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToPGM));
+                }
+
+
 
                 var scheduleEntity = _mapper.Map<Schedule>(model);
                 scheduleEntity.HolderCpf = family.Holder.Cpf;
