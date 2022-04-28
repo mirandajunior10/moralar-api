@@ -323,7 +323,7 @@ namespace Moralar.WebApi.Controllers
 
                 var now = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-                var entity = await _courseRepository.FindByAsync(x => x.EndDate > now, Builders<Course>.Sort.Descending(x => x.StartDate)).ConfigureAwait(false);
+                var entity = await _courseRepository.FindByAsync(x => x.EndDate > now && x.DataBlocked == null, Builders<Course>.Sort.Descending(x => x.StartDate)).ConfigureAwait(false);
 
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));

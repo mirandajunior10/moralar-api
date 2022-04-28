@@ -48,14 +48,16 @@ namespace Moralar.WebApi.Controllers
         private readonly IQuizFamilyRepository _quizFamilyRepository;
         private readonly IResidencialPropertyRepository _residencialPropertyRepository;
         private readonly IPropertiesInterestRepository _propertiesInterestRepository;
+        private readonly INotificationRepository _notificationRepository;
         private readonly ICityRepository _cityRepository;
         private readonly IUtilService _utilService;
         private readonly ISenderMailService _senderMailService;
+        private readonly ISenderNotificationService _senderNotificationService;
         private readonly IHttpContextAccessor _httpContextAccessor;
         public readonly List<string> _acceptedFiles = new List<string>() { ".xls", ".xlsx" };
 
 
-        public FamilyController(IHostingEnvironment env, IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, ICourseFamilyRepository courseFamilyRepository, IQuizFamilyRepository quizFamilyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, ICityRepository cityRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor)
+        public FamilyController(IHostingEnvironment env, IMapper mapper, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, IScheduleHistoryRepository scheduleHistoryRepository, ICourseFamilyRepository courseFamilyRepository, IQuizFamilyRepository quizFamilyRepository, IResidencialPropertyRepository residencialPropertyRepository, IPropertiesInterestRepository propertiesInterestRepository, ICityRepository cityRepository, IUtilService utilService, ISenderMailService senderMailService, IHttpContextAccessor httpContextAccessor, INotificationRepository notificationRepository, ISenderNotificationService senderNotificationService)
         {
             _env = env;
             _mapper = mapper;
@@ -70,6 +72,8 @@ namespace Moralar.WebApi.Controllers
             _utilService = utilService;
             _senderMailService = senderMailService;
             _httpContextAccessor = httpContextAccessor;
+            _notificationRepository = notificationRepository;
+            _senderNotificationService = senderNotificationService;
         }
         /// <summary>
         /// BLOQUEAR / DESBLOQUEAR FAMÍLIA
@@ -1400,6 +1404,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> Edit([FromBody] FamilyEditViewModel model)
         {
+            decimal incrementValue = 0;
             try
             {
                 var validOnly = _httpContextAccessor.GetFieldsFromBodyCustom();
@@ -1417,6 +1422,8 @@ namespace Moralar.WebApi.Controllers
 
                 if (entityFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                incrementValue = (decimal) entityFamily.Financial.IncrementValue;
 
                 entityFamily.SetIfDifferent(model, validOnly);
 
@@ -1468,10 +1475,38 @@ namespace Moralar.WebApi.Controllers
                 //if (model.Financial.IncrementValue > 0)
                 //    entityFamily.Financial.IncrementValue = model.Financial.IncrementValue;
 
-                //}
-
+                //}      
 
                 await _familyRepository.UpdateAsync(entityFamily).ConfigureAwait(false);
+
+
+                /*NOTIFICA A FAMILIA PARA ESCOLHA DE NOVOS IMÓVEIS*/
+                if (incrementValue != model.Financial.IncrementValue)
+                {
+                    var title = "Imóveis";
+                    var content = "Novas opções de imóveis estão disponíveis";
+
+                    var listNotification = new List<Notification>();
+
+
+                    listNotification.Add(new Notification()
+                    {
+                        For = ForType.Family,
+                        FamilyId = entityFamily._id.ToString(),
+                        Title = title,
+                        Description = content
+                    });
+
+
+                    await _notificationRepository.CreateAsync(listNotification);
+
+                    dynamic payloadPush = Util.GetPayloadPush();
+                    dynamic settingPush = Util.GetSettingsPush();
+
+                    await _senderNotificationService.SendPushAsync(title, content, entityFamily.DeviceId, data: payloadPush, settings: settingPush, priority: 10);
+
+
+                }
 
                 /*ATUALIZA AS INFORMAÇÕES NO AGENDAMENTO*/
                 _scheduleRepository.UpdateMultiple(Query<Schedule>.Where(x => x.FamilyId == entityFamily._id.ToString()),

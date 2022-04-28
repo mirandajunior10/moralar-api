@@ -1,3 +1,4 @@
+using Moralar.Data.Enum;
 using System.ComponentModel.DataAnnotations;
 
 using UtilityFramework.Application.Core;
@@ -20,14 +21,17 @@ namespace Moralar.Domain.ViewModels.Family
         
         [Display(Name = " Gênero")]
         [Column(4)]
+        [DropDownExcel(Options = typeof(TypeGenre), AllowBlank = true)]
         public string Genre { get; set; }
        
         [Display(Name = "Grau de parentesco")]             
         [Column(5)]
+        [DropDownExcel(Options = typeof(TypeKingShip), AllowBlank = true)]
         public string KinShip { get; set; }
         
         [Display(Name = "Escolaridade")]
         [Column(6)]
+        [DropDownExcel(Options = typeof(TypeScholarity), AllowBlank = true)]
         public string Scholarity { get; set; }
         
     }

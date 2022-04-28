@@ -478,8 +478,40 @@ namespace Moralar.Domain
                 var headings = t.GetProperties();
                 for (var a = 0; a < headings.Count(); a++)
                 {
+                    int num = a + 1;
                     var name = headings[a].GetCustomAttribute<DisplayAttribute>();
+
+                    DisplayAttribute customAttribute = headings[a].GetCustomAttribute<DisplayAttribute>();
+                    
                     worksheet.Cells[1, a + 1].Value = name?.Name ?? headings[a].Name;
+                    DropDownExcel customAttribute2 = headings[a].GetCustomAttribute<DropDownExcel>();
+
+                    if (customAttribute2 == null)
+                    {
+                        continue;
+                    }
+
+                    Array values = Enum.GetValues(customAttribute2.Options);
+                    List<string> list = new List<string>();
+                    foreach (int item in values)
+                    {
+                        list.Add(customAttribute2.Options.GetEnumMemberValueCustom(Enum.GetName(customAttribute2.Options, item)));
+                    }
+
+                    string address1 = ExcelCellBase.GetAddress(2, num, 1048576, num);
+                    IExcelDataValidationList excelDataValidationList = worksheet.DataValidations.AddListValidation(address1);
+                    excelDataValidationList.ShowErrorMessage = true;
+                    excelDataValidationList.ErrorStyle = ExcelDataValidationWarningStyle.stop;
+                    excelDataValidationList.ErrorTitle = "Valor inválido";
+                    excelDataValidationList.Error = "Selecione um item da lista";
+                    for (int j = 0; j < list.Count(); j++)
+                    {
+                        excelDataValidationList.Formula.Values.Add(list[j]);
+                    }
+
+                    excelDataValidationList.AllowBlank = customAttribute2.AllowBlank;
+                    excelDataValidationList.Validate();
+
                 }
 
                 var address = worksheet.Cells[1, headings.Count()]?.Address;
@@ -502,8 +534,38 @@ namespace Moralar.Domain
                 var headings2 = t2.GetProperties();
                 for (var a = 0; a < headings2.Count(); a++)
                 {
+                    int num = a + 1;
                     var name = headings2[a].GetCustomAttribute<DisplayAttribute>();                    
                     worksheet2.Cells[1, a + 1].Value = name?.Name ?? headings2[a].Name;
+
+                    DropDownExcel customAttribute2 = headings2[a].GetCustomAttribute<DropDownExcel>();
+
+                    if (customAttribute2 == null)
+                    {
+                        continue;
+                    }
+
+                    Array values = Enum.GetValues(customAttribute2.Options);
+                    List<string> list = new List<string>();
+                    foreach (int item in values)
+                    {
+                        list.Add(customAttribute2.Options.GetEnumMemberValueCustom(Enum.GetName(customAttribute2.Options, item)));
+                    }
+
+                    string address1 = ExcelCellBase.GetAddress(2, num, 1048576, num);
+                    IExcelDataValidationList excelDataValidationList = worksheet2.DataValidations.AddListValidation(address1);
+                    excelDataValidationList.ShowErrorMessage = true;
+                    excelDataValidationList.ErrorStyle = ExcelDataValidationWarningStyle.stop;
+                    excelDataValidationList.ErrorTitle = "Valor inválido";
+                    excelDataValidationList.Error = "Selecione um item da lista";
+                    for (int j = 0; j < list.Count(); j++)
+                    {
+                        excelDataValidationList.Formula.Values.Add(list[j]);
+                    }
+
+                    excelDataValidationList.AllowBlank = customAttribute2.AllowBlank;
+                    excelDataValidationList.Validate();
+
                 }
 
                 var address2 = worksheet2.Cells[1, headings2.Count()]?.Address;
@@ -782,7 +844,36 @@ namespace Moralar.Domain
 
             return settings;
 
-        } 
+        }
+
+
+        //
+        // Summary:
+        //     METODO PARA OBTER O ATRIBUTO MEMBERVALUE
+        //
+        // Parameters:
+        //   typeEnum:
+        //
+        //   value:
+        //
+        // Type parameters:
+        //   T:
+        //
+        // Exceptions:
+        //   T:System.Exception:
+        public static string GetEnumMemberValueCustom<T>(this Type typeEnum, T value)
+        {
+            if (!typeEnum.GetTypeInfo().IsEnum)
+            {
+                throw new Exception("Informe typo Enum");
+            }
+
+            return typeEnum.GetTypeInfo().DeclaredMembers.SingleOrDefault((MemberInfo x) => x.Name == value.ToString())?.GetCustomAttribute<EnumMemberAttribute>(inherit: false)?.Value;
+        }
+
+
+
+
     }
 }
     [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Property)]

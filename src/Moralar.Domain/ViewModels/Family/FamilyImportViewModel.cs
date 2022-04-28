@@ -36,6 +36,7 @@ namespace Moralar.Domain.ViewModels.Family
         [Column(4)]
         public string Data_de_Nascimento { get; set; }
         [Column(5)]
+        [DropDownExcel(Options = typeof(TypeGenre), AllowBlank = true)]
         public string Genero { get; set; }
        
         [Display(Name = "E-mail*")]        
@@ -46,7 +47,7 @@ namespace Moralar.Domain.ViewModels.Family
         [Column(7)]
         public string Telefone { get; set; }       
         [Column(8)]
-        [DropDownExcel(Options = typeof(TypeScholarity))]
+        [DropDownExcel(Options = typeof(TypeScholarity), AllowBlank = true)]
         public string Escolaridade { get; set; }
         
         [Display(Name = "CEP* Ex: #####-###")]
