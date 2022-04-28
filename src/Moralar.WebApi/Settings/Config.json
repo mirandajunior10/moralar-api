@@ -1,20 +1,4 @@
 ﻿{
-  "IUGU": {
-    // PROD - MEGALEIOS
-    "SandBox": true,
-    "LiveKey": "f97c6b38c1d67165df64eb44b783f7b8",
-    "TestKey": "9e9d750c8b86e719d483814b8635cb99",
-    "AccoundId": "97B9BC2219844ED2B03083A7583A16E8",
-    "Client": {
-      "Name": "",
-      "AccountKey": "",
-      "LiveKey": "",
-      "TestKey": "",
-      "UserApiKey": "",
-      "Tax": 0,
-      "EnableAdvance": true
-    }
-  },
   "smsDev": {
     // CONTA DE TESTE (MEGALEIOS)
     "apiKey": "5TZVPUYO9XP0567QY2FY1AUW"
