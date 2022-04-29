@@ -70,6 +70,7 @@ namespace Moralar.Domain
         {
             try
             {
+
                 var dateTime = date.TryParseAnyDate();
 
                 return new DateTimeOffset(dateTime).ToUnixTimeSeconds();
@@ -80,6 +81,8 @@ namespace Moralar.Domain
                 return (long?)null;
             }
         }
+
+        
 
         /// <summary>
         ///  CONVERTER STRING EM ENUM
@@ -196,12 +199,11 @@ namespace Moralar.Domain
         public static FamilySpouse SetSpouse(this FamilyImportViewModel model)
         {
             var response = new FamilySpouse();
-
             try
             {
                 response.Birthday = model.Data_de_Nascimento_do_Conjuge.ToUnixCustom();
-                response.Genre = model.Genero_Conjuge.ToEnumCustom<TypeGenre>();
-                response.SpouseScholarity = model.Escolaridade_Conjuge.ToEnumCustom<TypeScholarity>();
+                response.Genre = string.IsNullOrEmpty(model.Genero_Conjuge) == false ? model.Genero_Conjuge.ToEnumCustom<TypeGenre>() : (TypeGenre?)null;
+                response.SpouseScholarity = string.IsNullOrEmpty(model.Escolaridade_Conjuge) == false ? model.Escolaridade_Conjuge.ToEnumCustom<TypeScholarity>() : (TypeScholarity?)null;
                 response.Name = model.Nome_do_Conjuge;
             }
             catch (Exception)
@@ -211,9 +213,37 @@ namespace Moralar.Domain
 
             return response;
         }
-        public static FamilyAddress SetAddress(this FamilyImportViewModel model)
-            => new FamilyAddress();
+        public static async Task<FamilyAddress> SetAddress(this FamilyImportViewModel model)
+        {
+            var response = new FamilyAddress();
+            try
+            {
+                var infoAddressByZipCode = await GetInfoZipCode(model.CEP);
 
+                if (infoAddressByZipCode == null)
+                    throw new Exception("Cep não encontrado");
+
+                response.CEP = model.CEP.OnlyNumbers();
+                response.StreetAddress = model.StreetAddress;
+                response.Number = model.Number;
+                response.CityId = infoAddressByZipCode.CityId;
+                response.CityName = model.CityName;
+                response.StateId = infoAddressByZipCode.StateId;
+                response.StateName = model.StateName;
+                response.StateUf = model.StateUf;
+                response.Complement = model.Complement;
+                response.Neighborhood = model.Neighborhood;
+                
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+
+            return response;
+
+        }
         public static FamilyFinancial SetFinancial(this FamilyImportViewModel model)
         {
             var response = new FamilyFinancial();

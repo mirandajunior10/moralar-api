@@ -89,7 +89,7 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
         public string FloorLocation { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Tem Elevador?")]
+        [Display(Name = "Tem Elevador?*")]
         [Column(17)]
         public string HasElavator { get; set; }
 
@@ -109,47 +109,47 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
         public string HasServiceArea { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Tem garagem de serviço?")]
+        [Display(Name = "Tem garagem de serviço?*")]
         [Column(21)]
         public string HasGarage { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Tem quintal?")]
+        [Display(Name = "Tem quintal?*")]
         [Column(22)]
         public string HasYard { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Tem cisterna?")]
+        [Display(Name = "Tem cisterna?*")]
         [Column(23)]
         public string HasCistern { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "É toda murada?")]
+        [Display(Name = "É toda murada?*")]
         [Column(24)]
         public string HasWall { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Tem escada de acesso?")]
+        [Display(Name = "Tem escada de acesso?*")]
         [Column(25)]
         public string HasAccessLadder { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Tem rampa de acesso?")]
+        [Display(Name = "Tem rampa de acesso?*")]
         [Column(26)]
         public string HasAccessRamp { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "É Adaptada ou permite adaptação para PCD?")]
+        [Display(Name = "É Adaptada ou permite adaptação para PCD?*")]
         [Column(27)]
         public string HasAdaptedToPcd { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Regularização do imóvel")]
+        [Display(Name = "Regularização do imóvel*")]
         [Column(28)]
         public string PropertyRegularization { get; set; }
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]
-        [Display(Name = "Tipo de instalação de gás")]
+        [Display(Name = "Tipo de instalação de gás*")]
         [Column(29)]
         public string TypeGasInstallation { get; set; }
 

@@ -344,8 +344,8 @@ namespace Moralar.WebApi.Controllers
                 if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                // if (await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel) == false)
-                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty, responseList: true));
+                if (await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel) == false)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty, responseList: true));
 
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();

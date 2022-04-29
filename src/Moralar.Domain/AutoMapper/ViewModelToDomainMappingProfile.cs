@@ -70,7 +70,7 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.SetHolder()))
                 .ForMember(dest => dest.Spouse, opt => opt.MapFrom(src => src.SetSpouse()))
                 .ForMember(dest => dest.Priorization, opt => opt.MapFrom(src => src.SetPriorization()))
-                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => src.SetAddress()))
+                .ForMember(dest => dest.Address, opt => opt.MapFrom(src => Util.SetAddress(src).Result))
                 .ForMember(dest => dest.Financial, opt => opt.MapFrom(src => src.SetFinancial()));
 
 

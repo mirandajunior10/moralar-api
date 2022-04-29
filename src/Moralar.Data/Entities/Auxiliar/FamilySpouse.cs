@@ -9,7 +9,7 @@ namespace Moralar.Data.Entities.Auxiliar
     {
         public string Name { get; set; }
         public long? Birthday { get; set; }
-        public TypeGenre? Genre { get; set; }
-        public TypeScholarity? SpouseScholarity { get; set; }
+        public TypeGenre? Genre { get; set; } = null;
+        public TypeScholarity? SpouseScholarity { get; set; } = null;
     }
 }
