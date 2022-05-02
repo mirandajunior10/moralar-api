@@ -1450,6 +1450,7 @@ namespace Moralar.WebApi.Controllers
                 if (validOnly.Count(x => x == nameof(Family.Spouse)) > 0)
                 {
                     entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);
+                   
                 }
 
                 if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)

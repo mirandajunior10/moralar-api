@@ -121,11 +121,12 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
             CreateMap<Family, FamilyCompleteListViewModel>()
-               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
-               ;
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+
             CreateMap<Family, FamilyEditViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
                .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));
+              
 
             CreateMap<Family, ScheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel>();
 
