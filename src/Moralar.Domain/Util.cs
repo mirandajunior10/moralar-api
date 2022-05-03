@@ -620,6 +620,146 @@ namespace Moralar.Domain
 
         }
 
+        /// <summary>
+        /// JUNTAR LISTA DE STRING EM UMA STRING = RESULT (MAÇA, BANANA, ETC)
+        /// </summary>
+        /// <param name="list"></param>
+        /// <param name="aggregate"></param>
+        /// <returns></returns>
+        public static string CustomJoin(this List<string> list, string aggregate = ", ")
+        {
+            try
+            {
+                return string.Join(aggregate, list)?.Trim()?.TrimEnd(',');
+            }
+            catch (Exception)
+            {
+                throw;
+            }
+        }
+
+
+        public static string MapAnswer(this string questionId, List<QuestionAnswerAux> questionAnswers)
+        {
+            var listAnswer = new List<string>();
+            try
+            {
+                for (int i = 0; i < questionAnswers.Count(); i++)
+                {
+                    if (questionAnswers[i].QuestionId == questionId)
+                        listAnswer.Add(questionAnswers[i].AnswerDescription);
+                }
+
+            }
+            catch (Exception) { }
+
+            return listAnswer.Distinct().ToList().CustomJoin();
+        }
+
+
+        /// <summary>
+        ///  EXPORT LIST ENTITY TO TABLE IN EXCEL FILE
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="entitys"></param>
+        /// <param name="path"></param>
+        /// <param name="workSheetName">NOME DA WORKSHEET</param>
+        /// <param name="fileName"></param>
+        /// <param name="hexBColor"></param>
+        /// <param name="hexTxtColor"></param>
+        /// <param name="autoFit">AUTO RESIZE DA COLUNA</param>
+        /// <param name="ext"></param>
+        /// <param name="addWorksheet">NOVA WORKSHEET EM ARQUIVO EXISTENTE</param>
+        /// <param name="forceText">FORÇAR FORMATAÇÃO TEXTO EM TODOS CAMPOS</param>
+        public static void ExportToExcel<T>(List<T> entitys, string path, string workSheetName = "Result",
+            string fileName = "Export", string hexBColor = null, string hexTxtColor = null, bool autoFit = true,
+            string ext = ".xlsx", bool addWorksheet = false, bool forceText = false)
+        {
+            var bColor = Utilities.GetColorFromHex(Color.FromArgb(68, 114, 196), hexBColor);
+            var txtColor = Utilities.GetColorFromHex(Color.White, hexTxtColor);
+
+            var sFileName = $"{fileName.Split('.')[0]}{ext}";
+
+            #region FilePrepare
+
+            if (!Directory.Exists(path))
+                Directory.CreateDirectory(path);
+
+            var file = new FileInfo(Path.Combine(path, sFileName));
+            if (file.Exists && addWorksheet == false)
+            {
+                file.Delete();
+                file = new FileInfo(Path.Combine(path, sFileName));
+            }
+
+            #endregion
+
+            using (var package = new ExcelPackage(file))
+            {
+                var worksheet = package.Workbook.Worksheets.Add(workSheetName);
+
+                //HEADER TABLE
+                var t = typeof(T);
+                var headings = t.GetProperties();
+                for (var i = 0; i < headings.Count(); i++)
+                {
+                    var column = i + 1;
+                    var name = headings[i].GetCustomAttribute<DisplayAttribute>();
+                    worksheet.Cells[1, column].Value = name?.Name ?? headings[i].Name;
+
+                    var dropDownExcel = headings[i].GetCustomAttribute<DropDownExcel>();
+
+
+                    if (forceText)
+                        worksheet.Cells[ExcelRange.GetAddress(2, column, ExcelPackage.MaxRows, column)].Style.Numberformat.Format = "@";
+
+
+                    if (dropDownExcel != null)
+                    {
+                        var enumValues = Enum.GetValues(dropDownExcel.Options);
+
+                        var options = new List<string>();
+
+                        foreach (int value in enumValues)
+                            options.Add(dropDownExcel.Options.GetEnumMemberValueCustom(Enum.GetName(dropDownExcel.Options, value)));
+
+                        var range = ExcelRange.GetAddress(2, column, ExcelPackage.MaxRows, column);
+
+                        var validation = worksheet.DataValidations.AddListValidation(range);
+
+                        validation.ShowErrorMessage = true;
+                        validation.ErrorStyle = ExcelDataValidationWarningStyle.stop;
+                        validation.ErrorTitle = "Valor inválido";
+                        validation.Error = "Selecione um item da lista";
+
+                        for (int item = 0; item < options.Count(); item++)
+                            validation.Formula.Values.Add(options[item]);
+
+                        validation.AllowBlank = dropDownExcel.AllowBlank;
+                        validation.Validate();
+                    }
+                }
+
+                var address = worksheet.Cells[1, headings.Count()]?.Address;
+
+                //BODY DA TABLE
+                if (entitys.Any()) worksheet.Cells["A2"].LoadFromCollection(entitys);
+
+                using (var rng = worksheet.Cells[$"A1:{address ?? "AD1"}"])
+                {
+                    rng.Style.Font.Bold = true;
+                    rng.Style.Fill.PatternType = ExcelFillStyle.Solid;
+                    rng.Style.Fill.BackgroundColor.SetColor(bColor);
+                    rng.Style.Font.Color.SetColor(txtColor);
+                }
+
+                if (autoFit)
+                    worksheet.Cells.AutoFitColumns();
+
+                package.Save(); //Save the workbook.
+            }
+        }
+
 
 
         public static ReturnViewModel ModelIsValid<TEntity>(this TEntity entity, bool onlyValidFields = false, string[] customValidFields = null, string[] ignoredFields = null, string customStart = null) where TEntity : new()

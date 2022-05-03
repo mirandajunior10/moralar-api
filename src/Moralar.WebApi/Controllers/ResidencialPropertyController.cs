@@ -898,7 +898,7 @@ namespace Moralar.WebApi.Controllers
             {
                 var listProperty = await _residencialPropertyRepository.FindByAsync(x => x.Disabled == null) as List<ResidencialProperty>;
 
-                var listNeighborhood = listProperty.Select(x => x.ResidencialPropertyAdress.Neighborhood).Where(x => string.IsNullOrEmpty(x)).Distinct();
+                var listNeighborhood = listProperty.Select(x => x.ResidencialPropertyAdress.Neighborhood).Where(x => string.IsNullOrEmpty(x) == false).Distinct();
 
                 return Ok(Utilities.ReturnSuccess(data: listNeighborhood));
             }

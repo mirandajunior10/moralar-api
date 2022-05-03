@@ -22,6 +22,7 @@ using Moralar.Domain.Services.Interface;
 using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Question;
+using Moralar.Domain.ViewModels.QuestionAnswer;
 using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Repository.Interface;
 using UtilityFramework.Application.Core;
@@ -43,13 +44,14 @@ namespace Moralar.WebApi.Controllers
         private readonly IQuestionRepository _questionRepository;
         private readonly IQuizRepository _quizRepository;
         private readonly IQuestionDescriptionRepository _questionDescriptionRepository;
+        private readonly IQuestionAnswerRepository _questionAnswerRepository;
         private readonly IQuizFamilyRepository _quizFamilyRepository;
         private readonly IFamilyRepository _familyRepository;
         private readonly INotificationRepository _notificationRepository;
         private readonly IUtilService _utilService;
         private readonly ISenderNotificationService _senderNotificationService;
 
-        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, INotificationRepository notificationRepository, IUtilService utilService, ISenderNotificationService senderNotificationService)
+        public QuizController(IMapper mapper, IQuestionRepository questionRepository, IQuizRepository quizRepository, IQuestionDescriptionRepository questionDescriptionRepository, IQuizFamilyRepository quizFamilyRepository, IFamilyRepository familyRepository, INotificationRepository notificationRepository, IUtilService utilService, ISenderNotificationService senderNotificationService, IQuestionAnswerRepository questionAnswerRepository)
         {
             _mapper = mapper;
             _questionRepository = questionRepository;
@@ -60,6 +62,7 @@ namespace Moralar.WebApi.Controllers
             _notificationRepository = notificationRepository;
             _utilService = utilService;
             _senderNotificationService = senderNotificationService;
+            _questionAnswerRepository = questionAnswerRepository;
         }
 
         /// <summary>
@@ -194,7 +197,7 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Quiz>>();
 
                 conditions.Add(builder.Where(x => x.Disabled == null));
-               
+
 
                 if (string.IsNullOrEmpty(title) == false)
                     conditions.Add(builder.Regex(x => x.Title, new BsonRegularExpression(title, "i")));
@@ -213,7 +216,50 @@ namespace Moralar.WebApi.Controllers
                 var retorno = await _quizRepository
                  .LoadDataTableAsync(model.Search.Value, sortBy, 0, 0, conditions, columns) as List<Quiz>;
 
-                var response = _mapper.Map<List<QuizExportViewModel>>(retorno);
+                var listAnswer = await _questionAnswerRepository.FindIn(nameof(QuestionAnswer.QuizId), retorno.Select(x => x._id.ToString()).ToList()) as List<QuestionAnswer>;
+
+                var response = _mapper.Map<List<Quiz>, List<QuizExportViewModel>>(retorno, opt => opt.AfterMap((src, dest) =>
+                {
+                    for (int i = 0; i < src.Count(); i++)
+                    {
+                        var quizId = src[i]._id.ToString();
+
+                        dest[i].Id = quizId;
+                        dest[i].TotalAnswers = listAnswer.Where(x => x.QuizId == quizId).DistinctBy(x => x.FamilyHolderCpf).Count();
+                    }
+                }));
+
+                var listQuestion = await _questionRepository.FindIn("_id", listAnswer.SelectMany(x => x.Questions).Select(x => ObjectId.Parse(x.QuestionId)).Distinct().ToList()) as List<Question>;
+
+                var answersResponse = new List<QuestionAnswerExportViewModel>();
+
+                for (int i = 0; i < listQuestion.Count(); i++)
+                {
+                    var questionItem = listQuestion[i];
+                    var quizItem = retorno.Find(x => x._id.ToString() == questionItem.QuizId);
+                    var questionId = questionItem._id.ToString();
+                    var listAnswerItens = listAnswer.Where(x => x.Questions.Count(y => y.QuestionId == questionId) > 0).ToList();
+
+                    var holders = listAnswerItens.GroupBy(x => x.FamilyHolderCpf.OnlyNumbers()).Select(x => x.FirstOrDefault()).ToList();
+                    for (int a = 0; a < holders.Count(); a++)
+                    {
+                        var holderItem = holders[a];
+
+                        var holderAnswer = listAnswerItens.Where(x => x.Questions.Count(y => y.QuestionId == questionId) > 0 && x.FamilyHolderCpf == holderItem.FamilyHolderCpf).SelectMany(x => x.Questions).ToList();
+
+                        answersResponse.Add(new QuestionAnswerExportViewModel()
+                        {
+                            QuizId = questionItem.QuizId,
+                            QuizTitle = quizItem?.Title,
+                            QuestionId = questionId,
+                            QuestionName = questionItem.NameQuestion,
+                            HolderCpf = holderItem.FamilyHolderCpf,
+                            HolderName = holderItem.FamilyHolderName,
+                            TypeQuestion = questionItem.TypeResponse.GetEnumMemberValue(),
+                            Answers = Util.MapAnswer(questionId, holderAnswer)
+                        });
+                    }
+                }
 
                 var fileName = "Questionario_" + DateTime.Now.ToString("ddMMyyyyHHmmss") + ".xlsx";
                 var path = Path.Combine($"{Directory.GetCurrentDirectory()}/Content", @"ExportFiles");
@@ -223,14 +269,19 @@ namespace Moralar.WebApi.Controllers
                 var fullPathFile = Path.Combine(path, fileName);
 
                 Utilities.ExportToExcel(response, path, "Questionario", fileName.Split('.')[0]);
+
+                /*WORKSHEET COM RESPOSTAS*/
+                Util.ExportToExcel(answersResponse, path, "Respostas", fileName.Split('.')[0], addWorksheet: true);
+
                 if (System.IO.File.Exists(fullPathFile) == false)
                     return BadRequest(Utilities.ReturnErro("Ocorreu um erro fazer download do arquivo"));
+
 
                 var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
 
-               
+
             }
             catch (Exception ex)
             {
@@ -263,7 +314,7 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Data.Entities.Quiz>>();
 
                 conditions.Add(builder.Where(x => x.Created != null && x.Disabled == null));
-                
+
                 if (!string.IsNullOrEmpty(title))
                     conditions.Add(builder.Where(x => x.Title == title));
 
@@ -445,9 +496,9 @@ namespace Moralar.WebApi.Controllers
                     }
 
 
-                   //// var families = new List<Family>();
+                    //// var families = new List<Family>();
 
-                   // entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+                    // entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
 
                     var title = "Nova enquete";
                     var content = "Uma nova enquete foi disponibilizada";
@@ -560,7 +611,7 @@ namespace Moralar.WebApi.Controllers
                     await _notificationRepository.CreateAsync(new Notification
                     {
                         Title = "Novo questionário disponibilizado",
-                        Description = $"Olá { item.Holder.Name  }, Precisamos saber sua opinião sobre sua casa nova!",
+                        Description = $"Olá {item.Holder.Name}, Precisamos saber sua opinião sobre sua casa nova!",
                         FamilyId = item._id.ToString(),
                     });
 
