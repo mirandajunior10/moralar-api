@@ -335,6 +335,7 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+                double valueMaximumPurchase = 0;
                 var userId = Request.GetUserId();
 
                 if (string.IsNullOrEmpty(userId))
@@ -347,13 +348,16 @@ namespace Moralar.WebApi.Controllers
                 if (await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel) == false)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty, responseList: true));
 
+                valueMaximumPurchase = (double)(familyEntity.Financial?.MaximumPurchase + familyEntity.Financial?.IncrementValue);
+
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
                 conditions.Add(builder.Where(x => x.Created != null && x.DataBlocked == null && x.TypeStatusResidencialProperty != TypeStatusResidencial.Vendido));
 
                 conditions.Add(builder.Gte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.PropertyValueForDemolished));
-                conditions.Add(builder.Lte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.MaximumPurchase));
+                conditions.Add(builder.Lte(x => x.ResidencialPropertyFeatures.PropertyValue, valueMaximumPurchase));
+                //conditions.Add(builder.Lte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.MaximumPurchase));
 
                 if (model.TypeProperty != null)
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
