@@ -733,15 +733,15 @@ namespace Moralar.WebApi.Controllers
 
 
                 var propertyInterest = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
-                
-                if(propertyInterest == null)
+
+                if (propertyInterest == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertyNotChosen));
 
                 var residencialDestination = await _residencialPropertyRepository.FindIn(c => c.TypeStatusResidencialProperty == TypeStatusResidencial.Vendido, "_id", propertyInterest.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList(), Builders<ResidencialProperty>.Sort.Ascending(nameof(ResidencialProperty.LastUpdate))) as List<ResidencialProperty>;
-                
+
                 if (residencialDestination.FirstOrDefault() == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
-                
+
                 if (residencialDestination.Count() > 1)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialSaled));
 
@@ -1423,7 +1423,7 @@ namespace Moralar.WebApi.Controllers
                 if (entityFamily == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                incrementValue = (decimal) entityFamily.Financial.IncrementValue;
+                incrementValue = entityFamily.Financial.IncrementValue.GetValueOrDefault();
 
                 entityFamily.SetIfDifferent(model, validOnly);
 
@@ -1433,6 +1433,7 @@ namespace Moralar.WebApi.Controllers
                 if (validOnly.Count(x => x == nameof(Family.Holder)) > 0)
                 {
                     entityFamily.Holder.SetIfDifferentCustom(model.Holder);
+                    entityFamily.Holder.Name = model.Holder.Name;
                     entityFamily.Holder.Genre = model.Holder.Genre;
                     entityFamily.Holder.Scholarity = model.Holder.Scholarity;
                 }
@@ -1450,7 +1451,7 @@ namespace Moralar.WebApi.Controllers
                 if (validOnly.Count(x => x == nameof(Family.Spouse)) > 0)
                 {
                     entityFamily.Spouse.SetIfDifferentCustom(model.Spouse);
-                   
+
                 }
 
                 if (validOnly.Count(x => x == nameof(Family.Financial)) > 0)
@@ -1482,7 +1483,7 @@ namespace Moralar.WebApi.Controllers
 
 
                 /*NOTIFICA A FAMILIA PARA ESCOLHA DE NOVOS IMÓVEIS*/
-                if (incrementValue != model.Financial.IncrementValue)
+                if (model.Financial?.IncrementValue != null && incrementValue != model.Financial?.IncrementValue)
                 {
                     var title = "Imóveis";
                     var content = "Novas opções de imóveis estão disponíveis";
@@ -1699,7 +1700,7 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin, data: response));
 
                 if (familyEntity.DataBlocked != null)
-                    return BadRequest(Utilities.ReturnErro(string.Format(DefaultMessages.AccessBlockedWithReason,familyEntity.Reason.MapReason())));
+                    return BadRequest(Utilities.ReturnErro(string.Format(DefaultMessages.AccessBlockedWithReason, familyEntity.Reason.MapReason())));
 
                 /* VERIFICA SE EXISTE UM DISPOSITIVO LOGADO  */
                 if (familyEntity != null && string.IsNullOrEmpty(deviceId) == false && familyEntity.DeviceId != null && familyEntity.DeviceId.Count() > 0 && familyEntity.DeviceId[0] != deviceId && model.UseNewDevice == false)
@@ -1708,7 +1709,7 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.DeviceInUse, data: response));
                 }
 
-                
+
 
                 if (claims.Count(x => x.Type == "UserName") == 0)
                     claims.Add(new Claim("UserName", familyEntity.Holder.Name));
@@ -1765,8 +1766,6 @@ namespace Moralar.WebApi.Controllers
 
                 model.TrimStringProperties();
 
-
-
                 Data.Entities.Family familyEntity;
 
                 model.TrimStringProperties();
@@ -1775,9 +1774,8 @@ namespace Moralar.WebApi.Controllers
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
-                var dateBir = Utilities.TimeStampToDateTime(model.HolderBirthday);
-                var dateUnix = Utilities.ToTimeStamp(dateBir.Date);
-                familyEntity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Holder.Birthday == dateUnix).ConfigureAwait(false);
+
+                familyEntity = await _familyRepository.FindOneByAsync(x => x.Holder.Cpf == model.HolderCpf && x.Holder.Birthday == model.HolderBirthday).ConfigureAwait(false);
                 if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InvalidLogin));
 

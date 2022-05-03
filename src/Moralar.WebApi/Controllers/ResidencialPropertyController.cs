@@ -876,6 +876,38 @@ namespace Moralar.WebApi.Controllers
             }
         }
 
+
+        /// <summary>
+        /// METODO PARA LISTAR BAIRROS CADASTRADOS
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [AllowAnonymous]
+        [HttpGet("RegisteredNeighborhoods")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> RegisteredNeighborhoods()
+        {
+            try
+            {
+                var listProperty = await _residencialPropertyRepository.FindByAsync(x => x.Disabled == null) as List<ResidencialProperty>;
+
+                var listNeighborhood = listProperty.Select(x => x.ResidencialPropertyAdress.Neighborhood).Where(x => string.IsNullOrEmpty(x)).Distinct();
+
+                return Ok(Utilities.ReturnSuccess(data: listNeighborhood));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro(responseList: true));
+            }
+        }
+
         /// <summary>
         /// IMPORTAR IMOVEIS
         /// </summary>
@@ -891,7 +923,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
         [AllowAnonymous]
-        
+
         public async Task<IActionResult> FileImport([FromForm] IFormFile file)
         {
             try

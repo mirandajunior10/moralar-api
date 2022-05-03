@@ -82,7 +82,7 @@ namespace Moralar.Domain
             }
         }
 
-        
+
 
         /// <summary>
         ///  CONVERTER STRING EM ENUM
@@ -123,7 +123,7 @@ namespace Moralar.Domain
                         var isInvalidState = listEntityViewModel[i].ModelIsValid(customStart: $"Erro na linha {i + 1}, verifique os dados informados");
                         if (isInvalidState != null)
                             throw new Exception(isInvalidState.Message);
-                       
+
                     }
 
                     response = listEntityViewModel.ToList();
@@ -181,7 +181,7 @@ namespace Moralar.Domain
             {
                 response.Scholarity = model.Escolaridade.ToEnumCustom<TypeScholarity>();
                 response.Birthday = model.Data_de_Nascimento.ToUnixCustom();
-                response.Cpf = model.Cpf_do_titular.OnlyNumbers();                
+                response.Cpf = model.Cpf_do_titular.OnlyNumbers();
                 response.Email = string.IsNullOrEmpty(model.E_mail) ? null : model.E_mail.ToLower();
                 response.Genre = model.Genero.ToEnumCustom<TypeGenre>();
                 response.Name = model.Nome_do_titular;
@@ -233,7 +233,7 @@ namespace Moralar.Domain
                 response.StateUf = model.StateUf;
                 response.Complement = model.Complement;
                 response.Neighborhood = model.Neighborhood;
-                
+
             }
             catch (Exception)
             {
@@ -244,6 +244,10 @@ namespace Moralar.Domain
             return response;
 
         }
+
+        public static string StripHTML(this string input)
+            => Regex.Replace(input, "<.*?>", String.Empty);
+
         public static FamilyFinancial SetFinancial(this FamilyImportViewModel model)
         {
             var response = new FamilyFinancial();
@@ -512,7 +516,7 @@ namespace Moralar.Domain
                     var name = headings[a].GetCustomAttribute<DisplayAttribute>();
 
                     DisplayAttribute customAttribute = headings[a].GetCustomAttribute<DisplayAttribute>();
-                    
+
                     worksheet.Cells[1, a + 1].Value = name?.Name ?? headings[a].Name;
                     DropDownExcel customAttribute2 = headings[a].GetCustomAttribute<DropDownExcel>();
 
@@ -565,7 +569,7 @@ namespace Moralar.Domain
                 for (var a = 0; a < headings2.Count(); a++)
                 {
                     int num = a + 1;
-                    var name = headings2[a].GetCustomAttribute<DisplayAttribute>();                    
+                    var name = headings2[a].GetCustomAttribute<DisplayAttribute>();
                     worksheet2.Cells[1, a + 1].Value = name?.Name ?? headings2[a].Name;
 
                     DropDownExcel customAttribute2 = headings2[a].GetCustomAttribute<DropDownExcel>();
@@ -832,7 +836,7 @@ namespace Moralar.Domain
                 }
 
                 var validBirthday = listAges.Count(age => age >= startTargetAudienceAge && age <= endTargetAudienceAge) > 0;
-                
+
                 if (typeGender == TypeGenre.Todos)
                 {
                     validGender = true;
@@ -841,7 +845,7 @@ namespace Moralar.Domain
                 {
                     validGender = (typeGender == null || listTypeGender.Count(x => x == typeGender) > 0);
                 }
-                
+
                 return (validBirthday, validGender);
 
             }
@@ -906,18 +910,18 @@ namespace Moralar.Domain
 
     }
 }
-    [AttributeUsage(AttributeTargets.Struct | AttributeTargets.Property)]
-    public class DropDownExcel : Attribute
+[AttributeUsage(AttributeTargets.Struct | AttributeTargets.Property)]
+public class DropDownExcel : Attribute
+{
+    public Type Options
     {
-        public Type Options
-        {
-            get;
-            set;
-        }
-
-        public bool AllowBlank
-        {
-            get;
-            set;
-        }
+        get;
+        set;
     }
+
+    public bool AllowBlank
+    {
+        get;
+        set;
+    }
+}

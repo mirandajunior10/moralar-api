@@ -461,14 +461,14 @@ namespace Moralar.WebApi.Controllers
                 var propertiesEntity = _mapper.Map<List<PropertiesInterestViewModel>>(retorno);
 
 
-                var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
+                var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId)).ToList()) as List<ResidencialProperty>;
                 for (int i = 0; i < propertiesEntity.Count(); i++)
                 {
                     var objResidencial = residencialEntity.FirstOrDefault(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidencialPropertyId));
                     if (objResidencial != null)
                         propertiesEntity[i].ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(objResidencial.ResidencialPropertyAdress);
 
-                    propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).Interest = retorno.Count(x => x.ResidencialPropertyId == retorno.ToList()[i].ResidencialPropertyId.ToString());
+                    propertiesEntity[i].Interest = retorno.Count(x => x.ResidencialPropertyId == propertiesEntity[i].ResidencialPropertyId);
                 }
 
 

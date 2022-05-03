@@ -9,7 +9,7 @@ namespace Moralar.WebApi
         {
             var host = new WebHostBuilder()
                 .UseKestrel()
-                .UseUrls("http://0.0.0.0:5000") /*CASO NECESSARIO COMPARTILHAR LOCALHOST*/
+                //.UseUrls("http://0.0.0.0:5000") /*CASO NECESSARIO COMPARTILHAR LOCALHOST*/
                 .UseContentRoot(Directory.GetCurrentDirectory())
                 .UseIISIntegration()
                 .UseStartup<Startup>()

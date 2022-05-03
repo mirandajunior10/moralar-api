@@ -56,12 +56,13 @@
             "command": "msbuild",
             "args": [
                 "${workspaceFolder}/src/Moralar.WebApi/Moralar.WebApi.csproj",
-                "/p:DeployOnBuild=true",
-                "/p:WarningLevel=0",
-                "/p:PublishProfile=${input:publishProfile}",
-                "/p:Configuration=${input:publishProfile}",
-                "/p:Username=Fabricio",
-                "/p:Password=@#lei@s6890"
+                "-v:m",
+                "-p:WarningLevel=0",
+                "-p:DeployOnBuild=true",
+                "-p:PublishProfile=${input:publishProfile}",
+                "-p:Configuration=${input:publishProfile}",
+                "-p:Username=Fabricio",
+                "-p:Password=@#lei@s6890"
             ],
             "problemMatcher": []
         },
