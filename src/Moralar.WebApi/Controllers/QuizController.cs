@@ -673,7 +673,7 @@ namespace Moralar.WebApi.Controllers
                     }
                 }
 
-                return Ok(Utilities.ReturnSuccess(data: _quizViewModel));
+                return Ok(Utilities.ReturnSuccess(data: _quizViewModel.OrderByDescending(x => x.Created)));
             }
             catch (Exception ex)
             {

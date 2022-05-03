@@ -194,17 +194,15 @@ namespace Moralar.WebApi.Controllers
 
                     if (informativeSended != null)
                     {
+                        
+
                         responseViewModel[i].Description = informativeSended.Description;
                         responseViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
                         responseViewModel[i].Image = informativeSended.Image;
                     }
-                    else
-                    {
-                        responseViewModel.RemoveAt(i);
-                    }
                 }
 
-                return Ok(Utilities.ReturnSuccess(data: responseViewModel));
+                return Ok(Utilities.ReturnSuccess(data: responseViewModel.Where(x => string.IsNullOrEmpty(x.Description) == false).ToList()));
             }
             catch (Exception ex)
             {
