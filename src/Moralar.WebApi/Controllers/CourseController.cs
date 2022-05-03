@@ -231,9 +231,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.CourseNotFound));
 
-                var viewmodelData = _mapper.Map<CourseViewModel>(entity);
-
-                
+                var viewmodelData = _mapper.Map<CourseViewModel>(entity);                
 
                 var builder = Builders<CourseFamily>.Filter;
                 var conditions = new List<FilterDefinition<CourseFamily>>();
@@ -252,30 +250,27 @@ namespace Moralar.WebApi.Controllers
                 var listsubscribers = await _courseFamilyRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
 
                 var responseSubscibers = new List<FamilyCourseRegisteredViewModel>();
-                var responseWaiting = new List<FamilyCourseWaitingViewModel>();
-
-                var family = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
+                var responseWaiting = new List<FamilyCourseWaitingViewModel>();                
 
                 for (int i = 0; i < listsubscribers.Count; i++)
                 {
-                    var item = listsubscribers[i];
+                    var item = listsubscribers[i];                  
                    
-                    var itemFamily = family.Where(x => x._id == ObjectId.Parse(item.FamilyId));
+                    var familyEntity = await _familyRepository.FindByIdAsync(item.FamilyId);
 
-
-                    if (itemFamily != null)
+                    if (familyEntity != null)
                     {
                         if (item.TypeStatusCourse == TypeStatusCourse.Inscrito)
                         {
                             responseSubscibers.Add(new FamilyCourseRegisteredViewModel()
                             {
 
-                                Number = family[i].Holder.Number,
-                                Name = family[i].Holder.Name,
-                                Cpf = family[i].Holder.Cpf,
+                                Number = familyEntity.Holder.Number,
+                                Name = familyEntity.Holder.Name,
+                                Cpf = familyEntity.Holder.Cpf,
                                 TypeStatusCourse = TypeStatusCourse.Inscrito
 
-                            });
+                            }); ;
                             viewmodelData.ListSubscribers = responseSubscibers;
                         }
                         else
@@ -283,9 +278,9 @@ namespace Moralar.WebApi.Controllers
                             responseWaiting.Add(new FamilyCourseWaitingViewModel()
                             {
 
-                                Number = family[i].Holder.Number,
-                                Name = family[i].Holder.Name,
-                                Cpf = family[i].Holder.Cpf,
+                                Number = familyEntity.Holder.Number,
+                                Name = familyEntity.Holder.Name,
+                                Cpf = familyEntity.Holder.Cpf,
                                 TypeStatusCourse = TypeStatusCourse.ListaEspera
 
                             });
