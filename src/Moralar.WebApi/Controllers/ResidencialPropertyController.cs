@@ -350,7 +350,7 @@ namespace Moralar.WebApi.Controllers
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
-                conditions.Add(builder.Where(x => x.Created != null && x.DataBlocked == null));
+                conditions.Add(builder.Where(x => x.Created != null && x.DataBlocked == null && x.TypeStatusResidencialProperty != TypeStatusResidencial.Vendido));
 
                 conditions.Add(builder.Gte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.PropertyValueForDemolished));
                 conditions.Add(builder.Lte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.MaximumPurchase));
