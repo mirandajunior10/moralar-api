@@ -318,9 +318,7 @@ namespace Moralar.WebApi.Controllers
                     /*Checa se as etapas foram cumplidas*/
                     if (schedule == 3)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToPGM));
-                }
-
-
+                }              
 
                 var scheduleEntity = _mapper.Map<Schedule>(model);
                 scheduleEntity.HolderCpf = family.Holder.Cpf;

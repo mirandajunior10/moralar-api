@@ -407,7 +407,7 @@ namespace Moralar.WebApi.Controllers
                     }
                 }));
 
-                return Ok(Utilities.ReturnSuccess(data: response));
+                return Ok(Utilities.ReturnSuccess(data: response.OrderBy(x => x.ResidencialPropertyAdress.Latitude)));
             }
             catch (Exception ex)
             {
