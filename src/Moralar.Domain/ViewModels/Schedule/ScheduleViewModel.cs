@@ -1,16 +1,10 @@
-﻿using MongoDB.Bson;
-using MongoDB.Bson.Serialization.Attributes;
-using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using UtilityFramework.Infra.Core.MongoDb.Data.Modelos;
 
-namespace Moralar.Data.Entities
+using UtilityFramework.Application.Core.ViewModels;
+
+namespace Moralar.Domain.ViewModels.Schedule
 {
-    [BsonIgnoreExtraElements]
-    public class Schedule : ModelBase
+    public class ScheduleViewModel : BaseViewModel
     {
         public long Date { get; set; }
         public string Place { get; set; }
@@ -23,8 +17,5 @@ namespace Moralar.Data.Entities
         public TypeSubject TypeSubject { get; set; }
 
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
-
-        public long? DateFinished { get; set; }
-        public override string CollectionName => nameof(Schedule);
     }
 }

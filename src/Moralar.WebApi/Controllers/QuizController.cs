@@ -657,14 +657,14 @@ namespace Moralar.WebApi.Controllers
 
                 var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == userId).ConfigureAwait(false) as List<QuizFamily>;
 
-                if (quizFamilies.Count() > 0 && typeQuiz == TypeQuiz.Enquete)
+                if (quizFamilies.Count() == 0 && typeQuiz == TypeQuiz.Enquete)
                 {
                     var familyEntity = await _familyRepository.FindByIdAsync(userId);
 
                     if (familyEntity == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                    var listQuiz = await _quizRepository.FindAllAsync() as List<Quiz>;
+                    var listQuiz = await _quizRepository.FindByAsync(x => x.TypeQuiz == TypeQuiz.Enquete) as List<Quiz>;
 
                     for (int i = 0; i < listQuiz.Count(); i++)
                     {

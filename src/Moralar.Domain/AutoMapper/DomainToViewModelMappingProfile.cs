@@ -71,7 +71,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<FamilyHolder, FamilyHolderViewModel>();
             CreateMap<FamilyHolder, FamilyHolderListViewModel>()
                  .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
-            CreateMap<FamilyHolder, FamilyHolderMinViewModel>();           
+            CreateMap<FamilyHolder, FamilyHolderMinViewModel>();
             CreateMap<FamilySpouse, FamilySpouseViewModel>();
             CreateMap<FamilyMember, FamilyMemberViewModel>();
             CreateMap<FamilyFinancial, FamilyFinancialViewModel>();
@@ -126,7 +126,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<Family, FamilyEditViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
                .ForMember(dest => dest.Holder, opt => opt.MapFrom(src => src.Holder));
-              
+
 
             CreateMap<Family, ScheduleDetailTimeLineProcessChoosePropertyOneAndTwoViewModel>();
 
@@ -149,30 +149,30 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<ResidencialProperty, ResidencialPropertyAdress>();
             CreateMap<ResidencialProperty, ResidencialPropertyExportViewModel>()
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? "Inativo" : "Ativo"))
-                .ForMember(dest => dest.StreetAddress,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StreetAddress))
-                .ForMember(dest => dest.Number,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Number))
-                .ForMember(dest => dest.CityName,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.CityName))
-                .ForMember(dest => dest.StateName,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StateName))
-                .ForMember(dest => dest.StateUf,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StateUf))
-                .ForMember(dest => dest.Neighborhood,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Neighborhood))
-                .ForMember(dest => dest.NeighborhoodLocalization,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.Neighborhood))
-                .ForMember(dest => dest.Complement,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Complement))
-                .ForMember(dest => dest.CEP,opt => opt.MapFrom(src => src.ResidencialPropertyAdress.CEP))
-                .ForMember(dest => dest.SquareFootage,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.SquareFootage.ToString()))
-                .ForMember(dest => dest.PropertyValue,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.PropertyValue.ToReal(true)))
-                .ForMember(dest => dest.CondominiumValue,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.CondominiumValue.ToReal(true)))
-                .ForMember(dest => dest.IptuValue,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.IptuValue.ToReal(true)))
-                .ForMember(dest => dest.NumberFloors,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberFloors.ToString()))
-                .ForMember(dest => dest.NumberOfBathrooms,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberOfBathrooms.ToString()))
-                .ForMember(dest => dest.NumberOfBedrooms,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberOfBedrooms.ToString()))
-                .ForMember(dest => dest.FloorLocation,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.FloorLocation.ToString()))
+                .ForMember(dest => dest.StreetAddress, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StreetAddress))
+                .ForMember(dest => dest.Number, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Number))
+                .ForMember(dest => dest.CityName, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.CityName))
+                .ForMember(dest => dest.StateName, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StateName))
+                .ForMember(dest => dest.StateUf, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.StateUf))
+                .ForMember(dest => dest.Neighborhood, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Neighborhood))
+                .ForMember(dest => dest.NeighborhoodLocalization, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.Neighborhood))
+                .ForMember(dest => dest.Complement, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.Complement))
+                .ForMember(dest => dest.CEP, opt => opt.MapFrom(src => src.ResidencialPropertyAdress.CEP))
+                .ForMember(dest => dest.SquareFootage, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.SquareFootage.ToString()))
+                .ForMember(dest => dest.PropertyValue, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.PropertyValue.ToReal(true)))
+                .ForMember(dest => dest.CondominiumValue, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.CondominiumValue.ToReal(true)))
+                .ForMember(dest => dest.IptuValue, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.IptuValue.ToReal(true)))
+                .ForMember(dest => dest.NumberFloors, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberFloors.ToString()))
+                .ForMember(dest => dest.NumberOfBathrooms, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberOfBathrooms.ToString()))
+                .ForMember(dest => dest.NumberOfBedrooms, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.NumberOfBedrooms.ToString()))
+                .ForMember(dest => dest.FloorLocation, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.FloorLocation.ToString()))
                 .ForMember(dest => dest.HasAccessLadder, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasAccessLadder.MapBoolean()))
                 .ForMember(dest => dest.HasAccessRamp, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasAccessRamp.MapBoolean()))
                 .ForMember(dest => dest.HasAdaptedToPcd, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasAdaptedToPcd.MapBoolean()))
                 .ForMember(dest => dest.HasCistern, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasCistern.MapBoolean()))
                 .ForMember(dest => dest.HasElavator, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasElavator.MapBoolean()))
-                .ForMember(dest => dest.HasGarage,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasGarage.MapBoolean()))
-                .ForMember(dest => dest.HasServiceArea,opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasServiceArea.MapBoolean()))
+                .ForMember(dest => dest.HasGarage, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasGarage.MapBoolean()))
+                .ForMember(dest => dest.HasServiceArea, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasServiceArea.MapBoolean()))
                 .ForMember(dest => dest.HasWall, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasWall.MapBoolean()))
                 .ForMember(dest => dest.HasYard, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasYard.MapBoolean()))
                 .ForMember(dest => dest.TypeStatusResidencialProperty, opt => opt.MapFrom(src => src.TypeStatusResidencialProperty.GetEnumMemberValue()))
@@ -218,6 +218,8 @@ namespace Moralar.Domain.AutoMapper
             #region Schedule
             CreateMap<Schedule, ScheduleRegisterViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Schedule, ScheduleViewModel>()
+               .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<Schedule, ScheduleListViewModel>()
                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
             CreateMap<Schedule, ScheduleDetailTimeLinePGMViewModel>()
@@ -248,7 +250,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<InformativeSended, InformativeSendedDetailViewModel>()
              .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
-            CreateMap<InformativeSended, InformativeExportViewModel>()             
+            CreateMap<InformativeSended, InformativeExportViewModel>()
              .ForMember(dest => dest.Read, opt => opt.MapFrom(src => src.DateViewed != null ? "Sim" : "Não"));
 
             CreateMap<Informative, InformativeViewModel>()

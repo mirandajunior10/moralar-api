@@ -2205,6 +2205,16 @@
             <response code = "500" > Exception Error</response>
             <returns></returns>
         </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.DetailTimeLine(System.String,Moralar.Data.Enum.TypeSubject)">
+            <summary>
+            RETORNA OS DETALHES DA LINHA DO TEMPO DA FAMÍLIA POR TIPO DE AGENDAMENTO
+            </summary>
+            <response code = "200" > Returns success</response>
+            <response code = "400" > Custom Error</response>
+            <response code = "401" > Unauthorize Error</response>
+            <response code = "500" > Exception Error</response>
+            <returns></returns>
+        </member>
         <member name="M:Moralar.WebApi.Controllers.ScheduleController.ChangeStatus(Moralar.Domain.ViewModels.Schedule.ScheduleChangeStatusViewModel)">
              <summary>
              MUDA A SITUAÇÃO DA ETAPA - Aguardando confirmação = 0 - Confirmado = 1 - Aguardando reagendamento = 2 - Reagendado = 3 - Finalizado = 4

@@ -182,7 +182,7 @@ namespace Moralar.WebApi.Controllers
 
                 var listInformative = await _informativeSendedRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == familyId).ConfigureAwait(false) as List<InformativeSended>;
 
-                if (listInformative.Count() > 0)
+                if (listInformative.Count() == 0)
                 {
                     var listInformativeEntity = await _informativeRepository.FindAllAsync() as List<Informative>;
 
@@ -255,13 +255,15 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+                if (string.IsNullOrEmpty(model.DatePublish))
+                    model.DatePublish = DateTimeOffset.Now.ToUnixTimeSeconds().ToString();
+
                 var entity = _mapper.Map<Data.Entities.Informative>(model);
                 entity.Image = model.Image.SetPathImage();
                 entity.Status = TypeStatusActiveInactive.Ativo;
                 var informativeId = await _informativeRepository.CreateAsync(entity).ConfigureAwait(false);
 
                 var listFamily = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
-
 
                 var listInformative = new List<InformativeSended>();
                 for (int i = 0; i < listFamily.Count(); i++)
@@ -288,7 +290,6 @@ namespace Moralar.WebApi.Controllers
                     registred += limit;
                     index++;
                 }
-
 
                 var notificationFamily = new List<Family>();
 
@@ -366,7 +367,7 @@ namespace Moralar.WebApi.Controllers
                 if (informativeSended == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.InformativeNotFound));
 
-                if (informativeSended.DateViewed == 0)
+                if (informativeSended.DateViewed == null)
                 {
                     /* Informativo lido */
                     var now = DateTimeOffset.Now.ToUnixTimeSeconds();
@@ -374,7 +375,7 @@ namespace Moralar.WebApi.Controllers
                 }
                 else
                 {
-                    informativeSended.DateViewed = 0;
+                    informativeSended.DateViewed = (long?)null;
                 }
 
                 await _informativeSendedRepository.UpdateOneAsync(informativeSended).ConfigureAwait(false);

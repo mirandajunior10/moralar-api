@@ -1,20 +1,21 @@
-﻿using Moralar.Data.Enum;
-using Moralar.Domain.ViewModels.Course;
-using Moralar.Domain.ViewModels.Family;
-using System;
-using System.Collections.Generic;
-using System.Text;
+﻿using System.Collections.Generic;
+
+using Moralar.Data.Enum;
+using Moralar.Domain.ViewModels.Property;
+
 using UtilityFramework.Application.Core.ViewModels;
 
 namespace Moralar.Domain.ViewModels.Schedule
 {
-    public class ScheduleDetailTimeLinePGMViewModel: BaseViewModel
+    public class ScheduleDetailTimeLinePGMViewModel : BaseViewModel
     {
         public ScheduleDetailTimeLinePGMViewModel()
         {
             DetailQuiz = new List<ScheduleQuizDetailTimeLinePGMViewModel>();
             DetailEnquete = new List<ScheduleQuizDetailTimeLinePGMViewModel>();
             Courses = new List<ScheduleCourseViewModel>();
+            Schedules = new List<ScheduleViewModel>();
+            InterestResidencialProperty = new List<ResidencialPropertyViewModel>();
         }
         public long Date { get; set; }
         public string Place { get; set; }
@@ -31,5 +32,7 @@ namespace Moralar.Domain.ViewModels.Schedule
         public List<ScheduleQuizDetailTimeLinePGMViewModel> DetailQuiz { get; set; }
         public List<ScheduleQuizDetailTimeLinePGMViewModel> DetailEnquete { get; set; }
         public List<ScheduleCourseViewModel> Courses { get; set; }
+        public List<ScheduleViewModel> Schedules { get; set; }
+        public List<ResidencialPropertyViewModel> InterestResidencialProperty { get; set; }
     }
 }

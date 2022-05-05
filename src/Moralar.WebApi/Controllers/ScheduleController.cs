@@ -100,12 +100,16 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var entity = await _scheduleHistoryRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-                if (entity == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+                var listSchedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && x.Date <= now || x.TypeScheduleStatus == TypeScheduleStatus.Reagendado, Builders<Schedule>.Sort.Ascending(x => x.TypeSubject).Descending(x => x.Created));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleHistoryViewModel>>(entity.OrderBy(x => x.TypeSubject).ThenBy(x => x.Created).ToList())));
+                // var listSchedule = await _scheduleHistoryRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+
+                // if (listSchedule == null)
+                //     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleHistoryViewModel>>(listSchedule)));
             }
             catch (Exception ex)
             {
@@ -366,7 +370,6 @@ namespace Moralar.WebApi.Controllers
                     title = "Cadastro de Agendamento";
                     messageBody = $"<p>Caro(a) {family.Holder.Name.GetFirstName()}</p>"
                                 + $"<p>Foi cadastrado um agendamento para o horário {dateToSchedule:dd/MM/yyyy}</p>";
-
                 }
                 else
                 {
@@ -374,6 +377,7 @@ namespace Moralar.WebApi.Controllers
                     messageBody = $"<p>Sua agenda {model.TypeSubject.GetEnumMemberValue()} foi marcada</p>"
                                 + $"<p>Dia {Utilities.TimeStampToDateTime(scheduleEntity.Date):dd/MM/yyyy}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date):HH:mm)}, endereço {model.Place}</p>"
                                 + $"Aguardamos você!";
+
                 }
 
                 dataBody.Add("{{ title }}", title);
@@ -387,7 +391,6 @@ namespace Moralar.WebApi.Controllers
                     await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, family.Holder.Email, body, "Cadastro de Agendamento").ConfigureAwait(false);
                 });
 
-
                 /*ENVIA NOTIFICAÇÃO*/
 
                 var listNotification = new List<Notification>();
@@ -397,9 +400,8 @@ namespace Moralar.WebApi.Controllers
                     For = ForType.Family,
                     FamilyId = model.FamilyId,
                     Title = title,
-                    Description = messageBody.StripHTML()
+                    Description = messageBody
                 });
-
 
                 await _notificationRepository.CreateAsync(listNotification);
 
@@ -408,7 +410,7 @@ namespace Moralar.WebApi.Controllers
                     dynamic payloadPush = Util.GetPayloadPush();
                     dynamic settingPush = Util.GetSettingsPush();
 
-                    await _senderNotificationService.SendPushAsync(title, messageBody.StripHTML(), family.DeviceId, data: payloadPush, settings: settingPush, priority: 10);
+                    await _senderNotificationService.SendPushAsync(title, messageBody, family.DeviceId, data: payloadPush, settings: settingPush, priority: 10);
                 }
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
@@ -703,15 +705,16 @@ namespace Moralar.WebApi.Controllers
                 var family = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
                 if (family == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
-                var schedule = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == familyId && x.TypeSubject == TypeSubject.ReuniaoPGM);
-                if (schedule == null)
+                var listSchedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && x.TypeSubject == TypeSubject.ReuniaoPGM) as List<Schedule>;
+                if (listSchedule.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
                 var listQuizByFamily = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId, Builders<QuizFamily>.Sort.Descending(nameof(QuizFamily.Created))) as List<QuizFamily>;
                 var listQuiz = await _quizRepository.FindIn("_id", listQuizByFamily.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
 
+                var vwTimeLine = _mapper.Map<ScheduleDetailTimeLinePGMViewModel>(listSchedule[0]);
 
-                var vwTimeLine = _mapper.Map<ScheduleDetailTimeLinePGMViewModel>(schedule);
+                vwTimeLine.Schedules = _mapper.Map<List<ScheduleViewModel>>(listSchedule);
                 for (int i = 0; i < listQuizByFamily.Count(); i++)
                 {
                     if (listQuiz.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId)).TypeQuiz == TypeQuiz.Quiz)
@@ -759,6 +762,102 @@ namespace Moralar.WebApi.Controllers
         }
 
         /// <summary>
+        /// RETORNA OS DETALHES DA LINHA DO TEMPO DA FAMÍLIA POR TIPO DE AGENDAMENTO
+        /// </summary>
+        /// <response code = "200" > Returns success</response>
+        /// <response code = "400" > Custom Error</response>
+        /// <response code = "401" > Unauthorize Error</response>
+        /// <response code = "500" > Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("DetailTimeLine/{familyId}/{typeSubject}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(typeof(ScheduleDetailTimeLinePGMViewModel), 201)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> DetailTimeLine([FromRoute] string familyId, [FromRoute] TypeSubject typeSubject)
+        {
+            try
+            {
+                var familyEntity = await _familyRepository.FindByIdAsync(familyId).ConfigureAwait(false);
+                if (familyEntity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                var listSchedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && x.TypeSubject == typeSubject) as List<Schedule>;
+                if (listSchedule.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+
+                /*TODO RANGE DE DATAS ONDE MENOR DATA DE CADASTROD E AGENDAMENTO E MAIOR DATA DE FINALIZAÇÃO DO AGENDAMENTO*/
+
+                var listQuizByFamily = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId, Builders<QuizFamily>.Sort.Descending(nameof(QuizFamily.Created))) as List<QuizFamily>;
+                var listQuizEntity = await _quizRepository.FindIn("_id", listQuizByFamily.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
+
+                var vwTimeLine = _mapper.Map<ScheduleDetailTimeLinePGMViewModel>(listSchedule[0]);
+
+                vwTimeLine.Schedules = _mapper.Map<List<ScheduleViewModel>>(listSchedule);
+
+                for (int i = 0; i < listQuizByFamily.Count(); i++)
+                {
+                    var quizItem = listQuizEntity.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId));
+
+                    var item = new ScheduleQuizDetailTimeLinePGMViewModel()
+                    {
+                        Title = quizItem.Title,
+                        Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                        HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                        TypeStatus = listQuizByFamily[i].TypeStatus,
+                        FamilyId = familyId,
+                        QuizId = listQuizByFamily[i].QuizId,
+                        QuizFamilyId = listQuizByFamily[i]._id.ToString(),
+                        TypeQuiz = listQuizByFamily[i].TypeQuiz,
+                        Id = listQuizByFamily[i].QuizId,
+                    };
+
+                    if (quizItem.TypeQuiz == TypeQuiz.Quiz)
+                        vwTimeLine.DetailQuiz.Add(item);
+                    else
+                        vwTimeLine.DetailEnquete.Add(item);
+                }
+
+                var courseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<CourseFamily>; ;
+                var course = await _courseRepository.FindIn("_id", courseFamily.Select(x => ObjectId.Parse(x.CourseId.ToString())).ToList()) as List<Course>;
+                for (int i = 0; i < courseFamily.Count(); i++)
+                {
+                    var courseItem = course.Find(x => x._id == ObjectId.Parse(courseFamily[i].CourseId));
+
+                    if (courseItem == null)
+                        continue;
+
+                    vwTimeLine.Courses.Add(new ScheduleCourseViewModel()
+                    {
+                        Title = courseItem.Title,
+                        StartDate = courseItem.StartDate,
+                        EndDate = courseItem.EndDate,
+                        TypeStatusCourse = courseFamily[i].TypeStatusCourse
+                    });
+                }
+
+                switch (typeSubject)
+                {
+                    case TypeSubject.EscolhaDoImovel:
+
+                        var familyPropertyInterestList = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<PropertiesInterest>;
+
+                        vwTimeLine.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(familyPropertyInterestList);
+
+                        break;
+                }
+
+                return Ok(Utilities.ReturnSuccess(data: vwTimeLine));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
+        /// <summary>
         /// MUDA A SITUAÇÃO DA ETAPA - Aguardando confirmação = 0 - Confirmado = 1 - Aguardando reagendamento = 2 - Reagendado = 3 - Finalizado = 4
         /// </summary>
         /// <remarks>
@@ -785,10 +884,13 @@ namespace Moralar.WebApi.Controllers
                 if (isInvalidState != null)
                     return BadRequest(isInvalidState);
 
+                if (model.TypeScheduleStatus != TypeScheduleStatus.Finalizado)
+                {
+                    var dateToSchedule = Utilities.TimeStampToDateTime(model.Date);
+                    if (dateToSchedule < DateTime.Now)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalidToSchedule));
 
-                var dateToSchedule = Utilities.TimeStampToDateTime(model.Date);
-                if (dateToSchedule < DateTime.Now)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalidToSchedule));
+                }
 
                 var family = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
                 if (family == null)
@@ -796,10 +898,14 @@ namespace Moralar.WebApi.Controllers
 
 
                 var scheduleEntity = await _scheduleRepository.FindByIdAsync(model.Id).ConfigureAwait(false); ;
-                scheduleEntity.Date = model.Date;
+
+
                 scheduleEntity.TypeScheduleStatus = model.TypeScheduleStatus;
                 scheduleEntity.Description = model.Description;
                 scheduleEntity.Place = model.Place;
+
+                if (model.TypeScheduleStatus != TypeScheduleStatus.Finalizado)
+                    scheduleEntity.Date = model.Date;
 
                 if (model.TypeScheduleStatus == TypeScheduleStatus.Reagendado)
                     scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
