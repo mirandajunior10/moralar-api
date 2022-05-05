@@ -141,7 +141,7 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleListViewModel>>(entity.OrderBy(x => x.Created).ToList())));
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleListViewModel>>(entity.OrderBy(x => x.Date).ToList())));
             }
             catch (Exception ex)
             {
