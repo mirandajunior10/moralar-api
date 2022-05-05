@@ -641,28 +641,54 @@ namespace Moralar.WebApi.Controllers
                 //}
 
 
-
                 var sendInformation = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false);
-                foreach (var item in sendInformation)
-                {
 
+                var removedInterest = sendInformation.Where(x => x.FamilyId != model.FamiliIdResidencialChosen).ToList();
+
+
+                for (int i = 0; i < removedInterest.Count(); i++)
+                {
                     var dataBody = Util.GetTemplateVariables();
-                    dataBody.Add("{{ title }}", "Imóvel escolhido");
-                    dataBody.Add("{{ message }}", $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
-                                                $"<p> O imóvel {entityResidencial.ResidencialPropertyAdress.Location} foi escolhido por outra pessoa "
-                                                );
+                    var item = removedInterest[i];
+                    var familyEntity = await _familyRepository.FindByIdAsync(item.FamilyId).ConfigureAwait(false);
+
+                    dynamic payloadPush = Util.GetPayloadPush(RouteNotification.System);
+                    dynamic settingsPush = Util.GetSettingsPush();
+
+                    string title = "Imóvel vendido";
+                    var message = $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
+                                                $"<p> O imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} foi vendido para outra pessoa.";
+
+                    dataBody.Add("{{ title }}", title);
+                    dataBody.Add("{{ message }}", message);
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
 
-                    var unused = Task.Run(async () =>
-                    {
-                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, item.HolderEmail, body, "Imóvel Escolhido").ConfigureAwait(false);
-                    });
+                    await _senderMailService.SendMessageEmailAsync("MORALAR", familyEntity.Holder.Email, body, title);
+
+                    /*REMOVE AS FAMÍLIAS INTERESSADAS*/
+                    await _propertiesInterestRepository.DeleteAsync(x => x.FamilyId == item.FamilyId);
                 }
 
-                //await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entity.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
+                    var dataBodyFamily = Util.GetTemplateVariables();
 
-                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+                    dataBodyFamily.Add("{{ title }}", "Escolha do imóvel");
+                    dataBodyFamily.Add("{{ message }}", $"<p>Caro(a) {entityFamily.Holder.Name.GetFirstName()}</p>" +
+                                                $"<p> Você foi escolhido para a compra do imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress}."
+                                                );
+
+                    var bodyFamily = _senderMailService.GerateBody("custom", dataBodyFamily);
+
+                    var unused = Task.Run(async () =>
+                    {
+                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, entityFamily.Holder.Email, bodyFamily, "Imóvel Escolhido").ConfigureAwait(false);
+                    });
+
+
+                    await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
+
+                    return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
+                
             }
             catch (Exception ex)
             {
