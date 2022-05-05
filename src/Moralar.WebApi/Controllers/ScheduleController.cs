@@ -131,7 +131,8 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var entity = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var entity = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && x.Date >= now).ConfigureAwait(false);
 
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
