@@ -180,13 +180,41 @@ namespace Moralar.WebApi.Controllers
             {
                 var familyId = Request.GetUserId();
 
-                var entity = await _informativeSendedRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == familyId).ConfigureAwait(false) as List<InformativeSended>;
-                if (entity == null)
-                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.InformativeNotFound)));
+                var listInformative = await _informativeSendedRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == familyId).ConfigureAwait(false) as List<InformativeSended>;
 
-                var entityInformative = await _informativeRepository.FindIn(x => x.DataBlocked == null, "_id", entity.Select(x => ObjectId.Parse(x.InformativeId)).ToList(), Builders<Informative>.Sort.Descending(x => x.Created)) as List<Informative>;
+                if (listInformative.Count() > 0)
+                {
+                    var listInformativeEntity = await _informativeRepository.FindAllAsync() as List<Informative>;
 
-                var responseViewModel = _mapper.Map<List<InformativeSendedViewModel>>(entity);
+                    for (int i = 0; i < listInformativeEntity.Count(); i++)
+                    {
+                        listInformative.Add(new InformativeSended()
+                        {
+                            FamilyId = familyId,
+                            InformativeId = listInformativeEntity[i]._id.ToString()
+                        });
+                    }
+
+                    const int limit = 250;
+                    var registred = 0;
+                    var index = 0;
+
+                    while (listInformative.Count() > registred)
+                    {
+                        var itensToRegister = listInformative.Skip(limit * index).Take(limit).ToList();
+
+                        if (itensToRegister.Count() > 0)
+                            await _informativeSendedRepository.CreateAsync(itensToRegister);
+                        registred += limit;
+                        index++;
+                    }
+
+                    listInformative = await _informativeSendedRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == familyId).ConfigureAwait(false) as List<InformativeSended>;
+                }
+
+                var entityInformative = await _informativeRepository.FindIn(x => x.DataBlocked == null, "_id", listInformative.Select(x => ObjectId.Parse(x.InformativeId)).ToList(), Builders<Informative>.Sort.Descending(x => x.Created)) as List<Informative>;
+
+                var responseViewModel = _mapper.Map<List<InformativeSendedViewModel>>(listInformative);
 
                 for (int i = 0; i < responseViewModel.Count(); i++)
                 {
@@ -194,8 +222,6 @@ namespace Moralar.WebApi.Controllers
 
                     if (informativeSended != null)
                     {
-                        
-
                         responseViewModel[i].Description = informativeSended.Description;
                         responseViewModel[i].DatePublish = informativeSended.DatePublish.Value.TimeStampToDateTime().ToString("dd/MM/yyyy");
                         responseViewModel[i].Image = informativeSended.Image;
@@ -234,15 +260,33 @@ namespace Moralar.WebApi.Controllers
                 entity.Status = TypeStatusActiveInactive.Ativo;
                 var informativeId = await _informativeRepository.CreateAsync(entity).ConfigureAwait(false);
 
-                var entityFamily = await _familyRepository.FindAllAsync().ConfigureAwait(false);
-                foreach (var item in entityFamily)
+                var listFamily = await _familyRepository.FindAllAsync().ConfigureAwait(false) as List<Family>;
+
+
+                var listInformative = new List<InformativeSended>();
+                for (int i = 0; i < listFamily.Count(); i++)
                 {
-                    var informationSended = new InformativeSended()
+                    var familyEntity = listFamily[i];
+
+                    listInformative.Add(new InformativeSended()
                     {
-                        FamilyId = item._id.ToString(),
+                        FamilyId = familyEntity._id.ToString(),
                         InformativeId = informativeId
-                    };
-                    await _informativeSendedRepository.CreateAsync(informationSended);
+                    });
+                }
+
+                const int limit = 250;
+                var registred = 0;
+                var index = 0;
+
+                while (listInformative.Count() > registred)
+                {
+                    var itensToRegister = listInformative.Skip(limit * index).Take(limit).ToList();
+
+                    if (itensToRegister.Count() > 0)
+                        await _informativeSendedRepository.CreateAsync(itensToRegister);
+                    registred += limit;
+                    index++;
                 }
 
 
@@ -267,15 +311,28 @@ namespace Moralar.WebApi.Controllers
                     });
                 }
 
+                registred = 0;
+                index = 0;
+
+                while (listNotification.Count() > registred)
+                {
+                    var itensToRegister = listNotification.Skip(limit * index).Take(limit).ToList();
+
+                    if (itensToRegister.Count() > 0)
+                        await _notificationRepository.CreateAsync(itensToRegister);
+                    registred += limit;
+                    index++;
+                }
+
                 await _notificationRepository.CreateAsync(listNotification);
 
                 dynamic payloadPush = Util.GetPayloadPush();
                 dynamic settingPush = Util.GetSettingsPush();
 
-                await _senderNotificationService.SendPushAsync(title, content, entityFamily.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
+                await _senderNotificationService.SendPushAsync(title, content, listFamily.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
 
                 await _utilService.RegisterLogAction(LocalAction.Informativo, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Bloqueio de família {Request.GetUserName()?.Value}", Request.GetUserId(), Request.GetUserName()?.Value, informativeId);
-                
+
                 return Ok(Utilities.ReturnSuccess(DefaultMessages.Registred));
 
             }
@@ -542,7 +599,7 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                
+
                 var builder = Builders<InformativeSended>.Filter;
                 var conditions = new List<FilterDefinition<InformativeSended>>();
 
@@ -574,7 +631,7 @@ namespace Moralar.WebApi.Controllers
 
                         dest[i].Description = informative.Description;
                         dest[i].Name = familyInformative.Holder.Name;
-                       
+
                     }
                 }));
 
@@ -592,7 +649,7 @@ namespace Moralar.WebApi.Controllers
                 var fileBytes = System.IO.File.ReadAllBytes(fullPathFile);
                 return File(fileBytes, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet", fileName);
 
-              
+
             }
             catch (Exception ex)
             {

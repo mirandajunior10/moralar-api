@@ -3,6 +3,7 @@
   <PropertyGroup>
     <TargetFramework>netcoreapp1.1</TargetFramework>
     <PackageTargetFallback>$(PackageTargetFallback);portable-net45+win8+wp8+wpa81;</PackageTargetFallback>
+    <CheckEolTargetFramework>false</CheckEolTargetFramework>
   </PropertyGroup>
 
   <PropertyGroup>
@@ -14,7 +15,7 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <NoWarn>1998;1701;1702;1591;1572;1571;1573;1587;1570</NoWarn>
+    <NoWarn>1138;1998;1701;1702;1591;1572;1571;1573;1587;1570</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

@@ -38,7 +38,10 @@
                 "build",
                 "${workspaceFolder}/src/Moralar.WebApi/Moralar.WebApi.csproj",
                 "/property:GenerateFullPaths=true",
-                "/consoleloggerparameters:NoSummary"
+                "/consoleloggerparameters:NoSummary",
+                "/p:CheckEolTargetFramework=false",
+                "-v:m",
+                "-p:WarningLevel=0",
             ],
             "problemMatcher": "$msCompile"
         },

@@ -318,30 +318,28 @@ namespace Moralar.WebApi.Controllers
                     /*Checa se as etapas foram cumplidas*/
                     if (schedule == 3)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToPGM));
-                }              
+                }
 
                 var scheduleEntity = _mapper.Map<Schedule>(model);
                 scheduleEntity.HolderCpf = family.Holder.Cpf;
                 scheduleEntity.HolderName = family.Holder.Name;
                 scheduleEntity.HolderNumber = family.Holder.Number;
                 scheduleEntity.TypeSubject = model.TypeSubject;
-
-
-
                 scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
-
 
                 var scheduleId = await _scheduleRepository.CreateAsync(scheduleEntity).ConfigureAwait(false);
 
-
-
                 var scheduleHistoryEntity = _mapper.Map<ScheduleHistory>(model);
+
                 scheduleHistoryEntity.HolderCpf = family.Holder.Cpf;
                 scheduleHistoryEntity.HolderName = family.Holder.Name;
                 scheduleHistoryEntity.HolderNumber = family.Holder.Number;
                 scheduleHistoryEntity.TypeSubject = model.TypeSubject;
                 scheduleHistoryEntity.ScheduleId = scheduleId;
+
                 await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
+
+                /*GERAR OS PASSOS DE DE LINHA DO TEMPO*/
                 if (model.TypeSubject == TypeSubject.ReuniaoPGM)
                 {
                     scheduleHistoryEntity._id = new ObjectId();
@@ -356,6 +354,7 @@ namespace Moralar.WebApi.Controllers
                     scheduleHistoryEntity.TypeSubject = TypeSubject.AcompanhamentoPosMudança;
                     await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
                 }
+
                 var dataBody = Util.GetTemplateVariables();
 
                 string title = null;

@@ -1,8 +1,5 @@
 ﻿using MongoDB.Bson.Serialization.Attributes;
-using Moralar.Data.Enum;
-using System;
-using System.Collections.Generic;
-using System.Text;
+
 using UtilityFramework.Infra.Core.MongoDb.Data.Modelos;
 
 namespace Moralar.Data.Entities

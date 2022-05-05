@@ -657,10 +657,54 @@ namespace Moralar.WebApi.Controllers
 
                 var quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == userId).ConfigureAwait(false) as List<QuizFamily>;
 
+                if (quizFamilies.Count() > 0 && typeQuiz == TypeQuiz.Enquete)
+                {
+                    var familyEntity = await _familyRepository.FindByIdAsync(userId);
+
+                    if (familyEntity == null)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                    var listQuiz = await _quizRepository.FindAllAsync() as List<Quiz>;
+
+                    for (int i = 0; i < listQuiz.Count(); i++)
+                    {
+                        var quizEntity = listQuiz[i];
+
+                        quizFamilies.Add(new QuizFamily()
+                        {
+
+                            FamilyId = familyEntity._id.ToString(),
+                            QuizId = quizEntity._id.ToString(),
+                            HolderName = familyEntity.Holder.Name,
+                            HolderCpf = familyEntity.Holder.Cpf,
+                            HolderNumber = familyEntity.Holder.Number,
+                            TypeStatus = TypeStatus.NaoRespondido,
+                            TypeQuiz = quizEntity.TypeQuiz,
+                            Title = quizEntity.Title
+                        });
+                    }
+
+                    const int limit = 250;
+                    var registred = 0;
+                    var index = 0;
+
+                    while (quizFamilies.Count() > registred)
+                    {
+                        var itensToRegister = quizFamilies.Skip(limit * index).Take(limit).ToList();
+
+                        if (itensToRegister.Count() > 0)
+                            await _quizFamilyRepository.CreateAsync(itensToRegister);
+                        registred += limit;
+                        index++;
+                    }
+
+                    quizFamilies = quizFamilies = await _quizFamilyRepository.FindByAsync(x => x.DataBlocked == null && x.FamilyId == userId).ConfigureAwait(false) as List<QuizFamily>;
+                }
+
                 if (quizFamilies.Count() > 0)
                 {
                     var listQuiz = await _quizRepository.FindIn(x => x.TypeQuiz == typeQuiz && x.DataBlocked == null, "_id", quizFamilies.Select(x => ObjectId.Parse(x.QuizId)).ToList(), Builders<Quiz>.Sort.Descending(x => x._id)) as List<Quiz>;
-                    if (listQuiz.Count(x => x.TypeQuiz == typeQuiz) == 0)
+                    if (listQuiz.Count() == 0)
                         return Ok(Utilities.ReturnSuccess(DefaultMessages.AnyQuiz, new List<object>()));
 
                     _quizViewModel = _mapper.Map<List<QuizViewModel>>(listQuiz);
