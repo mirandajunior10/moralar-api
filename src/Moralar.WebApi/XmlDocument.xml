@@ -2138,12 +2138,13 @@
             
                     POST
                     {
-                    "date": 0,
-                    "place": "string",
-                    "description": "string",
-                    "familyId": "string",
-                    "typeSubject": " Visita do TTS",
-                    "id": "string"
+                         "date": 0,
+                         "place": "string",
+                         "description": "string",
+                         "familyId": "string",
+                         "typeSubject": " Visita do TTS",
+                         "quiz": { "id":"","title":""},
+                         "id": "string"
                     }
              </remarks>
              <response code="200">Returns success</response>
@@ -2151,6 +2152,24 @@
              <response code="401">Unauthorize Error</response>
              <response code="500">Exception Error</response>
              <returns></returns>
+        </member>
+        <member name="M:Moralar.WebApi.Controllers.ScheduleController.ToStageChosenProperty(UtilityFramework.Application.Core.ViewModels.BaseViewModel)">
+            <summary>
+            GERAR AGENDAMENTO DE ESCOLHA DE IMÓVEL
+            </summary>
+            <remarks>
+            OBJ DE ENVIO
+            
+                    POST
+                        {
+                         "id":"string"
+                        }
+            </remarks>
+            <response code="200">Returns success</response>
+            <response code="400">Custom Error</response>
+            <response code="401">Unauthorize Error</response>
+            <response code="500">Exception Error</response>
+            <returns></returns>
         </member>
         <member name="M:Moralar.WebApi.Controllers.ScheduleController.RegisterResettlement(Moralar.Domain.ViewModels.Schedule.ScheduleRegisterViewModel)">
              <summary>

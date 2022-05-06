@@ -1,37 +1,32 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Security.Claims;
 using System.Threading.Tasks;
-using AutoMapper;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
+using AutoMapper;
+
 using MongoDB.Bson;
 using MongoDB.Driver;
-using MongoDB.Driver.Builders;
+
 using Moralar.Data.Entities;
-using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
-using Moralar.Domain.ViewModels;
-using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Property;
-using Moralar.Domain.ViewModels.Question;
-using Moralar.Domain.ViewModels.Quiz;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.ScheduleHistory;
 using Moralar.Repository.Interface;
+
 using UtilityFramework.Application.Core;
-using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
 using UtilityFramework.Services.Core.Interface;
-
+using System.Text;
 
 namespace Moralar.WebApi.Controllers
 {
@@ -269,12 +264,13 @@ namespace Moralar.WebApi.Controllers
         ///
         ///        POST
         ///        {
-        ///        "date": 0,
-        ///        "place": "string",
-        ///        "description": "string",
-        ///        "familyId": "string",
-        ///        "typeSubject": " Visita do TTS",
-        ///        "id": "string"
+        ///             "date": 0,
+        ///             "place": "string",
+        ///             "description": "string",
+        ///             "familyId": "string",
+        ///             "typeSubject": " Visita do TTS",
+        ///             "quiz": { "id":"","title":""},
+        ///             "id": "string"
         ///        }
         /// </remarks>
         /// <response code="200">Returns success</response>
@@ -309,23 +305,20 @@ namespace Moralar.WebApi.Controllers
                 if (family == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                var schedule = await _scheduleRepository.CountAsync(x => x.FamilyId == model.FamilyId && x.TypeSubject == TypeSubject.ReuniaoPGM);
+                var schedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == model.FamilyId && x.TypeSubject == TypeSubject.ReuniaoPGM);
 
                 if (model.TypeSubject != TypeSubject.ReuniaoPGM)
                 {
                     /*Checa se as etapas anteriores foram cumplidas*/
-                    if (schedule < 3)
+                    if (schedule.Count() == 0)
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToSchedule));
+
+                    if (schedule.Count(x => (x.TypeScheduleStatus == TypeScheduleStatus.Confirmado || x.TypeScheduleStatus == TypeScheduleStatus.AguardandoConfirmacao)) > 0)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToSchedule));
                 }
 
-                if (model.TypeSubject == TypeSubject.ReuniaoPGM)
-                {
-                    /*Checa se as etapas foram cumplidas*/
-                    if (schedule == 3)
-                        return BadRequest(Utilities.ReturnErro(DefaultMessages.StageInvalidToPGM));
-                }
-
                 var scheduleEntity = _mapper.Map<Schedule>(model);
+
                 scheduleEntity.HolderCpf = family.Holder.Cpf;
                 scheduleEntity.HolderName = family.Holder.Name;
                 scheduleEntity.HolderNumber = family.Holder.Number;
@@ -421,6 +414,79 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
+        /// <summary>
+        /// GERAR AGENDAMENTO DE ESCOLHA DE IMÓVEL
+        /// </summary>
+        /// <remarks>
+        /// OBJ DE ENVIO
+        /// 
+        ///         POST
+        ///             {
+        ///              "id":"string"
+        ///             }
+        /// </remarks>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpPost("ToStageChosenProperty")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> ToStageChosenProperty([FromBody] BaseViewModel model)
+        {
+            try
+            {
+
+                var familyEntity = await _familyRepository.FindByIdAsync(model.Id);
+
+                if (familyEntity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+
+                var scheduleEntity = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == model.Id && x.TypeSubject == TypeSubject.EscolhaDoImovel);
+
+                if (scheduleEntity == null)
+                {
+
+                    var message = new StringBuilder();
+                    message.AppendLine($"<p>Olá {familyEntity.Holder.Name}</p>");
+                    message.AppendLine($"<p>Agora você já pode escolher seus imóveis de interesse</p>");
+
+                    var title = "Escolha de imóveis liberada";
+
+                    var content = "Verifique a area e escolha de imóveis";
+                    var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+                    scheduleEntity = new Schedule()
+                    {
+                        TypeSubject = TypeSubject.EscolhaDoImovel,
+                        FamilyId = model.Id,
+                        Description = "Escolha de imóveis de interesse",
+                        HolderCpf = familyEntity.Holder.Cpf,
+                        HolderName = familyEntity.Holder.Name,
+                        HolderNumber = familyEntity.Holder.Number,
+                        TypeScheduleStatus = TypeScheduleStatus.Confirmado,
+                        Place = "APP",
+                        Date = now
+
+                    };
+
+                    await _scheduleRepository.CreateAsync(scheduleEntity);
+                    await _utilService.SendNotify(title, message.ToString(), familyEntity.Holder.Email, familyEntity.DeviceId, familyId: model.Id, contentPush: content);
+                }
+
+                return Ok(Utilities.ReturnSuccess(DefaultMessages.SelectPropertyAvailable));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+
         /// <summary>
         /// REGISTRAR UM NOVO QUESTIONÁRIO
         /// </summary>
@@ -788,15 +854,13 @@ namespace Moralar.WebApi.Controllers
                 if (listSchedule.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
-                /*TODO RANGE DE DATAS ONDE MENOR DATA DE CADASTROD E AGENDAMENTO E MAIOR DATA DE FINALIZAÇÃO DO AGENDAMENTO*/
-
                 var listQuizByFamily = await _quizFamilyRepository.FindByAsync(x => x.FamilyId == familyId, Builders<QuizFamily>.Sort.Descending(nameof(QuizFamily.Created))) as List<QuizFamily>;
                 var listQuizEntity = await _quizRepository.FindIn("_id", listQuizByFamily.Select(x => ObjectId.Parse(x.QuizId.ToString())).ToList()) as List<Quiz>;
 
                 var vwTimeLine = _mapper.Map<ScheduleDetailTimeLinePGMViewModel>(listSchedule[0]);
 
                 vwTimeLine.Schedules = _mapper.Map<List<ScheduleViewModel>>(listSchedule);
-
+                vwTimeLine.CanNextStage = listSchedule.Count(x => x.TypeSubject == TypeSubject.EscolhaDoImovel) == 0 && listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM) == listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM && x.TypeScheduleStatus == TypeScheduleStatus.Finalizado);
                 for (int i = 0; i < listQuizByFamily.Count(); i++)
                 {
                     var quizItem = listQuizEntity.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId));
@@ -831,10 +895,12 @@ namespace Moralar.WebApi.Controllers
 
                     vwTimeLine.Courses.Add(new ScheduleCourseViewModel()
                     {
+                        Id = courseItem._id.ToString(),
+                        Created = courseFamily[i].Created,
                         Title = courseItem.Title,
                         StartDate = courseItem.StartDate,
                         EndDate = courseItem.EndDate,
-                        TypeStatusCourse = courseFamily[i].TypeStatusCourse
+                        TypeStatusCourse = courseFamily[i].TypeStatusCourse,
                     });
                 }
 
@@ -843,8 +909,9 @@ namespace Moralar.WebApi.Controllers
                     case TypeSubject.EscolhaDoImovel:
 
                         var familyPropertyInterestList = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<PropertiesInterest>;
+                        var residencialPropertyInterest = await _residencialPropertyRepository.FindIn("_id", familyPropertyInterestList.Select(x => ObjectId.Parse(x.ResidencialPropertyId)).ToList()) as List<ResidencialProperty>;
 
-                        vwTimeLine.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(familyPropertyInterestList);
+                        vwTimeLine.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialPropertyInterest);
 
                         break;
                 }
@@ -906,6 +973,10 @@ namespace Moralar.WebApi.Controllers
 
                 if (model.TypeScheduleStatus != TypeScheduleStatus.Finalizado)
                     scheduleEntity.Date = model.Date;
+
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                if (model.TypeScheduleStatus == TypeScheduleStatus.Finalizado)
+                    scheduleEntity.DateFinished = now;
 
                 if (model.TypeScheduleStatus == TypeScheduleStatus.Reagendado)
                     scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;

@@ -579,42 +579,54 @@ namespace Moralar.WebApi.Controllers
 
 
 
-                var entityFamily = new List<Family>();
+                var listFamilyEntity = new List<Family>();
+
                 if (model.AllFamily == true)
-                    entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
+                    listFamilyEntity = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
                 else
                 {
-                    entityFamily = await _familyRepository.FindIn("_id", model.FamilyId.Select(x => ObjectId.Parse(x)).ToList()) as List<Family>;
-                    if (model.FamilyId.Count() != entityFamily.Count())
+                    listFamilyEntity = await _familyRepository.FindIn("_id", model.FamilyId.Select(x => ObjectId.Parse(x)).ToList()) as List<Family>;
+                    if (model.FamilyId.Count() != listFamilyEntity.Count())
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
                 }
 
-                foreach (var item in entityFamily)
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                var alreadyRegistred = await _quizFamilyRepository.FindByAsync(x => x.QuizId == model.Id);
+
+                listFamilyEntity = listFamilyEntity.Where(x => alreadyRegistred.Count(y => y.FamilyId == x._id.ToString()) == 0).ToList();
+
+                foreach (var familyEntity in listFamilyEntity)
                 {
                     var entityQuizFamily = new QuizFamily()
                     {
-                        Created = DateTimeOffset.Now.ToUnixTimeSeconds(),
-                        FamilyId = item._id.ToString(),
+                        Created = now,
+                        FamilyId = familyEntity._id.ToString(),
                         QuizId = model.QuizId,
-                        HolderName = item.Holder.Name,
-                        HolderCpf = item.Holder.Cpf,
-                        HolderNumber = item.Holder.Number,
+                        HolderName = familyEntity.Holder.Name,
+                        HolderCpf = familyEntity.Holder.Cpf,
+                        HolderNumber = familyEntity.Holder.Number,
                         TypeStatus = TypeStatus.NaoRespondido,
                         TypeQuiz = quizEntity.TypeQuiz,
                         Title = quizEntity.Title
                     };
 
-                    if (await _quizFamilyRepository.CheckByAsync(x => x.QuizId == model.QuizId && x.FamilyId == item._id.ToString()) == false)
-                        await _quizFamilyRepository.CreateAsync(entityQuizFamily).ConfigureAwait(false);
+                    await _quizFamilyRepository.CreateAsync(entityQuizFamily).ConfigureAwait(false);
 
-                    /// ENVIAR MSG PARA O APP DO CLIENTE
-                    await _notificationRepository.CreateAsync(new Notification
+
+                    var notificationEntity = new Notification
                     {
                         Title = "Novo questionário disponibilizado",
-                        Description = $"Olá {item.Holder.Name}, Precisamos saber sua opinião sobre sua casa nova!",
-                        FamilyId = item._id.ToString(),
-                    });
+                        Description = $"Olá {familyEntity.Holder.Name}, Você tem um novo questionário disponível!",
+                        FamilyId = familyEntity._id.ToString(),
+                    };
 
+                    /// ENVIAR MSG PARA O APP DO CLIENTE
+                    await _notificationRepository.CreateAsync(notificationEntity);
+
+                    dynamic payloadPush = Util.GetPayloadPush(RouteNotification.System);
+                    dynamic settingsPush = Util.GetSettingsPush();
+
+                    await _senderNotificationService.SendPushAsync(notificationEntity.Title, notificationEntity.Description, familyEntity.DeviceId, data: payloadPush, settings: settingsPush, priority: 10);
 
                 }
 
@@ -672,7 +684,6 @@ namespace Moralar.WebApi.Controllers
 
                         quizFamilies.Add(new QuizFamily()
                         {
-
                             FamilyId = familyEntity._id.ToString(),
                             QuizId = quizEntity._id.ToString(),
                             HolderName = familyEntity.Holder.Name,
@@ -680,7 +691,7 @@ namespace Moralar.WebApi.Controllers
                             HolderNumber = familyEntity.Holder.Number,
                             TypeStatus = TypeStatus.NaoRespondido,
                             TypeQuiz = quizEntity.TypeQuiz,
-                            Title = quizEntity.Title
+                            Title = quizEntity.Title,
                         });
                     }
 
@@ -713,7 +724,10 @@ namespace Moralar.WebApi.Controllers
                     {
                         var quizfamilyEntity = quizFamilies.Find(x => x.QuizId == _quizViewModel[i].Id.ToString());
                         if (quizfamilyEntity != null)
+                        {
                             _quizViewModel[i].TypeStatus = quizfamilyEntity.TypeStatus;
+                            _quizViewModel[i].Created = quizfamilyEntity.Created;
+                        }
                     }
                 }
 

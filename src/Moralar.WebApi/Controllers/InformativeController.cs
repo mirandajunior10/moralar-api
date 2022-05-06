@@ -325,8 +325,6 @@ namespace Moralar.WebApi.Controllers
                     index++;
                 }
 
-                await _notificationRepository.CreateAsync(listNotification);
-
                 dynamic payloadPush = Util.GetPayloadPush();
                 dynamic settingPush = Util.GetSettingsPush();
 

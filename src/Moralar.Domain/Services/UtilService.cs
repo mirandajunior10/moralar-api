@@ -8,27 +8,37 @@ using Moralar.Domain.ViewModels;
 using Moralar.Repository.Interface;
 using RestSharp;
 using System;
+using System.Collections.Generic;
+using System.Linq;
 using System.Threading.Tasks;
 using UtilityFramework.Application.Core;
+using UtilityFramework.Services.Core.Interface;
 
 // ReSharper disable RedundantAnonymousTypePropertyName
 
 namespace Moralar.Domain.Services
 {
 
-    public class UtilService :ControllerBase, IUtilService
+    public class UtilService : ControllerBase, IUtilService
     {
         private readonly IMapper _mapper;
         private readonly ILogActionRepository _logActionRepository;
         private readonly ICityRepository _cityRepository;
+        private readonly INotificationRepository _notificationRepository;
+        private readonly ISenderMailService _senderMailService;
+        private readonly ISenderNotificationService _senderNotificationService;
 
-        public UtilService(IMapper mapper, ILogActionRepository logActionRepository, ICityRepository cityRepository)
+        public UtilService(IMapper mapper, ILogActionRepository logActionRepository, ICityRepository cityRepository, ISenderMailService senderMailService, ISenderNotificationService senderNotificationService, INotificationRepository notificationRepository)
         {
             _mapper = mapper;
             _logActionRepository = logActionRepository;
             _cityRepository = cityRepository;
+            _senderMailService = senderMailService;
+            _senderNotificationService = senderNotificationService;
+            _notificationRepository = notificationRepository;
         }
-        public string GetEscolasMunicipaisEnsinoFundamental() {
+        public string GetEscolasMunicipaisEnsinoFundamental()
+        {
 
             return "";
         }
@@ -71,7 +81,7 @@ namespace Moralar.Domain.Services
                 //};
 
                 //await _logActionRepository.CreateReturnAsync(entityLogAction);
-             
+
 
 
             }
@@ -130,7 +140,7 @@ namespace Moralar.Domain.Services
             try
             {
                 if (string.IsNullOrEmpty(zipCode))
-                     Utilities.ReturnErro("Informe o CEP");
+                    Utilities.ReturnErro("Informe o CEP");
 
                 var client = new RestSharp.RestClient($"http://viacep.com.br/ws/{zipCode.OnlyNumbers()}/json/");
 
@@ -139,7 +149,7 @@ namespace Moralar.Domain.Services
                 var infoZipCode = await client.Execute<AddressInfoViewModel>(request).ConfigureAwait(false);
 
                 if (infoZipCode.Data.Erro)
-                   Utilities.ReturnErro(DefaultMessages.ZipCodeNotFound);
+                    Utilities.ReturnErro(DefaultMessages.ZipCodeNotFound);
 
                 var response = _mapper.Map<InfoAddressViewModel>(infoZipCode.Data);
 
@@ -155,12 +165,57 @@ namespace Moralar.Domain.Services
                 //response.StateName = city.StateName;
 
 
-                return  response;
+                return response;
             }
             catch (Exception)
             {
                 return null;
             }
+        }
+
+        public async Task SendNotify(string title, string content, string email, List<string> deviceId, ForType fortype = ForType.Family, string familyId = null, string titlePush = null, string contentPush = null)
+        {
+            try
+            {
+                /*GERAR NOTIFICAÇÃO*/
+
+                var notificationFamilyEntity = new Notification()
+                {
+                    FamilyId = familyId,
+                    For = fortype,
+                    Title = titlePush ?? title,
+                    Description = contentPush ?? content
+                };
+
+                await _notificationRepository.CreateAsync(notificationFamilyEntity);
+
+                if (deviceId != null && deviceId.Count() > 0)
+                {
+                    dynamic payLoadPush = Util.GetPayloadPush();
+                    dynamic settingsPush = Util.GetSettingsPush();
+
+                    await _senderNotificationService.SendPushAsync(title, content, deviceId, data: payLoadPush, settings: settingsPush, priority: 10);
+                }
+
+            }
+            catch (Exception) {/*UNUSED*/}
+
+            try
+            {
+                /*ENVIO DE EMAIL*/
+                var dataBody = Util.GetTemplateVariables();
+
+                dataBody.Add("{{ title }}", title);
+                dataBody.Add("{{ message }}", content);
+
+                var body = _senderMailService.GerateBody("custom", dataBody);
+
+                await _senderMailService.SendMessageEmailAsync("Moralar", email, body, title);
+
+            }
+            catch (Exception) {/*UNUSED*/}
+
+
         }
     }
 }

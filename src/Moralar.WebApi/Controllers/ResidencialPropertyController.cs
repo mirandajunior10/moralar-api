@@ -345,7 +345,7 @@ namespace Moralar.WebApi.Controllers
                 if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                if (await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel) == false)
+                if (await _scheduleRepository.CheckByAsync(x => x.FamilyId == userId && x.TypeSubject == TypeSubject.EscolhaDoImovel && x.TypeScheduleStatus == TypeScheduleStatus.Confirmado) == false)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotInChooseProperty, responseList: true));
 
                 valueMaximumPurchase = (double)(familyEntity.Financial?.MaximumPurchase + familyEntity.Financial?.IncrementValue);
@@ -407,11 +407,11 @@ namespace Moralar.WebApi.Controllers
                     }
                 }));
 
-                return Ok(Utilities.ReturnSuccess(data: response.OrderBy(x => x.ResidencialPropertyAdress.Latitude)));
+                return Ok(Utilities.ReturnSuccess(data: response));
             }
             catch (Exception ex)
             {
-                return BadRequest(ex.ReturnErro());
+                return BadRequest(ex.ReturnErro(responseList: true));
             }
         }
 
@@ -609,19 +609,23 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
-                var entityResidencial = await _residencialPropertyRepository.FindByIdAsync(model.ResidencialPropertyId).ConfigureAwait(false);
-                if (entityResidencial == null)
+                var residencialPropertyEntity = await _residencialPropertyRepository.FindByIdAsync(model.ResidencialPropertyId).ConfigureAwait(false);
+                if (residencialPropertyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-                var entityFamily = await _familyRepository.FindByIdAsync(model.FamiliIdResidencialChosen).ConfigureAwait(false);
-                if (entityFamily == null)
+                var familyEntity = await _familyRepository.FindByIdAsync(model.FamiliIdResidencialChosen).ConfigureAwait(false);
+                if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
                 var validOnly = _httpContextAccessor.GetFieldsFromBody();
 
-                entityResidencial.FamiliIdResidencialChosen = model.FamiliIdResidencialChosen;
-                entityResidencial.TypeStatusResidencialProperty = TypeStatusResidencial.Vendido;
-                await _residencialPropertyRepository.UpdateAsync(entityResidencial).ConfigureAwait(false);
+                if (string.IsNullOrEmpty(residencialPropertyEntity.FamiliIdResidencialChosen) == false)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.AlreadySelectedForFamily));
+
+                residencialPropertyEntity.FamiliIdResidencialChosen = model.FamiliIdResidencialChosen;
+                residencialPropertyEntity.TypeStatusResidencialProperty = TypeStatusResidencial.Vendido;
+                
+                await _residencialPropertyRepository.UpdateAsync(residencialPropertyEntity).ConfigureAwait(false);
 
                 // var scheduleEntity = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == model.FamiliIdResidencialChosen).ConfigureAwait(false); ;
                 // if (scheduleEntity == null)
@@ -641,7 +645,7 @@ namespace Moralar.WebApi.Controllers
                 //}
 
 
-                var sendInformation = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == model.ResidencialPropertyId).ConfigureAwait(false);
+                var sendInformation = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == model.ResidencialPropertyId && x.FamilyId != model.FamiliIdResidencialChosen).ConfigureAwait(false);
 
                 var removedInterest = sendInformation.Where(x => x.FamilyId != model.FamiliIdResidencialChosen).ToList();
 
@@ -650,45 +654,43 @@ namespace Moralar.WebApi.Controllers
                 {
                     var dataBody = Util.GetTemplateVariables();
                     var item = removedInterest[i];
-                    var familyEntity = await _familyRepository.FindByIdAsync(item.FamilyId).ConfigureAwait(false);
+                    var familyEntityItem = await _familyRepository.FindByIdAsync(item.FamilyId).ConfigureAwait(false);
 
                     dynamic payloadPush = Util.GetPayloadPush(RouteNotification.System);
                     dynamic settingsPush = Util.GetSettingsPush();
 
                     string title = "Imóvel vendido";
-                    var message = $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
-                                                $"<p> O imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} foi vendido para outra pessoa.";
+                    var message = $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" 
+                                + $"<p> O imóvel {residencialPropertyEntity.ResidencialPropertyAdress.StreetAddress} foi vendido para outra pessoa. Atualize sua lista de interesses";
 
                     dataBody.Add("{{ title }}", title);
                     dataBody.Add("{{ message }}", message);
 
                     var body = _senderMailService.GerateBody("custom", dataBody);
 
-                    await _senderMailService.SendMessageEmailAsync("MORALAR", familyEntity.Holder.Email, body, title);
+                    await _senderMailService.SendMessageEmailAsync("MORALAR", familyEntityItem.Holder.Email, body, title);
 
                     /*REMOVE AS FAMÍLIAS INTERESSADAS*/
-                    await _propertiesInterestRepository.DeleteAsync(x => x.FamilyId == item.FamilyId);
+                    await _propertiesInterestRepository.DeleteAsync(x => x.FamilyId == item.FamilyId && x.ResidencialPropertyId == model.ResidencialPropertyId);
                 }
 
-                    var dataBodyFamily = Util.GetTemplateVariables();
+                var dataBodyFamily = Util.GetTemplateVariables();
 
-                    dataBodyFamily.Add("{{ title }}", "Escolha do imóvel");
-                    dataBodyFamily.Add("{{ message }}", $"<p>Caro(a) {entityFamily.Holder.Name.GetFirstName()}</p>" +
-                                                $"<p> Você foi escolhido para a compra do imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress}."
-                                                );
+                dataBodyFamily.Add("{{ title }}", "Escolha do imóvel");
+                dataBodyFamily.Add("{{ message }}", $"<p>Caro(a) {familyEntity.Holder.Name.GetFirstName()}</p>" +
+                                                    $"<p> Você foi escolhido para a compra do imóvel {residencialPropertyEntity.ResidencialPropertyAdress.StreetAddress}.");
 
-                    var bodyFamily = _senderMailService.GerateBody("custom", dataBodyFamily);
+                var bodyFamily = _senderMailService.GerateBody("custom", dataBodyFamily);
 
-                    var unused = Task.Run(async () =>
-                    {
-                        await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, entityFamily.Holder.Email, bodyFamily, "Imóvel Escolhido").ConfigureAwait(false);
-                    });
+                var unused = Task.Run(async () =>
+                {
+                    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, familyEntity.Holder.Email, bodyFamily, "Imóvel Escolhido").ConfigureAwait(false);
+                });
 
+                await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {familyEntity.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
 
-                    await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Update de nova família {entityFamily.Holder.Name}", "", "", model.Id);//Request.GetUserName()?.Value, Request.GetUserId()
+                return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
 
-                    return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
-                
             }
             catch (Exception ex)
             {

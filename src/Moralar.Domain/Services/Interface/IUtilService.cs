@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Threading.Tasks;
 
 using Moralar.Data.Entities;
@@ -14,5 +15,6 @@ namespace Moralar.Domain.Services.Interface
         void UpdateCascate(Family familyEntity);
         string GetFlag(string flag);
         Task<InfoAddressViewModel> GetInfoFromZipCode(string zipCode);
+        Task SendNotify(string title, string content, string email, List<string> deviceId, ForType fortype = ForType.Family, string familyId = null, string titlePush = null, string contentPush = null);
     }
 }

@@ -104,5 +104,9 @@ namespace Moralar.Domain
         public const string PropertyNotChosen = "Imóvel de interesse não escolhido";
         public const string StageInvalidToSchedule = "São necessárias 03 reuniões PGM antes de prosseguir";
         public const string StageInvalidToPGM = "Todas as reuniões PGM foram agendadas";
+        public const string StageInOpen = "Você precisa finalizar todas reuniões PGM em aberto";
+        public const string AlreadySelectedForFamily = "Esse imóvel já foi contemplado para outra família.";
+        public const string NoPropertiesInterest = "Nenhum interesse registrado para esse imóvel.";
+        public const string SelectPropertyAvailable = "Escolha de imóvel liberada com sucesso";
     }
 }

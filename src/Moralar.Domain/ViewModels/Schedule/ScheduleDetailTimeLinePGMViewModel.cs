@@ -24,11 +24,9 @@ namespace Moralar.Domain.ViewModels.Schedule
         public string HolderNumber { get; set; }
         public string HolderName { get; set; }
         public string HolderCpf { get; set; }
-
+        public bool CanNextStage { get; set; }
         public TypeSubject TypeSubject { get; set; }
-
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
-
         public List<ScheduleQuizDetailTimeLinePGMViewModel> DetailQuiz { get; set; }
         public List<ScheduleQuizDetailTimeLinePGMViewModel> DetailEnquete { get; set; }
         public List<ScheduleCourseViewModel> Courses { get; set; }

@@ -1,4 +1,5 @@
-﻿using Moralar.Data.Enum;
+﻿using Moralar.Data.Entities.Auxiliar;
+using Moralar.Data.Enum;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -36,6 +37,7 @@ namespace Moralar.Domain.ViewModels.Schedule
         public TypeSubject TypeSubject { get; set; }
         [JsonIgnore]
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
+        public QuizAux Quiz { get; set; }
 
 
     }

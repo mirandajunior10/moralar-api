@@ -79,7 +79,7 @@ namespace Moralar.WebApi.Controllers
                     return Ok(Utilities.ReturnSuccess(data: new List<object>()));
 
                 var listEntity = await _residencialPropertyRepository.FindIn(c => c.TypeStatusResidencialProperty != TypeStatusResidencial.Vendido, "_id", listPropertiesInterestEntity.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList(), Builders<ResidencialProperty>.Sort.Descending(nameof(ResidencialProperty.Created))) as List<ResidencialProperty>;
-               
+
                 if (listEntity.Count() == 0)
                     return Ok(Utilities.ReturnSuccess(data: new List<object>()));
 
@@ -117,29 +117,30 @@ namespace Moralar.WebApi.Controllers
         {
             try
             {
+                var listPropertiesInterest = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == residencialPropertyId).ConfigureAwait(false);
+                if (listPropertiesInterest.Count() == 0)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.NoPropertiesInterest));
 
-                var property = await _propertiesInterestRepository.FindByAsync(x => x.ResidencialPropertyId == residencialPropertyId).ConfigureAwait(false);
-                if (property == null)
-                    return BadRequest(Utilities.ReturnErro(nameof(DefaultMessages.ResidencialPropertyNotFound)));
+                var listFamilies = await _familyRepository.FindIn("_id", listPropertiesInterest.Select(x => ObjectId.Parse(x.FamilyId)).ToList()) as List<Family>;
 
-                var families = await _familyRepository.FindIn("_id", property.Select(x => ObjectId.Parse(x.FamilyId.ToString())).ToList()) as List<Family>;
-
-                var vwFamilies = _mapper.Map<List<FamilyCompleteListViewModel>>(families);
+                var vwFamilies = _mapper.Map<List<FamilyCompleteListViewModel>>(listFamilies);
 
                 var residencialProperty = await _residencialPropertyRepository.FindOneByAsync(x => x._id == ObjectId.Parse(residencialPropertyId)).ConfigureAwait(false);
-                if (residencialProperty != null && residencialProperty.FamiliIdResidencialChosen != null)
+                if (residencialProperty?.FamiliIdResidencialChosen != null)
                 {
-                    vwFamilies.Find(x => x.Id == residencialProperty.FamiliIdResidencialChosen).FamiliIdResidencialChosen = residencialProperty.FamiliIdResidencialChosen;
-                    vwFamilies.Find(x => x.Id == residencialProperty.FamiliIdResidencialChosen).TypeStatusResidencial = residencialProperty.TypeStatusResidencialProperty;
+                    for (int i = 0; i < vwFamilies.Count(); i++)
+                    {
+                        vwFamilies[i].FamiliIdResidencialChosen = residencialProperty.FamiliIdResidencialChosen;
+                        vwFamilies[i].TypeStatusResidencial = residencialProperty.TypeStatusResidencialProperty;
+                    }
                 }
 
-
-                for (int i = 0; i < families.Count(); i++)
+                for (int i = 0; i < listFamilies.Count(); i++)
                 {
-                    foreach (var p in families.ToList()[i].Priorization.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
+                    foreach (var p in listFamilies.ToList()[i].Priorization.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
                     {
-                        var priorityRate = (PriorityRate)p.GetValue(families.ToList()[i].Priorization, null);
-                        var item = vwFamilies.Find(x => x.Id == families.ToList()[i]._id.ToString());
+                        var priorityRate = (PriorityRate)p.GetValue(listFamilies.ToList()[i].Priorization, null);
+                        var item = vwFamilies.Find(x => x.Id == listFamilies.ToList()[i]._id.ToString());
                         if (item != null)
                         {
                             item.Priorization.Add(_mapper.Map<PriorityRateViewModel>(priorityRate));
@@ -329,8 +330,10 @@ namespace Moralar.WebApi.Controllers
 
                 if (string.IsNullOrEmpty(number) == false)
                     conditions.Add(builder.Where(x => x.HolderNumber == number));
+
                 if (string.IsNullOrEmpty(holderName) == false)
                     conditions.Add(builder.Where(x => x.HolderName.ToUpper().Contains(holderName.ToUpper())));
+
                 if (string.IsNullOrEmpty(holderCpf) == false)
                     conditions.Add(builder.Where(x => x.HolderCpf == holderCpf.OnlyNumbers()));
 
@@ -348,38 +351,27 @@ namespace Moralar.WebApi.Controllers
                     .LoadDataTableAsync(model.Search.Value, sortBy, model.Start, model.Length, conditions, columns) as List<PropertiesInterest>;
 
                 var propertiesEntity = _mapper.Map<List<PropertiesInterestViewModel>>(retorno);
-                for (int i = 0; i < retorno.Count(); i++)
+
+                if (propertiesEntity.Count() > 0)
                 {
-                    var s = retorno[i].Priorization;
+                    var listInterest = await _propertiesInterestRepository.FindIn("ResidencialPropertyId", retorno.Select(x => x.ResidencialPropertyId).Distinct().ToList()) as List<PropertiesInterest>;
+                    var listResidencialProperty = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
 
-                    foreach (var p in s.GetType().GetProperties().Where(p => !p.GetGetMethod().GetParameters().Any()))
+                    for (int i = 0; i < propertiesEntity.Count(); i++)
                     {
-                        var g = (PriorityRate)p.GetValue(s, null);
-                        if (g.Value == true)
-                            propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).PriorityRates.Add(g);
-                    }
-                    propertiesEntity.Find(x => x.Id == retorno.ToList()[i]._id.ToString()).Interest = retorno.Count(x => x.ResidencialPropertyId == retorno.ToList()[i].ResidencialPropertyId.ToString());
+                        propertiesEntity[i].Interest = listInterest.Count(x => x.ResidencialPropertyId == propertiesEntity[i].ResidencialPropertyId);
 
+                        var residencialEntity = listResidencialProperty.Find(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidencialPropertyId));
+
+                        if (residencialEntity != null)
+                            propertiesEntity[i].ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(residencialEntity.ResidencialPropertyAdress);
+                    }
                 }
 
                 var totalrecordsFiltered = !string.IsNullOrEmpty(model.Search.Value)
                     ? (int)await _propertiesInterestRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                     : totalRecords;
 
-                //var teste = !string.IsNullOrEmpty(model.SortOrder) ? model.SortOrder.UppercaseFirst() : model.Columns.FirstOrDefault(x => x.Orderable)?.Name ?? model.Columns.FirstOrDefault()?.Name;
-
-                if (propertiesEntity.Count() > 0)
-                {
-                    var residencialEntity = await _residencialPropertyRepository.FindIn("_id", retorno.Select(x => ObjectId.Parse(x.ResidencialPropertyId.ToString())).ToList()) as List<ResidencialProperty>;
-                    for (int i = 0; i < propertiesEntity.Count(); i++)
-                    {
-                        var objResidencial = residencialEntity.FirstOrDefault(x => x._id == ObjectId.Parse(propertiesEntity[i].ResidencialPropertyId));
-                        if (objResidencial != null)
-                            propertiesEntity[i].ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(objResidencial.ResidencialPropertyAdress);
-                    }
-                }
-
-                // response.Data = propertiesEntity.OrderBy(c => c.PriorityRates.Min(x => x.Rate)).ToList();
                 response.Data = propertiesEntity;
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;

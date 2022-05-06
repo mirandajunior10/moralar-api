@@ -23,7 +23,7 @@ namespace Moralar.Data.Entities
         public TypeSubject TypeSubject { get; set; }
 
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
-
+        public QuizAux Quiz { get; set; }
         public long? DateFinished { get; set; }
         public override string CollectionName => nameof(Schedule);
     }
