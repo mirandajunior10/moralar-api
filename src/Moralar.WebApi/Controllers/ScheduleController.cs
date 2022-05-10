@@ -1253,7 +1253,7 @@ namespace Moralar.WebApi.Controllers
                     if (infoOrigin == null)
                         return BadRequest(Utilities.ReturnErro("Cep não encontrado"));
 
-                    var residencialOrigin = Utilities.GetInfoFromAdressLocation(infoOrigin.StreetAddress + " " + infoOrigin.Complement + " " + infoOrigin.Neighborhood + " " + infoOrigin.CityName + " " + infoOrigin.StateUf);
+                    var residencialOrigin = Utilities.GetInfoFromAdressLocation(infoOrigin.StreetAddress + ", " + infoOrigin.Number + " " + infoOrigin.Complement + " " + infoOrigin.Neighborhood + " " + infoOrigin.CityName + " " + infoOrigin.StateUf);
                     if (residencialOrigin.Erro == true)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.LocationNotFound));
 
@@ -1275,7 +1275,7 @@ namespace Moralar.WebApi.Controllers
                     if (infoDestination == null)
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
 
-                    var destination = Utilities.GetInfoFromAdressLocation(infoDestination.StreetAddress + " " + infoDestination.Complement + " " + infoDestination.Neighborhood + " " + infoDestination.CityName + " " + infoDestination.StateUf);
+                    var destination = Utilities.GetInfoFromAdressLocation(infoDestination.StreetAddress + ", " + infoDestination.Number + " " + infoDestination.Complement + " " + infoDestination.Neighborhood + " " + infoDestination.CityName + " " + infoDestination.StateUf);
                     var distance = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng);
 
                     response[i].AddressPropertyDistanceMeters = (distance / 1000).ToString("0.###");
