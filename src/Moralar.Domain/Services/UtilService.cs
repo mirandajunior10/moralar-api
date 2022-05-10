@@ -181,7 +181,7 @@ namespace Moralar.Domain.Services
 
                 var notificationFamilyEntity = new Notification()
                 {
-                    FamilyId = familyId,
+                    FamilyId = fortype == ForType.Family ? familyId : null,
                     For = fortype,
                     Title = titlePush ?? title,
                     Description = contentPush ?? content
@@ -202,15 +202,18 @@ namespace Moralar.Domain.Services
 
             try
             {
-                /*ENVIO DE EMAIL*/
-                var dataBody = Util.GetTemplateVariables();
+                if (string.IsNullOrEmpty(email) == false)
+                {
+                    /*ENVIO DE EMAIL*/
+                    var dataBody = Util.GetTemplateVariables();
 
-                dataBody.Add("{{ title }}", title);
-                dataBody.Add("{{ message }}", content);
+                    dataBody.Add("{{ title }}", title);
+                    dataBody.Add("{{ message }}", content);
 
-                var body = _senderMailService.GerateBody("custom", dataBody);
+                    var body = _senderMailService.GerateBody("custom", dataBody);
 
-                await _senderMailService.SendMessageEmailAsync("Moralar", email, body, title);
+                    await _senderMailService.SendMessageEmailAsync("Moralar", email, body, title);
+                }
 
             }
             catch (Exception) {/*UNUSED*/}

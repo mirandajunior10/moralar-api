@@ -1,19 +1,29 @@
-﻿using System.IO;
-using System.Linq;
+﻿using System;
+using System.IO;
 using System.Reflection;
-using AutoMapper;
+
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Localization;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.FileProviders;
 using Microsoft.Extensions.Logging;
+
+using AutoMapper;
+
+using Hangfire;
+using Hangfire.Console;
+using Hangfire.Mongo;
+using Hangfire.Storage;
+
 using Moralar.WebApi.Filter;
 using Moralar.WebApi.Services;
-using UtilityFramework.Application.Core;
 
+using UtilityFramework.Application.Core;
+using Moralar.WebApi.HangFire.Interface;
+using Moralar.WebApi.HangFire;
+using MongoDB.Driver;
 
 namespace Moralar.WebApi
 {
@@ -29,6 +39,7 @@ namespace Moralar.WebApi
 
             ApplicationName = Assembly.GetEntryAssembly().GetName().Name?.Split('.')[0];
             EnableSwagger = Configuration.GetSection("EnableSwagger").Get<bool>();
+            EnableService = Configuration.GetSection("EnableService").Get<bool>();
 
             /* CRIAR NO Settings json prop com array de cultures ["pt","pt-br"] */
             //var cultures = Utilities.GetConfigurationRoot().GetSection("TranslateLanguages").Get<List<string>>();
@@ -39,6 +50,7 @@ namespace Moralar.WebApi
         public IConfigurationRoot Configuration { get; }
         public static string ApplicationName { get; set; }
         public static bool EnableSwagger { get; set; }
+        public static bool EnableService { get; set; }
 
         /* PARA TRANSLATE*/
         //public static List<CultureInfo> SupportedCultures { get; set; }
@@ -70,8 +82,32 @@ namespace Moralar.WebApi
             //});
 
             /*HANGFIRE*/
-            // services.AddHangfire(x => x.UseMemoryStorage());
+            if (EnableService)
+            {
+                var remoteDatabase = Configuration.GetSection("DATABASE:LOCAL").Get<string>();
+                var dataBaseName = Configuration.GetSection("DATABASE:NAME").Get<string>();
 
+                var mongoUrlBuilder = new MongoUrlBuilder($"mongodb://{remoteDatabase}/{dataBaseName}");
+                var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
+
+                var migrationOptions = new MongoMigrationOptions
+                {
+                    Strategy = MongoMigrationStrategy.Drop,
+                    BackupStrategy = MongoBackupStrategy.Collections
+                };
+                var storageOptions = new MongoStorageOptions
+                {
+                    MigrationOptions = migrationOptions,
+                    Prefix = "HangFire",
+                    CheckConnection = false
+                };
+
+                services.AddHangfire(configuration =>
+                {
+                    configuration.UseConsole();
+                    configuration.UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, storageOptions);
+                });
+            }
             /*ENABLE CORS*/
             services.AddCors(options =>
            {
@@ -93,7 +129,7 @@ namespace Moralar.WebApi
         }
 
         // This method gets Race by the runtime. Use this method to configure the HTTP request pipeline.
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IHttpContextAccessor httpContextAccessor)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory, IHttpContextAccessor httpContextAccessor, IServiceProvider serviceProvider)
         {
             loggerFactory.AddConsole(Configuration.GetSection("Logging"));
             loggerFactory.AddDebug();
@@ -102,11 +138,15 @@ namespace Moralar.WebApi
             Utilities.SetHttpContext(httpContextAccessor);
 
             /* PARA USO DO HANG FIRE ROTINAS*/
-            // app.UseHangfireServer();
-            // app.UseHangfireDashboard("/jobs", new DashboardOptions
-            // {
-            //     Authorization = new[] { new MyAuthorizationFilter() }
-            // }); 
+            if (EnableService)
+            {
+                GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(serviceProvider));
+                app.UseHangfireServer();
+                app.UseHangfireDashboard("/jobs", new DashboardOptions
+                {
+                    Authorization = new[] { new MyAuthorizationFilter() }
+                });
+            }
 
             /*CROP IMAGE*/
             app.UseImageResizer();
@@ -143,7 +183,7 @@ namespace Moralar.WebApi
 
             /*JWT TOKEN*/
             app.UseJwtTokenApiAuth(Configuration);
-         
+
             app.UseMvc();
 
             if (EnableSwagger)
@@ -156,6 +196,22 @@ namespace Moralar.WebApi
                    c.EnableDeepLinking();
                    c.EnableFilter();
                });
+            }
+
+            if (EnableService)
+            {
+                using (var connection = JobStorage.Current.GetConnection())
+                    foreach (var recurringJob in connection.GetRecurringJobs())
+                        RecurringJob.RemoveIfExists(recurringJob.Id);
+
+                var timeZoneBrazil = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
+
+                /*RODA A CADA MINUTO*/
+                RecurringJob.AddOrUpdate<IHangFireService>(
+                    "MAKEQUESTIONAVAILABLE",
+                    services => services.MakeQuestionAvailable(null),
+                    Cron.Minutely(), timeZoneBrazil);
+
             }
         }
     }

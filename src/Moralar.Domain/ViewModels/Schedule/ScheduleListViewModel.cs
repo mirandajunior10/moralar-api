@@ -1,4 +1,5 @@
-﻿using Moralar.Data.Enum;
+﻿using Moralar.Data.Entities.Auxiliar;
+using Moralar.Data.Enum;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -17,5 +18,6 @@ namespace Moralar.Domain.ViewModels.Schedule
         public string HolderCpf { get; set; }
         public TypeSubject TypeSubject { get; set; }
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
+        public QuizAux Quiz { get; set; }
     }
 }

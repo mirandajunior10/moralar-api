@@ -97,7 +97,7 @@ namespace Moralar.WebApi.Controllers
             {
                 var now = DateTimeOffset.Now.ToUnixTimeSeconds();
 
-                var listSchedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && x.Date <= now || x.TypeScheduleStatus == TypeScheduleStatus.Reagendado, Builders<Schedule>.Sort.Ascending(x => x.TypeSubject).Descending(x => x.Created));
+                var listSchedule = await _scheduleRepository.FindByAsync(x => (x.FamilyId == familyId && x.Date <= now && x.TypeScheduleStatus == TypeScheduleStatus.Finalizado) || (x.TypeScheduleStatus == TypeScheduleStatus.Reagendado), Builders<Schedule>.Sort.Ascending(x => x.TypeSubject).Descending(x => x.Created));
 
                 // var listSchedule = await _scheduleHistoryRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false);
 
@@ -131,7 +131,7 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-                var entity = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && x.Date >= now).ConfigureAwait(false);
+                var entity = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && (x.TypeScheduleStatus == TypeScheduleStatus.AguardandoConfirmacao || x.TypeScheduleStatus == TypeScheduleStatus.Confirmado || x.TypeScheduleStatus == TypeScheduleStatus.AguardandoReagendamento || x.TypeScheduleStatus == TypeScheduleStatus.Finalizado)).ConfigureAwait(false);
 
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
@@ -300,9 +300,9 @@ namespace Moralar.WebApi.Controllers
                 if (dateToSchedule < DateTime.Now)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.DateInvalidToSchedule));
 
-                var family = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
+                var familyEntity = await _familyRepository.FindByIdAsync(model.FamilyId).ConfigureAwait(false);
 
-                if (family == null)
+                if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
                 var schedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == model.FamilyId && x.TypeSubject == TypeSubject.ReuniaoPGM);
@@ -319,9 +319,9 @@ namespace Moralar.WebApi.Controllers
 
                 var scheduleEntity = _mapper.Map<Schedule>(model);
 
-                scheduleEntity.HolderCpf = family.Holder.Cpf;
-                scheduleEntity.HolderName = family.Holder.Name;
-                scheduleEntity.HolderNumber = family.Holder.Number;
+                scheduleEntity.HolderCpf = familyEntity.Holder.Cpf;
+                scheduleEntity.HolderName = familyEntity.Holder.Name;
+                scheduleEntity.HolderNumber = familyEntity.Holder.Number;
                 scheduleEntity.TypeSubject = model.TypeSubject;
                 scheduleEntity.TypeScheduleStatus = TypeScheduleStatus.AguardandoConfirmacao;
 
@@ -329,9 +329,9 @@ namespace Moralar.WebApi.Controllers
 
                 var scheduleHistoryEntity = _mapper.Map<ScheduleHistory>(model);
 
-                scheduleHistoryEntity.HolderCpf = family.Holder.Cpf;
-                scheduleHistoryEntity.HolderName = family.Holder.Name;
-                scheduleHistoryEntity.HolderNumber = family.Holder.Number;
+                scheduleHistoryEntity.HolderCpf = familyEntity.Holder.Cpf;
+                scheduleHistoryEntity.HolderName = familyEntity.Holder.Name;
+                scheduleHistoryEntity.HolderNumber = familyEntity.Holder.Number;
                 scheduleHistoryEntity.TypeSubject = model.TypeSubject;
                 scheduleHistoryEntity.ScheduleId = scheduleId;
 
@@ -355,56 +355,44 @@ namespace Moralar.WebApi.Controllers
 
                 var dataBody = Util.GetTemplateVariables();
 
-                string title = null;
+                string title = $"Olá {familyEntity.Holder.Name.GetFirstName()}!";
                 string messageBody = null;
 
-                if (model.TypeSubject == TypeSubject.ReuniaoPGM)
+
+
+                switch (model.TypeSubject)
                 {
-                    title = "Cadastro de Agendamento";
-                    messageBody = $"<p>Caro(a) {family.Holder.Name.GetFirstName()}</p>"
-                                + $"<p>Foi cadastrado um agendamento para o horário {dateToSchedule:dd/MM/yyyy}</p>";
+                    case TypeSubject.ReuniaoPGM:
+                        title = "Cadastro de Agendamento";
+                        messageBody = $"<p>Olá {familyEntity.Holder.Name.GetFirstName()}<br/>"
+                                    + $"Foi cadastrado um agendamento para o dia {dateToSchedule:dd/MM/yyyy HH:mm}</p>";
+                        break;
+
+                    case TypeSubject.VisitaImovel:
+
+                        messageBody = $"<p>Sua visita domiciliar foi marcada.<br/>"
+                                    + $"Dia {Utilities.TimeStampToDateTime(scheduleEntity.Date):dd/MM/yyyy}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date):HH:mm}, endereço {model.Place}</p>"
+                                    + $"<p>Até lá!</p>";
+                        break;
+                    case TypeSubject.Mudanca:
+
+                        messageBody = $"<p>Sua mudança foi agendada.<br/>"
+                                    + $"Dia {Utilities.TimeStampToDateTime(scheduleEntity.Date):dd/MM/yyyy}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date):HH:mm}<br/>"
+                                    + $"Lembre-se: todos seus pertences devem estar embalados e o imóvel vazio.<br/>"
+                                    + $"Fique tranquilo, tudo correrá bem!</p>";
+                        break;
+                    case TypeSubject.Demolicão:
+
+                        messageBody = $"<p>A demolição de seu antigo imóvel foi agendada.<br/>"
+                                    + $"Para o dia {Utilities.TimeStampToDateTime(scheduleEntity.Date):dd/MM/yyyy}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date):HH:mm}<br/>"
+                                    + $"Caso queira acompanhar, entre em contato com a equipe do TTS.</p>";
+                        break;
+
+                    default:
+                        break;
                 }
-                else
-                {
-                    title = $"Olá {family.Holder.Name.GetFirstName()}!";
-                    messageBody = $"<p>Sua agenda {model.TypeSubject.GetEnumMemberValue()} foi marcada</p>"
-                                + $"<p>Dia {Utilities.TimeStampToDateTime(scheduleEntity.Date):dd/MM/yyyy}, horário {Utilities.TimeStampToDateTime(scheduleEntity.Date):HH:mm)}, endereço {model.Place}</p>"
-                                + $"Aguardamos você!";
 
-                }
-
-                dataBody.Add("{{ title }}", title);
-                dataBody.Add("{{ message }}", messageBody);
-
-
-                var body = _senderMailService.GerateBody("custom", dataBody);
-
-                var unused = Task.Run(async () =>
-                {
-                    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, family.Holder.Email, body, "Cadastro de Agendamento").ConfigureAwait(false);
-                });
-
-                /*ENVIA NOTIFICAÇÃO*/
-
-                var listNotification = new List<Notification>();
-
-                listNotification.Add(new Notification()
-                {
-                    For = ForType.Family,
-                    FamilyId = model.FamilyId,
-                    Title = title,
-                    Description = messageBody
-                });
-
-                await _notificationRepository.CreateAsync(listNotification);
-
-                if (family.DeviceId != null && family.DeviceId.Count() > 0)
-                {
-                    dynamic payloadPush = Util.GetPayloadPush();
-                    dynamic settingPush = Util.GetSettingsPush();
-
-                    await _senderNotificationService.SendPushAsync(title, messageBody, family.DeviceId, data: payloadPush, settings: settingPush, priority: 10);
-                }
+                await _utilService.SendNotify(title, messageBody, familyEntity.Holder.Email, familyEntity.DeviceId, ForType.Family, model.FamilyId);
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
@@ -453,13 +441,13 @@ namespace Moralar.WebApi.Controllers
                 {
 
                     var message = new StringBuilder();
-                    message.AppendLine($"<p>Olá {familyEntity.Holder.Name}</p>");
-                    message.AppendLine($"<p>Agora você já pode escolher seus imóveis de interesse</p>");
+                    message.AppendLine($"<p>Olá {familyEntity.Holder.Name}<br/>");
+                    message.AppendLine($"Agora você já pode escolher seus imóveis de interesse</p>");
 
                     var title = "Escolha de imóveis liberada";
 
                     var content = "Verifique a area e escolha de imóveis";
-                    var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                    var now = new DateTimeOffset(DateTime.Today.AddDays(15)).ToUnixTimeSeconds();
 
                     scheduleEntity = new Schedule()
                     {
@@ -472,14 +460,13 @@ namespace Moralar.WebApi.Controllers
                         TypeScheduleStatus = TypeScheduleStatus.Confirmado,
                         Place = "APP",
                         Date = now
-
                     };
 
                     await _scheduleRepository.CreateAsync(scheduleEntity);
                     await _utilService.SendNotify(title, message.ToString(), familyEntity.Holder.Email, familyEntity.DeviceId, familyId: model.Id, contentPush: content);
                 }
 
-                return Ok(Utilities.ReturnSuccess(DefaultMessages.SelectPropertyAvailable));
+                return Ok(Utilities.ReturnSuccess(DefaultMessages.SelectPropertyAvailable, DefaultMessages.SelectPropertyAvailable));
             }
             catch (Exception ex)
             {
@@ -545,8 +532,8 @@ namespace Moralar.WebApi.Controllers
 
                 var dataBody = Util.GetTemplateVariables();
                 dataBody.Add("{{ title }}", "Cadastro de Agendamento");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {family.Holder.Name.GetFirstName()}</p>" +
-                                            $"<p>Foi cadastrado um agendamento para o horário {dateToSchedule.ToString("dd/MM/yyyy")}</p>"
+                dataBody.Add("{{ message }}", $"<p>Olá {family.Holder.Name.GetFirstName()}<br/>" +
+                                              $"<p>Foi cadastrado um agendamento para o horário {dateToSchedule.ToString("dd/MM/yyyy HH:mm")}</p>"
                                             );
 
                 var body = _senderMailService.GerateBody("custom", dataBody);
@@ -850,7 +837,7 @@ namespace Moralar.WebApi.Controllers
                 if (familyEntity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
 
-                var listSchedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && x.TypeSubject == typeSubject) as List<Schedule>;
+                var listSchedule = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId) as List<Schedule>;
                 if (listSchedule.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
 
@@ -859,8 +846,11 @@ namespace Moralar.WebApi.Controllers
 
                 var vwTimeLine = _mapper.Map<ScheduleDetailTimeLinePGMViewModel>(listSchedule[0]);
 
-                vwTimeLine.Schedules = _mapper.Map<List<ScheduleViewModel>>(listSchedule);
-                vwTimeLine.CanNextStage = listSchedule.Count(x => x.TypeSubject == TypeSubject.EscolhaDoImovel) == 0 && listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM) == listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM && x.TypeScheduleStatus == TypeScheduleStatus.Finalizado);
+                vwTimeLine.Schedules = _mapper.Map<List<ScheduleViewModel>>(listSchedule.Where(x => x.TypeSubject == typeSubject));
+
+                if (typeSubject == TypeSubject.ReuniaoPGM)
+                    vwTimeLine.CanNextStage = listSchedule.Count(x => x.TypeSubject == TypeSubject.EscolhaDoImovel) == 0 && listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM) == listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM && x.TypeScheduleStatus == TypeScheduleStatus.Finalizado);
+
                 for (int i = 0; i < listQuizByFamily.Count(); i++)
                 {
                     var quizItem = listQuizEntity.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId));
@@ -909,10 +899,13 @@ namespace Moralar.WebApi.Controllers
                     case TypeSubject.EscolhaDoImovel:
 
                         var familyPropertyInterestList = await _propertiesInterestRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<PropertiesInterest>;
-                        var residencialPropertyInterest = await _residencialPropertyRepository.FindIn("_id", familyPropertyInterestList.Select(x => ObjectId.Parse(x.ResidencialPropertyId)).ToList()) as List<ResidencialProperty>;
 
-                        vwTimeLine.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialPropertyInterest);
+                        if (familyPropertyInterestList.Count() > 0)
+                        {
+                            var residencialPropertyInterest = await _residencialPropertyRepository.FindIn("_id", familyPropertyInterestList.Select(x => ObjectId.Parse(x.ResidencialPropertyId)).ToList()) as List<ResidencialProperty>;
 
+                            vwTimeLine.InterestResidencialProperty = _mapper.Map<List<ResidencialPropertyViewModel>>(residencialPropertyInterest);
+                        }
                         break;
                 }
 
@@ -966,6 +959,7 @@ namespace Moralar.WebApi.Controllers
 
                 var scheduleEntity = await _scheduleRepository.FindByIdAsync(model.Id).ConfigureAwait(false); ;
 
+                var oldDate = Utilities.TimeStampToDateTime(scheduleEntity.Date).ToString("dd/MM/yyyy HH:mm");
 
                 scheduleEntity.TypeScheduleStatus = model.TypeScheduleStatus;
                 scheduleEntity.Description = model.Description;
@@ -995,31 +989,38 @@ namespace Moralar.WebApi.Controllers
                 await _scheduleHistoryRepository.CreateAsync(scheduleHistoryEntity).ConfigureAwait(false);
 
 
-                if (model.TypeScheduleStatus == TypeScheduleStatus.AguardandoReagendamento)
+                bool sendNotify = false;
+                string title = null;
+                string content = null;
+                ForType forType = ForType.Family;
+
+                var message = new StringBuilder();
+
+                switch (model.TypeScheduleStatus)
                 {
+                    case TypeScheduleStatus.AguardandoReagendamento:
+                        sendNotify = true;
+                        forType = ForType.TTS;
+                        title = "Solicitação de reagendamento";
 
-                    var title = "Solicitação de reagendamento";
-                    var content = $"A famíla de número {family.Holder.Number} solicitou um reagendamento";
+                        message.AppendLine("<p>Olá,<br/>");
+                        message.AppendLine($"A famíla de número {family.Holder.Number} solicitou um reagendamento</p>");
 
-                    var listNotification = new List<Notification>();
+                        break;
+                    case TypeScheduleStatus.Reagendado:
+                        sendNotify = true;
+                        title = "Aviso de reagendamento";
 
-                    listNotification.Add(new Notification()
-                    {
-                        For = ForType.TTS,
-                        FamilyId = null,
-                        Title = title,
-                        Description = content
+                        message.AppendLine($"<p>Olá {family.Holder.Name},<br/>");
+                        message.AppendLine($"Seu agendamento do dia {oldDate} foi reagendado para a data: {Utilities.TimeStampToDateTime(model.Date):dd/MM/yyyy HH:mm}  e precisa da sua confirmação.</p>");
 
-                    });
-
-                    await _notificationRepository.CreateAsync(listNotification);
-
-                    dynamic payloadPush = Util.GetPayloadPush();
-                    dynamic settingPush = Util.GetSettingsPush();
-
-                    await _senderNotificationService.SendPushAsync(title, content, null, data: payloadPush, settings: settingPush, priority: 10);
+                        break;
                 }
 
+                content = message.ToString();
+
+                if (sendNotify)
+                    await _utilService.SendNotify(title, content, family.Holder.Email, family.DeviceId, forType, family._id.ToString());
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
             }
@@ -1213,8 +1214,6 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-
-
         public async Task<IActionResult> ExportMap([FromForm] DtParameters model, [FromForm] string number)
         {
 
@@ -1277,11 +1276,10 @@ namespace Moralar.WebApi.Controllers
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.PropertySaledNotFound));
 
                     var destination = Utilities.GetInfoFromAdressLocation(infoDestination.StreetAddress + " " + infoDestination.Complement + " " + infoDestination.Neighborhood + " " + infoDestination.CityName + " " + infoDestination.StateUf);
-                    var distanceM = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'M');
-                    var distanceK = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng, 'K');
+                    var distance = Utilities.GetDistance(residencialOrigin.Geometry.Location.Lat, residencialOrigin.Geometry.Location.Lng, destination.Geometry.Location.Lat, destination.Geometry.Location.Lng);
 
-                    response[i].AddressPropertyDistanceMeters = distanceM.ToString("0.###");
-                    response[i].AddressPropertyDistanceKilometers = distanceK.ToString("0.##");
+                    response[i].AddressPropertyDistanceMeters = (distance / 1000).ToString("0.###");
+                    response[i].AddressPropertyDistanceKilometers = distance.ToString("0.##");
                     response[i].AddressPropertyOrigin = residencialOrigin.FormatedAddress;
                     response[i].AddressPropertyDestination = destination.FormatedAddress;
 

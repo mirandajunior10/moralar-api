@@ -1,3 +1,4 @@
+using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
 
 using UtilityFramework.Application.Core.ViewModels;
@@ -17,5 +18,7 @@ namespace Moralar.Domain.ViewModels.Schedule
         public TypeSubject TypeSubject { get; set; }
 
         public TypeScheduleStatus TypeScheduleStatus { get; set; }
+
+        public QuizAux Quiz { get; set; }
     }
 }

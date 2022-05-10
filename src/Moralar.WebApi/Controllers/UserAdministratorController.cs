@@ -325,7 +325,7 @@ namespace Moralar.WebApi.Controllers
                 var newPassword = Utilities.RandomString(8);
 
                 dataBody.Add("{{ title }}", "Lembrete de senha");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {entity.Name.GetFirstName()}</p>" +
+                dataBody.Add("{{ message }}", $"<p>Olá {entity.Name.GetFirstName()}</p>" +
                                             $"<p>Segue sua senha de acesso ao {Startup.ApplicationName} - Dashboard</p>" +
                                             $"<p><b>Login</b> : {entity.Login}</p>" +
                                             $"<p><b>Senha</b> :{newPassword}</p>");

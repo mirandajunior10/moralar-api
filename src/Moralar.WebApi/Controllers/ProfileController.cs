@@ -216,7 +216,7 @@ namespace Moralar.WebApi.Controllers
                 {
                     const string title = "Lembrete de senha";
                     var message = new StringBuilder();
-                    message.AppendLine($"<p>Caro(a) {listEntity[i].Name.GetFirstName()}</p>");
+                    message.AppendLine($"<p>Olá {listEntity[i].Name.GetFirstName()}</p>");
                     message.AppendLine($"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>");
                     message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Cpf}<br/>");
                     message.AppendLine($"<strong>Senha</strong> :{listEntity[i].Password}</p>");
@@ -316,7 +316,7 @@ namespace Moralar.WebApi.Controllers
                 {
                     const string title = "Lembrete de senha";
                     var message = new StringBuilder();
-                    message.AppendLine($"<p>Caro(a) {listEntity[i].Name.GetFirstName()}</p>");
+                    message.AppendLine($"<p>Olá {listEntity[i].Name.GetFirstName()}</p>");
                     message.AppendLine($"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>");
                     message.AppendLine($"<p><strong>Cpf</strong> : {listEntity[i].Cpf}<br/>");
                     message.AppendLine($"<strong>Senha</strong> :{listEntity[i].Password}</p>");
@@ -605,7 +605,7 @@ namespace Moralar.WebApi.Controllers
 
                 var dataBody = Util.GetTemplateVariables();
                 dataBody.Add("{{ title }}", "Lembrete de senha");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Name.GetFirstName()}</p>" +
+                dataBody.Add("{{ message }}", $"<p>Olá {model.Name.GetFirstName()}</p>" +
                                             $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
                                             //$"<p><b>Login</b> : {profile.Login}</p>" +
                                             $"<p><b>Senha</b> :{entity.Password}</p>"
@@ -1063,7 +1063,7 @@ namespace Moralar.WebApi.Controllers
                 var newPassword = Utilities.RandomInt(8);
 
                 dataBody.Add("{{ title }}", "Lembrete de senha");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {profile.Name.GetFirstName()}</p>" +
+                dataBody.Add("{{ message }}", $"<p>Olá {profile.Name.GetFirstName()}</p>" +
                                             $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
                                             $"<p><b>CPF</b> : {profile.Cpf}</p>" +
                                             $"<p><b>Senha</b> :{newPassword}</p>");

@@ -408,7 +408,7 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] bool forGestor, [FromForm] bool forTTS)
+        public async Task<IActionResult> LoadData([FromForm] DtParameters model, [FromForm] long? startDate, [FromForm] long? endDate, [FromForm] bool forGestor, [FromForm] bool forTTS,[FromForm] bool onlyNoRead, [FromForm] bool setRead)
         {
             var response = new DtResult<NotificationViewModel>();
             try
@@ -417,6 +417,9 @@ namespace Moralar.WebApi.Controllers
                 var conditions = new List<FilterDefinition<Notification>>();
 
                 conditions.Add(builder.Where(x => x.Disabled == null));
+
+                if (onlyNoRead)
+                    conditions.Add(builder.Where(x => x.DateViewed == null));
 
                 if (forGestor)
                     conditions.Add(builder.Where(x => x.FamilyId == null && (x.For == null || x.For == ForType.Gestor)));
@@ -446,10 +449,16 @@ namespace Moralar.WebApi.Controllers
                    ? (int)await _notificationRepository.CountSearchDataTableAsync(model.Search.Value, conditions, columns)
                    : totalRecords;
 
-                response.Data = _mapper.Map<List<NotificationViewModel>>(retorno.OrderBy(x => x.Created));
+                response.Data = _mapper.Map<List<NotificationViewModel>>(retorno);
                 response.Draw = model.Draw;
                 response.RecordsFiltered = totalrecordsFiltered;
                 response.RecordsTotal = totalRecords;
+
+                if (setRead && retorno.Count() > 0)
+                {
+                    var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+                    _notificationRepository.UpdateMultiple(Query<Notification>.In(x => x._id, retorno.Select(x => x._id).ToList()), new UpdateBuilder<Notification>().Set(x => x.DateViewed, now), UpdateFlags.Multi);
+                }
 
                 return Ok(response);
 

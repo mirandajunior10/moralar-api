@@ -131,7 +131,7 @@ namespace Moralar.WebApi.Controllers
 
         //                    var status = model.Data.Status.ToLower();
 
-        //                    body.AppendLine($"<p>Caro(a) {profile.Name.GetFirstName()}</p>");
+        //                    body.AppendLine($"<p>Olá {profile.Name.GetFirstName()}</p>");
 
         //                    var dataBody = Util.GetTemplateVariables();
 

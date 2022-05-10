@@ -107,6 +107,8 @@ namespace Moralar.Domain
         public const string StageInOpen = "Você precisa finalizar todas reuniões PGM em aberto";
         public const string AlreadySelectedForFamily = "Esse imóvel já foi contemplado para outra família.";
         public const string NoPropertiesInterest = "Nenhum interesse registrado para esse imóvel.";
-        public const string SelectPropertyAvailable = "Escolha de imóvel liberada com sucesso";
+        public const string SelectPropertyAvailable = "Escolha de imóvel liberada";
+        public const string EmailNotFound = "Familia sem e-mail cadastrado";
+        public const string FamilyHasPropertySelected = "Essa familia já foi contemplada com outro imóvel";
     }
 }

@@ -236,7 +236,9 @@ namespace Moralar.Domain.AutoMapper
             #endregion
             #region ScheduleHistory
             CreateMap<ScheduleHistory, ScheduleHistoryViewModel>()
-        .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
+            CreateMap<Schedule, ScheduleHistoryViewModel>()
+                .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()));
 
             #endregion
             #region Informative

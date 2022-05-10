@@ -1056,7 +1056,7 @@
         </member>
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToRead(System.String)" -->
         <!-- Badly formed XML comment ignored for member "M:Moralar.WebApi.Controllers.NotificationController.ChangeToReadInfo(System.String)" -->
-        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.Nullable{System.Int64},System.Nullable{System.Int64},System.Boolean,System.Boolean)">
+        <member name="M:Moralar.WebApi.Controllers.NotificationController.LoadData(UtilityFramework.Application.Core.ViewModels.DtParameters,System.Nullable{System.Int64},System.Nullable{System.Int64},System.Boolean,System.Boolean,System.Boolean,System.Boolean)">
             <summary>
             METODO DE LISTAGEM COM DATATABLE
             </summary>
@@ -1432,7 +1432,7 @@
             DETALHES DAS FAMÍLIAS INTERESSADAS NO IMÓVEL
             </summary>
             <response code="200">Returns success</response>
-            <response code="400">Custom Error</response>
+            <response code="400">Custom Error</response>'
             <response code="401">Unauthorize Error</response>
             <response code="500">Exception Error</response>
             <returns></returns>

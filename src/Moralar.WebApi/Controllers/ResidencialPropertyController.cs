@@ -3,15 +3,21 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
-using AutoMapper;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
+using AutoMapper;
+
 using MimeTypes.Core;
+
 using MongoDB.Bson;
 using MongoDB.Driver;
+using MongoDB.Driver.Builders;
+
 using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
@@ -21,7 +27,7 @@ using Moralar.Domain.ViewModels;
 using Moralar.Domain.ViewModels.Property;
 using Moralar.Domain.ViewModels.ResidencialProperty;
 using Moralar.Repository.Interface;
-using Moralar.WebApi.Services;
+
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -353,48 +359,97 @@ namespace Moralar.WebApi.Controllers
                 var builder = Builders<Data.Entities.ResidencialProperty>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.ResidencialProperty>>();
 
+
+                var conditionOlds = new List<IMongoQuery>();
+
                 conditions.Add(builder.Where(x => x.Created != null && x.DataBlocked == null && x.TypeStatusResidencialProperty != TypeStatusResidencial.Vendido));
 
                 conditions.Add(builder.Gte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.PropertyValueForDemolished));
                 conditions.Add(builder.Lte(x => x.ResidencialPropertyFeatures.PropertyValue, valueMaximumPurchase));
+
+                conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.Created != null && x.DataBlocked == null && x.TypeStatusResidencialProperty != TypeStatusResidencial.Vendido));
+
+                conditionOlds.Add(Query<ResidencialProperty>.GTE(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.PropertyValueForDemolished));
+                conditionOlds.Add(Query<ResidencialProperty>.LTE(x => x.ResidencialPropertyFeatures.PropertyValue, valueMaximumPurchase));
                 //conditions.Add(builder.Lte(x => x.ResidencialPropertyFeatures.PropertyValue, (double)familyEntity.Financial.MaximumPurchase));
 
                 if (model.TypeProperty != null)
+                {
+
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
+                }
 
                 if (model.StartSquareFootage > 0 && model.EndSquareFootage > 0)
+                {
+
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.SquareFootage >= model.StartSquareFootage && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.SquareFootage >= model.StartSquareFootage && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
+                }
 
                 if (model.StartCondominiumValue > 0 && model.EndCondominiumValue > 0)
+                {
+
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.CondominiumValue >= model.StartCondominiumValue && x.ResidencialPropertyFeatures.CondominiumValue <= model.EndCondominiumValue));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.CondominiumValue >= model.StartCondominiumValue && x.ResidencialPropertyFeatures.CondominiumValue <= model.EndCondominiumValue));
+                }
 
                 if (model.StartIptuValue > 0 && model.EndIptuValue > 0)
+                {
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.IptuValue >= model.StartIptuValue && x.ResidencialPropertyFeatures.IptuValue <= model.EndIptuValue));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.IptuValue >= model.StartIptuValue && x.ResidencialPropertyFeatures.IptuValue <= model.EndIptuValue));// && x.ResidencialPropertyFeatures.SquareFootage <= model.EndSquareFootage
+
+                }
 
                 if (model.StartNumberOfBedrooms > 0 && model.EndNumberOfBedrooms > 0)
+                {
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.NumberOfBedrooms >= model.StartNumberOfBedrooms && x.ResidencialPropertyFeatures.NumberOfBedrooms <= model.EndNumberOfBedrooms));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.NumberOfBedrooms >= model.StartNumberOfBedrooms && x.ResidencialPropertyFeatures.NumberOfBedrooms <= model.EndNumberOfBedrooms));
+
+                }
 
                 if (string.IsNullOrEmpty(model.Neighborhood) == false)
+                {
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.Neighborhood.ToUpper().Contains(model.Neighborhood.ToUpper())));
+
+                }
 
                 if (model.HasGarage != null)
+                {
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasGarage == model.HasGarage.GetValueOrDefault()));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.HasGarage == model.HasGarage.GetValueOrDefault()));
+
+                }
 
                 if (model.HasAccessLadder != null)
+                {
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessLadder == model.HasAccessLadder.GetValueOrDefault()));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.HasAccessLadder == model.HasAccessLadder.GetValueOrDefault()));
+                }
 
                 if (model.HasAccessRamp != null)
+                {
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAccessRamp == model.HasAccessRamp.GetValueOrDefault()));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.HasAccessRamp == model.HasAccessRamp.GetValueOrDefault()));
+                }
 
                 if (model.HasAdaptedToPcd != null)
+                {
                     conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd.GetValueOrDefault()));
+                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.HasAdaptedToPcd == model.HasAdaptedToPcd.GetValueOrDefault()));
 
-                if (model.Lat != null && model.Lng != null)
-                    conditions.Add(builder.Near(x => x.Position, model.Lat.GetValueOrDefault(), model.Lng.GetValueOrDefault()));
+                }
+
+                // if (model.Lat != null && model.Lng != null)
+                //     conditions.Add(builder.Near(x => x.Position, model.Lat.GetValueOrDefault(), model.Lng.GetValueOrDefault()));
 
                 var condition = builder.And(conditions);
 
-                var listEntity = await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
+                var listEntity = model.Lat != null && model.Lng != null
+                               ? await _residencialPropertyRepository.FindByNearWithDistanceAsync(model.Lat.GetValueOrDefault(), model.Lng.GetValueOrDefault(), 100000, propertyIndex: nameof(ResidencialProperty.Position), distanceProperty: "Distance", queries: conditionOlds)
+                               : await _residencialPropertyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.ResidencialProperty>() { }).ToListAsync();
+
                 if (listEntity.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.AnyResidencialProperty));
 
@@ -563,6 +618,7 @@ namespace Moralar.WebApi.Controllers
                 if (Util.CheckHasField(validOnly, nameof(model.ResidencialPropertyAdress)))
                 {
                     residencialPropertyEntity.ResidencialPropertyAdress = _mapper.Map<ResidencialPropertyAdress>(model.ResidencialPropertyAdress);
+                    residencialPropertyEntity.Position = new List<double> { residencialPropertyEntity.ResidencialPropertyAdress.Latitude, residencialPropertyEntity.ResidencialPropertyAdress.Longitude };
                 }
                 if (Util.CheckHasField(validOnly, nameof(model.ResidencialPropertyAdress)))
                 {
@@ -622,9 +678,12 @@ namespace Moralar.WebApi.Controllers
                 if (string.IsNullOrEmpty(residencialPropertyEntity.FamiliIdResidencialChosen) == false)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.AlreadySelectedForFamily));
 
+                if (await _residencialPropertyRepository.CheckByAsync(x => x._id != ObjectId.Parse(model.ResidencialPropertyId) && x.FamiliIdResidencialChosen == model.FamiliIdResidencialChosen))
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyHasPropertySelected));
+
                 residencialPropertyEntity.FamiliIdResidencialChosen = model.FamiliIdResidencialChosen;
                 residencialPropertyEntity.TypeStatusResidencialProperty = TypeStatusResidencial.Vendido;
-                
+
                 await _residencialPropertyRepository.UpdateAsync(residencialPropertyEntity).ConfigureAwait(false);
 
                 // var scheduleEntity = await _scheduleRepository.FindOneByAsync(x => x.FamilyId == model.FamiliIdResidencialChosen).ConfigureAwait(false); ;
@@ -660,7 +719,7 @@ namespace Moralar.WebApi.Controllers
                     dynamic settingsPush = Util.GetSettingsPush();
 
                     string title = "Imóvel vendido";
-                    var message = $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" 
+                    var message = $"<p>Olá {item.HolderName.GetFirstName()}</p>"
                                 + $"<p> O imóvel {residencialPropertyEntity.ResidencialPropertyAdress.StreetAddress} foi vendido para outra pessoa. Atualize sua lista de interesses";
 
                     dataBody.Add("{{ title }}", title);
@@ -677,7 +736,7 @@ namespace Moralar.WebApi.Controllers
                 var dataBodyFamily = Util.GetTemplateVariables();
 
                 dataBodyFamily.Add("{{ title }}", "Escolha do imóvel");
-                dataBodyFamily.Add("{{ message }}", $"<p>Caro(a) {familyEntity.Holder.Name.GetFirstName()}</p>" +
+                dataBodyFamily.Add("{{ message }}", $"<p>Olá {familyEntity.Holder.Name.GetFirstName()}</p>" +
                                                     $"<p> Você foi escolhido para a compra do imóvel {residencialPropertyEntity.ResidencialPropertyAdress.StreetAddress}.");
 
                 var bodyFamily = _senderMailService.GerateBody("custom", dataBodyFamily);

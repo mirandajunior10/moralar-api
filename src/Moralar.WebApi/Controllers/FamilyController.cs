@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Security.Claims;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using AutoMapper;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -942,50 +943,84 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(500)]
         public async Task<IActionResult> ForgotPassword([FromBody] FamilyForgotPasswordViewModel model)
         {
+            var response = new { NoEmail = false };
+
             try
             {
                 model?.TrimStringProperties();
                 var isInvalidState = ModelState.ValidModelStateOnlyFields(nameof(model.Cpf), nameof(model.MotherCityBorned), nameof(model.MotherName));
                 if (isInvalidState != null)
+                {
+                    isInvalidState.Data = response;
                     return BadRequest(isInvalidState);
+                }
+
 
                 var builder = Builders<Data.Entities.Family>.Filter;
                 var conditions = new List<FilterDefinition<Data.Entities.Family>>();
 
-                conditions.Add(builder.Where(x => x.Created != null));
-                if (!string.IsNullOrEmpty(model.Cpf))
-                    conditions.Add(builder.Where(x => x.Holder.Cpf.Contains(model.Cpf.OnlyNumbers())));
-                if (!string.IsNullOrEmpty(model.MotherCityBorned))
-                    conditions.Add(builder.Where(x => x.MotherCityBorned.ToUpper().Contains(model.MotherCityBorned.RemoveAccents().ToUpper())));
-                if (!string.IsNullOrEmpty(model.MotherName))
-                    conditions.Add(builder.Where(x => x.MotherName.ToUpper().Contains(model.MotherName.RemoveAccents().ToUpper())));
+                bool changePassword = false;
 
-                var condition = builder.And(conditions);
+                if (string.IsNullOrEmpty(model.Cpf) == false && string.IsNullOrEmpty(model.MotherName))
+                {
+                    conditions.Add(builder.Where(x => x.Holder.Cpf == model.Cpf));
 
-                var profile = await _familyRepository.GetCollectionAsync().FindSync(condition, new FindOptions<Data.Entities.Family>() { }).ToListAsync();
-                if (profile.Count() == 0 || profile.Count() > 1)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound));
+                }
+                else
+                {
+                    changePassword = true;
+
+                    conditions.Add(builder.Where(x => x.Holder.Cpf == model.Cpf));
+                    conditions.Add(builder.Regex(x => x.MotherName, new BsonRegularExpression(new Regex(model.MotherName, RegexOptions.IgnoreCase))));
+                    conditions.Add(builder.Regex(x => x.MotherCityBorned, new BsonRegularExpression(new Regex(model.MotherCityBorned, RegexOptions.IgnoreCase))));
+
+                }
+
+                var familyEntity = await _familyRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Data.Entities.Family>() { Collation = new Collation("en", strength: CollationStrength.Primary) }).FirstOrDefaultAsync();
+                if (familyEntity == null)
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.FamilyNotFound, response));
 
 
+                if (string.IsNullOrEmpty(familyEntity?.Holder?.Email) && changePassword == false)
+                {
+                    response = new { NoEmail = true };
+                    return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailNotFound, response));
+                }
+
+
+                if (changePassword)
+                {
+                    if (string.IsNullOrEmpty(model.Password))
+                    {
+                        response = new { NoEmail = true };
+                        return BadRequest(Utilities.ReturnErro(string.Format(DefaultMessages.FieldRequired, "Senha"), response));
+                    }
+
+                    familyEntity.Password = model.Password;
+
+                    await _familyRepository.UpdateAsync(familyEntity);
+
+                    return Ok(Utilities.ReturnSuccess("Senha alterada com sucesso"));
+                }
 
                 var dataBody = Util.GetTemplateVariables();
 
                 var newPassword = Utilities.RandomInt(8);
 
                 dataBody.Add("{{ title }}", "Lembrete de senha");
-                dataBody.Add("{{ message }}", $"<p>Caro(a) {profile.FirstOrDefault().Holder.Name.GetFirstName()}</p>" +
-                                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
-                                            $"<p><b>CPF</b> : {profile.FirstOrDefault().Holder.Cpf}</p>" +
-                                            $"<p><b>Senha</b> :{newPassword}</p>");
+                dataBody.Add("{{ message }}", $"<p>Olá {familyEntity.Holder.Name.GetFirstName()}</p>" +
+                                              $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
+                                              $"<p><b>CPF</b> : {familyEntity.Holder.Cpf}</p>" +
+                                              $"<p><b>Senha</b> :{newPassword}</p>");
 
                 var body = _senderMailService.GerateBody("custom", dataBody);
 
                 var unused = Task.Run(async () =>
                 {
-                    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, profile.FirstOrDefault().Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
+                    await _senderMailService.SendMessageEmailAsync(Startup.ApplicationName, familyEntity.Holder.Email, body, "Lembrete de senha").ConfigureAwait(false);
 
-                    profile.FirstOrDefault().Password = newPassword;
-                    await _familyRepository.UpdateAsync(profile.FirstOrDefault());
+                    familyEntity.Password = newPassword;
+                    await _familyRepository.UpdateAsync(familyEntity);
 
                 });
                 await _utilService.RegisterLogAction(LocalAction.Familia, TypeAction.Change, TypeResposible.UserAdminstratorGestor, $"Atualizou a senha {model.Cpf}", "", "", "");
@@ -1228,7 +1263,7 @@ namespace Moralar.WebApi.Controllers
 
                 //var dataBody = Util.GetTemplateVariables();
                 //dataBody.Add("{{ title }}", "Lembrete de senha");
-                //dataBody.Add("{{ message }}", $"<p>Caro(a) {model.Holder.Name.GetFirstName()}</p>" +
+                //dataBody.Add("{{ message }}", $"<p>Olá {model.Holder.Name.GetFirstName()}</p>" +
                 //                            $"<p>Segue sua senha de acesso ao {Startup.ApplicationName}</p>" +
                 //                            //$"<p><b>Login</b> : {profile.Login}</p>" +
                 //                            $"<p><b>Senha</b> :{newPassword}</p>"

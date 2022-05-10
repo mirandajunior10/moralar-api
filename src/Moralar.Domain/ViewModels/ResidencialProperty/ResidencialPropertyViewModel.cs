@@ -39,5 +39,7 @@ namespace Moralar.Domain.ViewModels.Property
         /// </summary>
         [Display(Name = "Famílias interessadas")]
         public long InterestedFamilies { get; set; }
+        public double? Distance { get; set; }
+
     }
 }

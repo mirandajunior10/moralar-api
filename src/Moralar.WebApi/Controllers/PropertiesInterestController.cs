@@ -103,7 +103,7 @@ namespace Moralar.WebApi.Controllers
         /// DETALHES DAS FAMÍLIAS INTERESSADAS NO IMÓVEL
         /// </summary>
         /// <response code="200">Returns success</response>
-        /// <response code="400">Custom Error</response>
+        /// <response code="400">Custom Error</response>'
         /// <response code="401">Unauthorize Error</response>
         /// <response code="500">Exception Error</response>
         /// <returns></returns>
@@ -232,7 +232,7 @@ namespace Moralar.WebApi.Controllers
 
                     var dataBody = Util.GetTemplateVariables();
                     dataBody.Add("{{ title }}", title);
-                    dataBody.Add("{{ message }}", $"<p>Caro(a) {item.HolderName.GetFirstName()}</p>" +
+                    dataBody.Add("{{ message }}", $"<p>Olá {item.HolderName.GetFirstName()}</p>" +
                                                   $"<p>Uma família manifestou interesse pelo imóvel {entityResidencial.ResidencialPropertyAdress.StreetAddress} "
                                                 );
 
@@ -278,7 +278,7 @@ namespace Moralar.WebApi.Controllers
                         {
                             var dataBody = Util.GetTemplateVariables();
                             dataBody.Add("{{ title }}", "Processo de escolha de imóvel finalizado");
-                            dataBody.Add("{{ message }}", $"<p>Caro(a) {item.Name.GetFirstName()}</p>" +
+                            dataBody.Add("{{ message }}", $"<p>Olá {item.Name.GetFirstName()}</p>" +
                                                           $"<p> A família {familyEntity.Holder.Name} completou o processo de escolha de imóvel.");
 
                             var body = _senderMailService.GerateBody("custom", dataBody);

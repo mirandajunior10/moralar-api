@@ -21,6 +21,8 @@ namespace Moralar.Data.Entities
         public TypeStatusResidencial TypeStatusResidencialProperty { get; set; }
         public string FamiliIdResidencialChosen { get; set; }
         public List<double> Position { get; set; } = new List<double>();
+        [BsonIgnoreIfNull]
+        public double? Distance { get; set; }
         public override string CollectionName => nameof(ResidencialProperty);
     }
 }

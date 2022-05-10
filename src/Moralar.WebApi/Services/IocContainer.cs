@@ -1,6 +1,8 @@
 ﻿using Microsoft.Extensions.DependencyInjection;
 using Moralar.Domain.Services;
 using Moralar.Domain.Services.Interface;
+using Moralar.WebApi.HangFire;
+using Moralar.WebApi.HangFire.Interface;
 using System.Linq;
 using System.Reflection;
 using UtilityFramework.Services.Core;
@@ -61,6 +63,7 @@ namespace Moralar.WebApi.Services
 
             /*UTILIDADES */
             services.AddSingleton(typeof(IUtilService), typeof(UtilService));
+            services.AddSingleton(typeof(IHangFireService), typeof(HangFireService));
 
             return services;
         }
