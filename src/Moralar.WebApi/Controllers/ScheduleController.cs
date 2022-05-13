@@ -131,12 +131,61 @@ namespace Moralar.WebApi.Controllers
             try
             {
                 var now = DateTimeOffset.Now.ToUnixTimeSeconds();
-                var entity = await _scheduleRepository.FindByAsync(x => x.FamilyId == familyId && (x.TypeScheduleStatus == TypeScheduleStatus.AguardandoConfirmacao || x.TypeScheduleStatus == TypeScheduleStatus.Confirmado || x.TypeScheduleStatus == TypeScheduleStatus.AguardandoReagendamento || x.TypeScheduleStatus == TypeScheduleStatus.Finalizado)).ConfigureAwait(false);
 
-                if (entity == null)
-                    return BadRequest(Utilities.ReturnErro(DefaultMessages.ScheduleNotFound));
+                var builder = Builders<Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Schedule>>();
 
-                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleListViewModel>>(entity.OrderBy(x => x.Date).ToList())));
+                conditions.Add(builder.Eq(x => x.FamilyId, familyId));
+
+                var listSchedule = await _scheduleRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Schedule>()
+                {
+                    Sort = Builders<Schedule>.Sort.Descending(x => x.Date),
+                    Collation = new Collation("en", strength: CollationStrength.Primary)
+
+                }).ToListAsync();
+
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleListViewModel>>(listSchedule.OrderBy(x => x.Date).ToList())));
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.ReturnErro());
+            }
+        }
+        /// <summary>
+        /// RETORNA OS PRÓXIMOS AGENDAMENTOS POR FAMÍLIA
+        /// </summary>
+        /// <response code="200">Returns success</response>
+        /// <response code="400">Custom Error</response>
+        /// <response code="401">Unauthorize Error</response>
+        /// <response code="500">Exception Error</response>
+        /// <returns></returns>
+        [HttpGet("GetScheduleTimeLineByFamily/{familyId}")]
+        [Produces("application/json")]
+        [ProducesResponseType(typeof(ReturnViewModel), 200)]
+        [ProducesResponseType(400)]
+        [ProducesResponseType(401)]
+        [ProducesResponseType(500)]
+        public async Task<IActionResult> GetScheduleTimeLineByFamily([FromRoute] string familyId)
+        {
+            try
+            {
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();
+
+                var builder = Builders<Schedule>.Filter;
+                var conditions = new List<FilterDefinition<Schedule>>();
+
+                var timeLineTypeSubject = Util.GetTypeSubjectTimeline();
+
+                conditions.Add(builder.Eq(x => x.FamilyId, familyId));
+                conditions.Add(builder.In(x => x.TypeSubject, timeLineTypeSubject));
+
+                var listSchedule = await _scheduleRepository.GetCollectionAsync().FindSync(builder.And(conditions), new FindOptions<Schedule>()
+                {
+                    Sort = Builders<Schedule>.Sort.Descending(x => x.Date),
+                    Collation = new Collation("en", strength: CollationStrength.Primary)
+
+                }).ToListAsync();
+                return Ok(Utilities.ReturnSuccess(data: _mapper.Map<List<ScheduleListViewModel>>(listSchedule.OrderBy(x => x.Date).ToList())));
             }
             catch (Exception ex)
             {
@@ -473,6 +522,7 @@ namespace Moralar.WebApi.Controllers
                 return BadRequest(ex.ReturnErro());
             }
         }
+
 
         /// <summary>
         /// REGISTRAR UM NOVO QUESTIONÁRIO
@@ -851,28 +901,30 @@ namespace Moralar.WebApi.Controllers
                 if (typeSubject == TypeSubject.ReuniaoPGM)
                     vwTimeLine.CanNextStage = listSchedule.Count(x => x.TypeSubject == TypeSubject.EscolhaDoImovel) == 0 && listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM) == listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM && x.TypeScheduleStatus == TypeScheduleStatus.Finalizado);
 
-                for (int i = 0; i < listQuizByFamily.Count(); i++)
-                {
-                    var quizItem = listQuizEntity.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId));
+                if (typeSubject == TypeSubject.ReuniaoPGM)
 
-                    var item = new ScheduleQuizDetailTimeLinePGMViewModel()
+                    for (int i = 0; i < listQuizByFamily.Count(); i++)
                     {
-                        Title = quizItem.Title,
-                        Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
-                        HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
-                        TypeStatus = listQuizByFamily[i].TypeStatus,
-                        FamilyId = familyId,
-                        QuizId = listQuizByFamily[i].QuizId,
-                        QuizFamilyId = listQuizByFamily[i]._id.ToString(),
-                        TypeQuiz = listQuizByFamily[i].TypeQuiz,
-                        Id = listQuizByFamily[i].QuizId,
-                    };
+                        var quizItem = listQuizEntity.Find(x => x._id == ObjectId.Parse(listQuizByFamily[i].QuizId));
 
-                    if (quizItem.TypeQuiz == TypeQuiz.Quiz)
-                        vwTimeLine.DetailQuiz.Add(item);
-                    else
-                        vwTimeLine.DetailEnquete.Add(item);
-                }
+                        var item = new ScheduleQuizDetailTimeLinePGMViewModel()
+                        {
+                            Title = quizItem.Title,
+                            Date = listQuizByFamily[i].Created.Value.TimeStampToDateTime().ToString("dd/MM/yyyy"),
+                            HasAnswered = listQuizByFamily[i].TypeStatus == TypeStatus.NaoRespondido ? "Não respondido" : "Respondido",
+                            TypeStatus = listQuizByFamily[i].TypeStatus,
+                            FamilyId = familyId,
+                            QuizId = listQuizByFamily[i].QuizId,
+                            QuizFamilyId = listQuizByFamily[i]._id.ToString(),
+                            TypeQuiz = listQuizByFamily[i].TypeQuiz,
+                            Id = listQuizByFamily[i].QuizId,
+                        };
+
+                        if (quizItem.TypeQuiz == TypeQuiz.Quiz)
+                            vwTimeLine.DetailQuiz.Add(item);
+                        else
+                            vwTimeLine.DetailEnquete.Add(item);
+                    }
 
                 var courseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<CourseFamily>; ;
                 var course = await _courseRepository.FindIn("_id", courseFamily.Select(x => ObjectId.Parse(x.CourseId.ToString())).ToList()) as List<Course>;
@@ -886,6 +938,7 @@ namespace Moralar.WebApi.Controllers
                     vwTimeLine.Courses.Add(new ScheduleCourseViewModel()
                     {
                         Id = courseItem._id.ToString(),
+                        CourseFamilyId = courseFamily[i]._id.ToString(),
                         Created = courseFamily[i].Created,
                         Title = courseItem.Title,
                         StartDate = courseItem.StartDate,

@@ -196,6 +196,10 @@ namespace Moralar.Domain
 
             return response;
         }
+
+        public static List<TypeSubject> GetTypeSubjectTimeline()
+            => new List<TypeSubject>() { TypeSubject.ReuniaoPGM, TypeSubject.EscolhaDoImovel, TypeSubject.Mudanca, TypeSubject.AcompanhamentoPosMudança };
+
         public static FamilySpouse SetSpouse(this FamilyImportViewModel model)
         {
             var response = new FamilySpouse();

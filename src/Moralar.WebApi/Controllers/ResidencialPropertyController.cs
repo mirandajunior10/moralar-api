@@ -375,9 +375,8 @@ namespace Moralar.WebApi.Controllers
 
                 if (model.TypeProperty != null)
                 {
-
-                    conditions.Add(builder.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
-                    conditionOlds.Add(Query<ResidencialProperty>.Where(x => x.ResidencialPropertyFeatures.TypeProperty == model.TypeProperty));
+                    conditions.Add(builder.Eq(x => x.ResidencialPropertyFeatures.TypeProperty, model.TypeProperty));
+                    conditionOlds.Add(Query<ResidencialProperty>.EQ(x => x.ResidencialPropertyFeatures.TypeProperty, model.TypeProperty));
                 }
 
                 if (model.StartSquareFootage > 0 && model.EndSquareFootage > 0)

@@ -5,17 +5,22 @@ using System.Linq;
 using System.Security.Claims;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using AutoMapper;
+
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Cors;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+
+using AutoMapper;
+
 using MimeTypes.Core;
+
 using MongoDB.Bson;
 using MongoDB.Driver;
 using MongoDB.Driver.Builders;
+
 using Moralar.Data.Entities;
 using Moralar.Data.Entities.Auxiliar;
 using Moralar.Data.Enum;
@@ -26,7 +31,7 @@ using Moralar.Domain.ViewModels.Family;
 using Moralar.Domain.ViewModels.Schedule;
 using Moralar.Domain.ViewModels.Shared;
 using Moralar.Repository.Interface;
-using OfficeOpenXml;
+
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.JwtMiddleware;
 using UtilityFramework.Application.Core.ViewModels;
@@ -221,6 +226,9 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
+                // var timeLineTypeSubject = new List<TypeSubject>() { TypeSubject.ReuniaoPGM, TypeSubject.EscolhaDoImovel, TypeSubject.Mudanca, TypeSubject.AcompanhamentoPosMudança };
+
+                // conditions.Add(builder.In(x => x.TypeSubject, timeLineTypeSubject));
 
                 if (typeSubject != null)
                     conditions.Add(builder.Eq(x => x.TypeSubject, typeSubject));
