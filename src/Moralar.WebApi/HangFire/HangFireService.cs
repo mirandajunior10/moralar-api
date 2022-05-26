@@ -59,6 +59,9 @@ namespace Moralar.WebApi.HangFire
                         {
                             var scheduleEntity = listQuestionaryToSend[i];
 
+                            if (listQuiz == null)
+                                continue;
+
                             var quizEntity = listQuiz.Find(x => x._id.ToString() == scheduleEntity.Quiz.Id);
 
                             var familyEntity = listFamily.Find(x => x._id.ToString() == scheduleEntity.FamilyId);
