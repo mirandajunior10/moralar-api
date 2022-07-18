@@ -11,7 +11,8 @@ namespace Moralar.Domain.ViewModels.Schedule
         public long? Created { get; set; } = DateTimeOffset.Now.ToUnixTimeSeconds();
         public string Title { get; set; }
         public long StartDate { get; set; }
-        public long EndDate { get; set; }
+        public long EndDate { get; set; }       
+        public string Schedule { get; set; }
         public TypeStatusCourse TypeStatusCourse { get; set; }
     }
 }

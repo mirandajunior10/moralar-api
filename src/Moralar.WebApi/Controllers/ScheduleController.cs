@@ -944,6 +944,7 @@ namespace Moralar.WebApi.Controllers
                         StartDate = courseItem.StartDate,
                         EndDate = courseItem.EndDate,
                         TypeStatusCourse = courseFamily[i].TypeStatusCourse,
+                        Schedule = courseItem.Schedule
                     });
                 }
 
