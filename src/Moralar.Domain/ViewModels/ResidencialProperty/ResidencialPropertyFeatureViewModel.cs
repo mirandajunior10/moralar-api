@@ -31,7 +31,7 @@ namespace Moralar.Domain.ViewModels.Property
         public double IptuValue { get; set; }
 
 
-        [Required(ErrorMessage = DefaultMessages.FieldRequired)]
+        
         [Display(Name = "Bairro de localização")]
         public string Neighborhood { get; set; }
 

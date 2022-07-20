@@ -215,8 +215,9 @@ namespace Moralar.WebApi.Controllers
         [ProducesResponseType(400)]
         [ProducesResponseType(401)]
         [ProducesResponseType(500)]
-        public async Task<IActionResult> TimeLineLoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf, [FromForm] TypeSubject? typeSubject)
+        public async Task<IActionResult> TimeLineLoadData([FromForm] DtParameters model, [FromForm] string number, [FromForm] string holderName, [FromForm] string holderCpf)
         {
+            //[FromForm] TypeSubject? typeSubject
             var response = new DtResult<FamilyHolderListViewModel>();
             var listFamily = new List<Family>();
             try
@@ -226,12 +227,12 @@ namespace Moralar.WebApi.Controllers
 
                 conditions.Add(builder.Where(x => x.Created != null));
 
-                // var timeLineTypeSubject = new List<TypeSubject>() { TypeSubject.ReuniaoPGM, TypeSubject.EscolhaDoImovel, TypeSubject.Mudanca, TypeSubject.AcompanhamentoPosMudança };
+                var timeLineTypeSubject = new List<TypeSubject>() { TypeSubject.ReuniaoPGM, TypeSubject.EscolhaDoImovel, TypeSubject.Mudanca, TypeSubject.AcompanhamentoPosMudança };
 
-                // conditions.Add(builder.In(x => x.TypeSubject, timeLineTypeSubject));
+                conditions.Add(builder.In(x => x.TypeSubject, timeLineTypeSubject));            
 
-                if (typeSubject != null)
-                    conditions.Add(builder.Eq(x => x.TypeSubject, typeSubject));
+                //if (typeSubject != null)
+                //    conditions.Add(builder.Eq(x => x.TypeSubject, typeSubject));
 
                 if (string.IsNullOrEmpty(number) == false)
                     conditions.Add(builder.Where(x => x.HolderNumber == number));

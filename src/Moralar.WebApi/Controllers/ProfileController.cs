@@ -176,11 +176,11 @@ namespace Moralar.WebApi.Controllers
                 if (listEntityViewModel.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ZeroItems));
 
-                /*PERMITE O CADASTRO DO GESTOR CASO EXISTA UM TTS COM MESMO CPF*/
+                /*PERMITE O CADASTRO DO TTS CASO EXISTA UM GESTOR COM MESMO CPF*/
                 //var builder = Builders<Data.Entities.Profile>.Filter;
                 //var conditions = new List<FilterDefinition<Data.Entities.Profile>>();
 
-                //conditions.Add(builder.In(x => x.Cpf, listEntityViewModel.Select(x => x.Cpf.OnlyNumbers()).ToList()));                
+                //conditions.Add(builder.In(x => x.Cpf, listEntityViewModel.Select(x => x.Cpf.OnlyNumbers()).ToList()));
 
                 //var exists = await _profileRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
 
@@ -277,19 +277,20 @@ namespace Moralar.WebApi.Controllers
                 if (listEntityViewModel.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ZeroItems));
 
-                var builder = Builders<Data.Entities.Profile>.Filter;
-                var conditions = new List<FilterDefinition<Data.Entities.Profile>>();
+                /*PERMITE O CADASTRO DO GESTOR CASO EXISTA UM TTS COM MESMO CPF*/
+                //var builder = Builders<Data.Entities.Profile>.Filter;
+                //var conditions = new List<FilterDefinition<Data.Entities.Profile>>();
 
-                conditions.Add(builder.In(x => x.Cpf, listEntityViewModel.Select(x => x.Cpf.OnlyNumbers()).ToList()));
+                //conditions.Add(builder.In(x => x.Cpf, listEntityViewModel.Select(x => x.Cpf.OnlyNumbers()).ToList()));
 
-                var exists = await _profileRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
+                //var exists = await _profileRepository.GetCollectionAsync().FindSync(builder.And(conditions)).ToListAsync();
 
-                if (exists.Count() > 0)
-                {
-                    var messageError = "O(s) CPF's _ estão em uso na plataforma";
-                    messageError = messageError.Replace("_", string.Join(",", exists.Select(x => x.Cpf).ToList()).TrimEnd(','));
-                    return BadRequest(Utilities.ReturnErro(messageError));
-                }
+                //if (exists.Count() > 0)
+                //{
+                //    var messageError = "O(s) CPF's _ estão em uso na plataforma";
+                //    messageError = messageError.Replace("_", string.Join(",", exists.Select(x => x.Cpf).ToList()).TrimEnd(','));
+                //    return BadRequest(Utilities.ReturnErro(messageError));
+                //}
 
                 var listEntity = _mapper.Map<List<Data.Entities.Profile>>(listEntityViewModel);
 
@@ -594,9 +595,16 @@ namespace Moralar.WebApi.Controllers
                 /*PERMITE O CADASTRO DE OUTROS PERFIS COM O MESMO CPF*/
                 if (model.TypeProfile == TypeUserProfile.TTS)
                 {
-                    if (await _profileRepository.CheckByAsync(x => x.Cpf == model.Cpf).ConfigureAwait(false))
+                    if (await _profileRepository.CheckByAsync(x => x.Cpf == model.Cpf && x.TypeProfile == TypeUserProfile.TTS).ConfigureAwait(false))
                         return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
                 }
+                else
+                {
+                    if (await _profileRepository.CheckByAsync(x => x.Cpf == model.Cpf && x.TypeProfile == TypeUserProfile.Gestor).ConfigureAwait(false))
+                        return BadRequest(Utilities.ReturnErro(DefaultMessages.CpfInUse));
+                }
+
+
 
                 if (await _profileRepository.CheckByAsync(x => x.Email == model.Email).ConfigureAwait(false))
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.EmailInUse));

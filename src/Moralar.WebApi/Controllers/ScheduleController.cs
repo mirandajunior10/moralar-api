@@ -901,7 +901,7 @@ namespace Moralar.WebApi.Controllers
                 if (typeSubject == TypeSubject.ReuniaoPGM)
                     vwTimeLine.CanNextStage = listSchedule.Count(x => x.TypeSubject == TypeSubject.EscolhaDoImovel) == 0 && listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM) == listSchedule.Count(x => x.TypeSubject == TypeSubject.ReuniaoPGM && x.TypeScheduleStatus == TypeScheduleStatus.Finalizado);
 
-                if (typeSubject == TypeSubject.ReuniaoPGM)
+                if (typeSubject == TypeSubject.ReuniaoPGM || typeSubject == TypeSubject.Mudanca || typeSubject == TypeSubject.AcompanhamentoPosMudança)
 
                     for (int i = 0; i < listQuizByFamily.Count(); i++)
                     {
@@ -925,6 +925,7 @@ namespace Moralar.WebApi.Controllers
                         else
                             vwTimeLine.DetailEnquete.Add(item);
                     }
+
 
                 var courseFamily = await _courseFamilyRepository.FindByAsync(x => x.FamilyId == familyId).ConfigureAwait(false) as List<CourseFamily>; ;
                 var course = await _courseRepository.FindIn("_id", courseFamily.Select(x => ObjectId.Parse(x.CourseId.ToString())).ToList()) as List<Course>;
