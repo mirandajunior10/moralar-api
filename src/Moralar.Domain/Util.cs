@@ -1049,8 +1049,15 @@ namespace Moralar.Domain
             return typeEnum.GetTypeInfo().DeclaredMembers.SingleOrDefault((MemberInfo x) => x.Name == value.ToString())?.GetCustomAttribute<EnumMemberAttribute>(inherit: false)?.Value;
         }
 
+        public static string MapUnixTime(this long? unixTime, string format = "dd/MM/yyyy HH:mm", string defaultResponse = "Não informado")
+        {
+            if (!unixTime.HasValue || unixTime == 0)
+            {
+                return defaultResponse;
+            }
 
-
+            return unixTime.GetValueOrDefault().TimeStampToDateTime().ToString(format);
+        }
 
     }
 }

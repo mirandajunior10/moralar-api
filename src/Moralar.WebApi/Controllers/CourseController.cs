@@ -447,7 +447,7 @@ namespace Moralar.WebApi.Controllers
                entityFamily = await _familyRepository.FindByAsync(x => x.Disabled == null).ConfigureAwait(false) as List<Family>;
 
                 var title = "Novo curso";
-                var content = "Um novo curso foi disponibilizado para inscrição";
+                var content = $"{entity.Title} foi disponibilizado para inscrição";
 
                 var listNotification = new List<Notification>();
                 for (int i = 0; i < entityFamily.Count(); i++)
@@ -465,10 +465,17 @@ namespace Moralar.WebApi.Controllers
 
                 await _notificationRepository.CreateAsync(listNotification);
 
-                dynamic payloadPush = Util.GetPayloadPush();
-                dynamic settingPush = Util.GetSettingsPush();
+                var allDeviceId = entityFamily.SelectMany(x => x.DeviceId).Distinct().Where(x => string.IsNullOrEmpty(x) == false).ToList();
 
-                await _senderNotificationService.SendPushAsync(title, content, entityFamily.SelectMany(x => x.DeviceId).ToList(), data: payloadPush, settings: settingPush, priority: 10);
+                if (allDeviceId.Count > 0)
+                {                    
+
+                    dynamic payloadPush = Util.GetPayloadPush();   
+                    dynamic settingPush = Util.GetSettingsPush();
+
+                    await _senderNotificationService.SendPushAsync(title, content, allDeviceId, data: payloadPush, settings: settingPush, priority: 10);
+
+                }
 
                 return Ok(Utilities.ReturnSuccess(data: "Registrado com sucesso!"));
 

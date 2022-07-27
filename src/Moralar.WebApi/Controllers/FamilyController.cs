@@ -1719,7 +1719,7 @@ namespace Moralar.WebApi.Controllers
                 if (claimUserName != null)
                     claims.Add(claimUserName);
 
-                var deviceId = Request.Headers["deviceId"].ToString();
+               var deviceId = Request.Headers["deviceId"].ToString();
 
                 model.TrimStringProperties();
 

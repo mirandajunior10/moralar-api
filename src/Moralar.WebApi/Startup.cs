@@ -212,6 +212,13 @@ namespace Moralar.WebApi
                     services => services.MakeQuestionAvailable(null),
                     Cron.Minutely(), timeZoneBrazil);
 
+                /*RODA TODO DIA AS 9 AM*/
+                RecurringJob.AddOrUpdate<IHangFireService>(
+                    "ALERTA_AGENDAMENTO",
+                    services => services.ScheduleAlert(null),                    
+                    Cron.Daily(9), timeZoneBrazil);
+                //Cron.MinuteInterval(5), timeZoneBrazil);
+
             }
         }
     }

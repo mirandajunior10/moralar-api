@@ -5,7 +5,12 @@ namespace Moralar.Data.Enum
 {
     public enum RouteNotification
     {
+        [EnumMember(Value = "Notificação de sistema")]
+        [Description("Notificação de sistema")]
         System,
+        [EnumMember(Value = "Agendamento")]
+        [Description("Agendamento")]
+        Schedule
 
     }
 

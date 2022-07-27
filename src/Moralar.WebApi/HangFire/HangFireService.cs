@@ -5,15 +5,19 @@ using System.Text;
 using System.Threading.Tasks;
 
 using Hangfire;
+using Hangfire.Console;
 using Hangfire.Server;
 
 using MongoDB.Bson;
 
 using Moralar.Data.Entities;
 using Moralar.Data.Enum;
+using Moralar.Domain;
 using Moralar.Domain.Services.Interface;
 using Moralar.Repository.Interface;
 using Moralar.WebApi.HangFire.Interface;
+using UtilityFramework.Application.Core;
+using UtilityFramework.Services.Core.Interface;
 
 namespace Moralar.WebApi.HangFire
 {
@@ -24,12 +28,14 @@ namespace Moralar.WebApi.HangFire
         private readonly IFamilyRepository _familyRepository;
         private readonly IScheduleRepository _scheduleRepository;
         private readonly IUtilService _utilService;
+        private readonly ISenderNotificationService _senderNotificationService;
 
-        public HangFireService(IQuizRepository quizRepository, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository)
+        public HangFireService(IQuizRepository quizRepository, IFamilyRepository familyRepository, IScheduleRepository scheduleRepository, ISenderNotificationService senderNotificationService)
         {
             _quizRepository = quizRepository;
             _familyRepository = familyRepository;
             _scheduleRepository = scheduleRepository;
+            _senderNotificationService = senderNotificationService;
         }
 
         [AutomaticRetry(Attempts = 0, OnAttemptsExceeded = AttemptsExceededAction.Delete)]
@@ -96,6 +102,62 @@ namespace Moralar.WebApi.HangFire
 
             }
             catch (Exception) {/*UNUSED*/}
+        }
+
+        public async Task ScheduleAlert(PerformContext context = null)
+        {
+            try
+            {
+               
+                var now = DateTimeOffset.Now.ToUnixTimeSeconds();                
+
+                var listSchedule = await _scheduleRepository.FindByAsync(x => x.TypeScheduleStatus == TypeScheduleStatus.Confirmado) as List<Schedule>;
+
+                var total = listSchedule.Count();
+
+                if (total > 0)
+                {
+
+                    var listProfile = await _familyRepository.FindIn("_id", listSchedule.Select(x => ObjectId.Parse(x.FamilyId)).ToList()) as List<Family>;                                    
+
+                    string title = "Lembrete de agendamento";
+
+                    dynamic payloadPush = Util.GetPayloadPush(RouteNotification.Schedule);
+
+                    dynamic settingsPush = Util.GetSettingsPush();
+
+                    for (int i = 0; i < total; i++)
+                    {
+                        var scheduleEntity = listSchedule[i];
+
+                        var scheduleId = scheduleEntity._id.ToString();
+
+                        var dateSchedule = Utilities.TimeStampToDateTime(scheduleEntity.Date).Date;
+                        var alertDate = Utilities.TimeStampToDateTime(now).AddDays(1).Date;
+
+                        if (dateSchedule == alertDate)
+                        {
+
+                            var familyEntity = listProfile.Find(x => x._id == ObjectId.Parse(scheduleEntity.FamilyId));
+
+                            if (familyEntity != null)
+                            {
+                                payloadPush.scheduleId = scheduleId;
+
+                                /*NOTIFICA USUÁRIO*/
+                                var content = $"Seu agendamento ocorrerá em: {scheduleEntity.Date.TimeStampToDateTime():dd/MM/yyyy HH:mm}";
+               
+                                await _senderNotificationService.SendPushAsync(title, content, familyEntity.DeviceId, data: payloadPush, settings: settingsPush, priority: 10);
+                            }
+                        }                 
+                    }
+                }               
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
         }
     }
 }

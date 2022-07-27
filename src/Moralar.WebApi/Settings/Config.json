@@ -35,7 +35,7 @@
         "ICON": "default",
         "APPID": "f3a41312-fd24-4e06-87f5-2244edd4851c"
       }
-    ],
+    ],   
     "SMTP": {
       "TEMPLATE": "Template",
       "HOST": "smtp.gmail.com",

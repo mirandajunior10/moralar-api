@@ -110,5 +110,7 @@ namespace Moralar.Domain
         public const string SelectPropertyAvailable = "Escolha de imóvel liberada";
         public const string EmailNotFound = "Familia sem e-mail cadastrado";
         public const string FamilyHasPropertySelected = "Essa familia já foi contemplada com outro imóvel";
+       
+
     }
 }
