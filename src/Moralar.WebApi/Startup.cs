@@ -87,8 +87,9 @@ namespace Moralar.WebApi
                 var remoteDatabase = Configuration.GetSection("DATABASE:LOCAL").Get<string>();
                 var dataBaseName = Configuration.GetSection("DATABASE:NAME").Get<string>();
 
-                var mongoUrlBuilder = new MongoUrlBuilder($"mongodb://{remoteDatabase}/{dataBaseName}");
-                var mongoClient = new MongoClient(mongoUrlBuilder.ToMongoUrl());
+                var settings = MongoClientSettings.FromConnectionString("mongodb+srv://moralar:moralar123@cluster0.pgu9nc8.mongodb.net/?retryWrites=true&w=majority");
+
+                var mongoClient = new MongoClient(settings);
 
                 var migrationOptions = new MongoMigrationOptions
                 {
@@ -105,7 +106,7 @@ namespace Moralar.WebApi
                 services.AddHangfire(configuration =>
                 {
                     configuration.UseConsole();
-                    configuration.UseMongoStorage(mongoClient, mongoUrlBuilder.DatabaseName, storageOptions);
+                    configuration.UseMongoStorage(mongoClient, "MoralarDEV", storageOptions);
                 });
             }
             /*ENABLE CORS*/
