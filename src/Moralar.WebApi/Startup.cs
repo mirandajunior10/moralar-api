@@ -17,13 +17,15 @@ using Hangfire.Console;
 using Hangfire.Mongo;
 using Hangfire.Storage;
 
+using MongoDB.Driver;
+
 using Moralar.WebApi.Filter;
+using Moralar.WebApi.HangFire;
+using Moralar.WebApi.HangFire.Interface;
 using Moralar.WebApi.Services;
 
 using UtilityFramework.Application.Core;
-using Moralar.WebApi.HangFire.Interface;
-using Moralar.WebApi.HangFire;
-using MongoDB.Driver;
+using UtilityFramework.Infra.Core.MongoDb.Data.Database;
 
 namespace Moralar.WebApi
 {
@@ -40,6 +42,7 @@ namespace Moralar.WebApi
             ApplicationName = Assembly.GetEntryAssembly().GetName().Name?.Split('.')[0];
             EnableSwagger = Configuration.GetSection("EnableSwagger").Get<bool>();
             EnableService = Configuration.GetSection("EnableService").Get<bool>();
+            Environment = env;
 
             /* CRIAR NO Settings json prop com array de cultures ["pt","pt-br"] */
             //var cultures = Utilities.GetConfigurationRoot().GetSection("TranslateLanguages").Get<List<string>>();
@@ -51,6 +54,7 @@ namespace Moralar.WebApi
         public static string ApplicationName { get; set; }
         public static bool EnableSwagger { get; set; }
         public static bool EnableService { get; set; }
+        public static IHostingEnvironment Environment { get; set; }
 
         /* PARA TRANSLATE*/
         //public static List<CultureInfo> SupportedCultures { get; set; }
@@ -84,12 +88,9 @@ namespace Moralar.WebApi
             /*HANGFIRE*/
             if (EnableService)
             {
-                var remoteDatabase = Configuration.GetSection("DATABASE:LOCAL").Get<string>();
-                var dataBaseName = Configuration.GetSection("DATABASE:NAME").Get<string>();
+                var databaseSettings = AppSettingsBase.GetSettings(Environment);
 
-                var settings = MongoClientSettings.FromConnectionString("mongodb+srv://moralar:moralar123@cluster0.pgu9nc8.mongodb.net/?retryWrites=true&w=majority");
-
-                var mongoClient = new MongoClient(settings);
+                var mongoClient = AppSettingsBase.GetMongoClient(Environment);
 
                 var migrationOptions = new MongoMigrationOptions
                 {
@@ -106,7 +107,7 @@ namespace Moralar.WebApi
                 services.AddHangfire(configuration =>
                 {
                     configuration.UseConsole();
-                    configuration.UseMongoStorage(mongoClient, "MoralarDEV", storageOptions);
+                    configuration.UseMongoStorage(mongoClient, databaseSettings.Name, storageOptions);
                 });
             }
             /*ENABLE CORS*/
@@ -142,6 +143,8 @@ namespace Moralar.WebApi
             if (EnableService)
             {
                 GlobalConfiguration.Configuration.UseActivator(new HangfireActivator(serviceProvider));
+                GlobalJobFilters.Filters.Add(new ProlongExpirationTimeAttribute());
+
                 app.UseHangfireServer();
                 app.UseHangfireDashboard("/jobs", new DashboardOptions
                 {
@@ -207,16 +210,16 @@ namespace Moralar.WebApi
 
                 var timeZoneBrazil = TimeZoneInfo.FindSystemTimeZoneById("E. South America Standard Time");
 
-                /*RODA A CADA MINUTO*/
+                /*RODA A CADA 30 MINUTO*/
                 RecurringJob.AddOrUpdate<IHangFireService>(
                     "MAKEQUESTIONAVAILABLE",
                     services => services.MakeQuestionAvailable(null),
-                    Cron.Minutely(), timeZoneBrazil);
+                    Cron.MinuteInterval(30), timeZoneBrazil);
 
                 /*RODA TODO DIA AS 9 AM*/
                 RecurringJob.AddOrUpdate<IHangFireService>(
                     "ALERTA_AGENDAMENTO",
-                    services => services.ScheduleAlert(null),                    
+                    services => services.ScheduleAlert(null),
                     Cron.Daily(9), timeZoneBrazil);
                 //Cron.MinuteInterval(5), timeZoneBrazil);
 
