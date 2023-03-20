@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 using Moralar.Data.Enum;
+using Moralar.Domain.ViewModels.ResidencialProperty;
 using Newtonsoft.Json;
 using UtilityFramework.Application.Core;
 using UtilityFramework.Application.Core.ViewModels;
@@ -21,7 +22,7 @@ namespace Moralar.Domain.ViewModels.Property
         [Display(Name = "Foto")]
         [LimitElements(1, 15, ErrorMessage = "Selecione no mínimo 1 e no máximo 15 imagens")]
         [IsReadOnly]
-        public List<string> Photo { get; set; }
+        public List<ResidencialPropertyPhoto> Photo { get; set; }
 
 
         [Required(ErrorMessage = DefaultMessages.FieldRequired)]

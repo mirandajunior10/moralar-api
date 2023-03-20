@@ -550,7 +550,8 @@ namespace Moralar.WebApi.Controllers
                     return BadRequest(isInvalidState);
 
                 for (int i = 0; i < model.Photo.Count(); i++)
-                    model.Photo[i] = model.Photo[i].SetPathImage();
+                    model.Photo[i].ImageUrl = model.Photo[i].ImageUrl.SetPathImage();
+                
                 model.Project = model.Project.SetPathImage();
                 var entity = _mapper.Map<Data.Entities.ResidencialProperty>(model);
                 entity.TypeStatusResidencialProperty = TypeStatusResidencial.AEscolher;
@@ -625,7 +626,7 @@ namespace Moralar.WebApi.Controllers
                 }
                 if (Util.CheckHasField(validOnly, nameof(model.Photo)))
                 {
-                    residencialPropertyEntity.Photo = model.Photo.Select(x => x.RemovePathImage()).ToList();
+                    residencialPropertyEntity.Photo = model.Photo.Select(x => x.ImageUrl.RemovePathImage()).ToList();
                 }
 
                 residencialPropertyEntity = await _residencialPropertyRepository.UpdateAsync(residencialPropertyEntity);
