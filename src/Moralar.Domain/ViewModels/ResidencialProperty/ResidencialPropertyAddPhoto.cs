@@ -7,6 +7,6 @@ namespace Moralar.Domain.ViewModels.ResidencialProperty
     public class ResidencialPropertyAddPhoto
     {
         public string Id { get; set; }
-        public string Photo { get; set; }
+        public ResidencialPropertyPhoto Photo { get; set; }
     }
 }

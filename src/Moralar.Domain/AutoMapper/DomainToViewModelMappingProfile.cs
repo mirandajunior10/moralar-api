@@ -141,7 +141,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<ResidencialProperty, ResidencialPropertyViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
-                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo.Select(x => x.SetPathImage(null)).ToList()))
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo.Select(x => x.ImageUrl.SetPathImage(null)).ToList()))
                 .ForMember(dest => dest.Project, opt => opt.MapFrom(src => src.Project.SetPathImage(null)));
 
             CreateMap<ResidencialPropertyAdress, ResidencialPropertyAdressViewModel>();
@@ -177,7 +177,7 @@ namespace Moralar.Domain.AutoMapper
                 .ForMember(dest => dest.HasYard, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.HasYard.MapBoolean()))
                 .ForMember(dest => dest.TypeStatusResidencialProperty, opt => opt.MapFrom(src => src.TypeStatusResidencialProperty.GetEnumMemberValue()))
                 .ForMember(dest => dest.Project, opt => opt.MapFrom(src => src.Project.SetPathImage(null)))
-                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => string.Join(",", src.Photo.Select(x => x.SetPathImage(null)).ToList()).TrimEnd(',')))
+                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => string.Join(",", src.Photo.Select(x => x.ImageUrl.SetPathImage(null)).ToList()).TrimEnd(',')))
                 .ForMember(dest => dest.PropertyRegularization, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.PropertyRegularization.GetEnumMemberValue()))
                 .ForMember(dest => dest.TypeGasInstallation, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.TypeGasInstallation.GetEnumMemberValue()))
                 .ForMember(dest => dest.TypeProperty, opt => opt.MapFrom(src => src.ResidencialPropertyFeatures.TypeProperty.GetEnumMemberValue()));

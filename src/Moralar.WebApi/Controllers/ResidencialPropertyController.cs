@@ -626,7 +626,17 @@ namespace Moralar.WebApi.Controllers
                 }
                 if (Util.CheckHasField(validOnly, nameof(model.Photo)))
                 {
-                    residencialPropertyEntity.Photo = model.Photo.Select(x => x.ImageUrl.RemovePathImage()).ToList();
+                    residencialPropertyEntity.Photo = model.Photo.Select(x =>
+                    {
+                        x.ImageUrl = x.ImageUrl.RemovePathImage();
+                        Data.Entities.Auxiliar.ResidencialPropertyPhoto newPhoto = new Data.Entities.Auxiliar.ResidencialPropertyPhoto
+                        {
+                            ImageUrl = x.ImageUrl,
+                            Description = x.Description
+                           
+                        };
+                        return newPhoto;
+                    }).ToList();
                 }
 
                 residencialPropertyEntity = await _residencialPropertyRepository.UpdateAsync(residencialPropertyEntity);
@@ -786,10 +796,10 @@ namespace Moralar.WebApi.Controllers
                 var entity = await _residencialPropertyRepository.FindByIdAsync(model.Id).ConfigureAwait(false);
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
-                if (entity.Photo.Count() == 0 || entity.Photo.FindIndex(x => x == model.Name) < 0)
+                if (entity.Photo.Count() == 0 || entity.Photo.FindIndex(x => x.ImageUrl == model.Name) < 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.PhotoNotFound));
 
-                entity.Photo.RemoveAt(entity.Photo.FindIndex(x => x == model.Name));
+                entity.Photo.RemoveAt(entity.Photo.FindIndex(x => x.ImageUrl == model.Name));
 
                 await _residencialPropertyRepository.UpdateOneAsync(entity).ConfigureAwait(false);
 
@@ -833,14 +843,22 @@ namespace Moralar.WebApi.Controllers
                 if (entity == null)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.ResidencialPropertyNotFound));
 
-                if (model.Photo.Count() == 0)
+                if (model.Photo.ImageUrl.Count() == 0)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.AmountPhoto));
 
                 int amoutPhoto = entity.Photo.Count() + 1;
                 if (amoutPhoto > 15)
                     return BadRequest(Utilities.ReturnErro(DefaultMessages.AmountPhotoInclude));
 
-                entity.Photo.Add(model.Photo.SetPathImage());
+                model.Photo.ImageUrl.SetPathImage();
+
+                Data.Entities.Auxiliar.ResidencialPropertyPhoto newPhoto = new Data.Entities.Auxiliar.ResidencialPropertyPhoto
+                {
+                    ImageUrl = model.Photo.ImageUrl,
+                    Description = model.Photo.Description
+                };
+
+                entity.Photo.Add(newPhoto);
 
                 await _residencialPropertyRepository.UpdateOneAsync(entity).ConfigureAwait(false);
 
