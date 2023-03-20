@@ -12,7 +12,7 @@ namespace Moralar.Data.Entities
     public class ResidencialProperty : ModelBase
     {
         public string Code { get; set; }
-        public List<string> Photo { get; set; }
+        public List<ResidencialPropertyPhoto> Photo { get; set; }
         public string Project { get; set; }
         public string Reason { get; set; }
         public ResidencialPropertyAdress ResidencialPropertyAdress { get; set; }
