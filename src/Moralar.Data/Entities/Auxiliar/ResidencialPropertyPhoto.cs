@@ -1,9 +1,5 @@
-﻿using MongoDB.Bson.Serialization.Attributes;
-
-
-namespace Moralar.Data.Entities.Auxiliar
+﻿namespace Moralar.Data.Entities.Auxiliar
 {
-    [BsonIgnoreExtraElements]
     public class ResidencialPropertyPhoto
     {
         public string ImageUrl { get; set; }

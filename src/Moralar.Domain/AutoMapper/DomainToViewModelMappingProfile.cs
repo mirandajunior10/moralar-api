@@ -138,10 +138,10 @@ namespace Moralar.Domain.AutoMapper
 
             #endregion
             #region ResidencialProperty
+            CreateMap<Data.Entities.Auxiliar.ResidencialPropertyPhoto, ViewModels.ResidencialProperty.ResidencialPropertyPhoto>().ForMember(dest => dest.ImageUrl, opt => opt.MapFrom(src => src.ImageUrl.SetPathImage(null)));
             CreateMap<ResidencialProperty, ResidencialPropertyViewModel>()
                 .ForMember(dest => dest.Id, opt => opt.MapFrom(src => src._id.ToString()))
                 .ForMember(dest => dest.Blocked, opt => opt.MapFrom(src => src.DataBlocked != null ? true : false))
-                .ForMember(dest => dest.Photo, opt => opt.MapFrom(src => src.Photo.Select(x => x.ImageUrl.SetPathImage(null)).ToList()))
                 .ForMember(dest => dest.Project, opt => opt.MapFrom(src => src.Project.SetPathImage(null)));
 
             CreateMap<ResidencialPropertyAdress, ResidencialPropertyAdressViewModel>();
