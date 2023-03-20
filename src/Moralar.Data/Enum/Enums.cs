@@ -88,6 +88,7 @@ namespace Moralar.Data.Enum
         Pt = 2
 
     }
+
     public enum TypeProperty
     {
         [EnumMember(Value = "Casa")]
@@ -96,6 +97,15 @@ namespace Moralar.Data.Enum
         [EnumMember(Value = "Apartamento")]
         [Description("Apartamento")]
         Apartamento = 1
+    }
+    public enum TypeAffirmation
+    {
+        [EnumMember(Value = "Sim")]
+        [Description("Sim")]
+        Sim = 0,
+        [EnumMember(Value = "Não")]
+        [Description("Não")]
+        Nao = 1
     }
     public enum TypePropertyRegularization
     {
