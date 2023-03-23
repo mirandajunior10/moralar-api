@@ -101,6 +101,7 @@ namespace Moralar.Domain.AutoMapper
             CreateMap<FamilyFirstAccessViewModel, Family>();
             #endregion
             #region ResidencialProperty
+            CreateMap<ViewModels.ResidencialProperty.ResidencialPropertyPhoto, Data.Entities.Auxiliar.ResidencialPropertyPhoto>();
             CreateMap<ResidencialPropertyViewModel, ResidencialProperty>()
               .ForMember(dest => dest._id, opt => opt.MapFrom(src => ObjectId.Parse(src.Id)));
             CreateMap<ResidencialPropertyFeatureViewModel, ResidencialPropertyFeatures>();
